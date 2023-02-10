@@ -63,7 +63,7 @@ public class TestPixelsReader
             option.tolerantSchemaEvolution(true);
             option.includeCols(cols);
             PixelsRecordReader recordReader = reader.read(option);
-            System.out.println(recordReader.getRowNumber());
+            System.out.println(recordReader.getCompletedRows());
             System.out.println(reader.getRowGroupInfo(0).getNumberOfRows());
             int batchSize = 10000;
             VectorizedRowBatch rowBatch;
