@@ -742,7 +742,9 @@ public class Main
                         column.setChunkSize(column.getSize() / rowGroupCount);
                         column.setRecordStats(columnStatsMap.get(column.getName())
                                 .serialize().build().toByteString().asReadOnlyByteBuffer());
+                        column.getRecordStats().mark();
                         metadataService.updateColumn(column);
+                        column.getRecordStats().reset();
                     }
 
                     /* Set cardinality and null_fraction after the chunk size and column size,
