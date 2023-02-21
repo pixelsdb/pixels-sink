@@ -72,6 +72,7 @@ public class PixelsConsumer extends Consumer
             int[] orderMapping = config.getOrderMapping();
             int maxRowNum = config.getMaxRowNum();
             String regex = config.getRegex();
+            boolean enableEncoding = config.isEnableEncoding();
             if (regex.equals("\\s"))
             {
                 regex = " ";
@@ -136,7 +137,7 @@ public class PixelsConsumer extends Consumer
                                     .setBlockSize(blockSize)
                                     .setReplication(replication)
                                     .setBlockPadding(true)
-                                    .setEncoding(true)
+                                    .setEncoding(enableEncoding)
                                     .setCompressionBlockSize(1)
                                     .build();
                         }

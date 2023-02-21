@@ -148,6 +148,8 @@ public class Main
                         .help("specify the number of consumer threads used for data generation");
                 argumentParser.addArgument("-p", "--producer").setDefault(false)
                         .help("specify the option of choosing producer");
+                argumentParser.addArgument("-e", "--enable_encoding").setDefault(true)
+                        .help("specify the option of enabling encoding or not");
                 argumentParser.addArgument("-l", "--loading_data_path")
                         .help("specify the path of loading data");
 
@@ -174,6 +176,8 @@ public class Main
 
                     int threadNum = Integer.parseInt(ns.getString("consumer_thread_num"));
                     boolean producer = Boolean.parseBoolean(ns.getString("producer"));
+                    boolean enableEncoding = Boolean.parseBoolean(ns.getString("enable_encoding"));
+                    System.out.println("enable encoding: " + enableEncoding);
 
                     if (!origin.endsWith("/"))
                     {
@@ -184,7 +188,7 @@ public class Main
 
                     if (format != null)
                     {
-                        config = new Config(dbName, tableName, rowNum, regex, format, loadingDataPath);
+                        config = new Config(dbName, tableName, rowNum, regex, format, loadingDataPath, enableEncoding);
                     }
 
                     if (producer && config != null)
