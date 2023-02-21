@@ -28,16 +28,15 @@ import java.util.List;
 
 public class Config
 {
-    private String dbName;
-    private String tableName;
-    private int maxRowNum;
-    private String regex;
-
-    private String format;
-
+    private final String dbName;
+    private final String tableName;
+    private final int maxRowNum;
+    private final String regex;
+    private final String format;
     private String pixelsPath;
     private String schema;
     private int[] orderMapping;
+    private final boolean enableEncoding;
 
     public String getPixelsPath()
     {
@@ -69,7 +68,12 @@ public class Config
         return format;
     }
 
-    public Config(String dbName, String tableName, int maxRowNum, String regex, String format, String pixelsPath)
+    public boolean isEnableEncoding()
+    {
+        return enableEncoding;
+    }
+
+    public Config(String dbName, String tableName, int maxRowNum, String regex, String format, String pixelsPath, boolean enableEncoding)
     {
         this.dbName = dbName;
         this.tableName = tableName;
@@ -77,6 +81,7 @@ public class Config
         this.regex = regex;
         this.format = format;
         this.pixelsPath = pixelsPath;
+        this.enableEncoding = enableEncoding;
     }
 
     public boolean load(ConfigFactory configFactory) throws MetadataException, InterruptedException

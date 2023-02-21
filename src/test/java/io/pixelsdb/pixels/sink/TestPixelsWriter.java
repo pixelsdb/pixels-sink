@@ -41,7 +41,8 @@ public class TestPixelsWriter
     public void testWrite () throws IOException, MetadataException, InterruptedException
     {
         ConfigFactory configFactory = ConfigFactory.Instance();
-        Config config = new Config("pixels", "test_105", 5000, "\t", "pixels", null);
+        Config config = new Config("pixels", "test_105",
+                5000, "\t", "pixels", null, true);
         config.load(configFactory);
         String loadingDataPath = config.getPixelsPath();
         String schemaStr = config.getSchema();
@@ -136,7 +137,8 @@ public class TestPixelsWriter
             throws IOException, MetadataException, InterruptedException
     {
         ConfigFactory configFactory = ConfigFactory.Instance();
-        Config config = new Config("pixels", "test_105", 5000, "\t", "pixels", null);
+        Config config = new Config("pixels", "test_105",
+                5000, "\t", "pixels", null, true);
         config.load(configFactory);
         String loadingDataPath = config.getPixelsPath();
 
