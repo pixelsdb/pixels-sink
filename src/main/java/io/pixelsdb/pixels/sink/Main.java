@@ -47,6 +47,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author tao
@@ -77,10 +78,10 @@ import static com.google.common.base.Preconditions.checkArgument;
  * COPY -p .pxl -s hdfs://dbiir27:9000/pixels/pixels/test_105/v_1_order -d hdfs://dbiir27:9000/pixels/pixels/test_105/v_1_order -n 3 -c 3
  * </p>
  * <p>
- * COMPACT -s pixels -t test_105 -l 3 -n yes -c 8
+ * COMPACT -s pixels -t test_105 -n yes -c 8
  * </p>
  * <p>
- * STAT -d s3://pixels-tpch/region/v-0-order/ -s tpch -t region
+ * STAT -s tpch -t region -o false -c true
  * </p>
  */
 public class Main
@@ -173,11 +174,14 @@ public class Main
                     int rowNum = Integer.parseInt(ns.getString("row_num"));
                     String regex = ns.getString("row_regex");
                     String loadingDataPath = ns.getString("loading_data_path");
-
                     int threadNum = Integer.parseInt(ns.getString("consumer_thread_num"));
                     boolean producer = Boolean.parseBoolean(ns.getString("producer"));
                     boolean enableEncoding = Boolean.parseBoolean(ns.getString("enable_encoding"));
                     System.out.println("enable encoding: " + enableEncoding);
+                    if (loadingDataPath != null && !loadingDataPath.isEmpty())
+                    {
+                        validateOrderOrCompactPath(loadingDataPath);
+                    }
 
                     if (!origin.endsWith("/"))
                     {
@@ -454,8 +458,6 @@ public class Main
                         .help("Specify the name of schema.");
                 argumentParser.addArgument("-t", "--table").required(true)
                         .help("specify the name of table.");
-                argumentParser.addArgument("-l", "--layout").required(true)
-                        .help("Specify the id of the layout to compact.");
                 argumentParser.addArgument("-n", "--naive").required(true)
                         .help("Specify whether or not to create naive compact layout.");
                 argumentParser.addArgument("-c", "--concurrency")
@@ -477,7 +479,6 @@ public class Main
                 {
                     String schema = ns.getString("schema");
                     String table = ns.getString("table");
-                    int layoutId = Integer.parseInt(ns.getString("layout"));
                     String naive = ns.getString("naive");
                     int threadNum = Integer.parseInt(ns.getString("concurrency"));
                     ExecutorService compactExecutor = Executors.newFixedThreadPool(threadNum);
@@ -493,13 +494,14 @@ public class Main
                     Layout layout = null;
                     for (Layout layout1 : layouts)
                     {
-                        if (layout1.getId() == layoutId)
+                        if (layout1.isWritable())
                         {
                             layout = layout1;
                             break;
                         }
                     }
 
+                    requireNonNull(layout, String.format("writable layout is not found for table '%s.%s'.", schema, table));
                     Compact compact = layout.getCompactObject();
                     int numRowGroupInBlock = compact.getNumRowGroupInBlock();
                     int numColumn = compact.getNumColumn();
@@ -515,11 +517,16 @@ public class Main
 
                     // get input file paths
                     ConfigFactory configFactory = ConfigFactory.Instance();
+                    validateOrderOrCompactPath(layout.getOrderPath());
+                    validateOrderOrCompactPath(layout.getCompactPath());
+                    // PIXELS-399: it is not a problem if the order or compact path contains multiple directories
                     Storage orderStorage = StorageFactory.Instance().getStorage(layout.getOrderPath());
                     Storage compactStorage = StorageFactory.Instance().getStorage(layout.getCompactPath());
                     long blockSize = Long.parseLong(configFactory.getProperty("block.size"));
                     short replication = Short.parseShort(configFactory.getProperty("block.replication"));
                     List<Status> statuses = orderStorage.listStatus(layout.getOrderPath());
+                    String[] targetPaths = layout.getCompactPath().split(";");
+                    int targetPathId = 0;
 
                     // compact
                     long startTime = System.currentTimeMillis();
@@ -529,7 +536,7 @@ public class Main
                         {
                             /**
                              * Issue #160:
-                             * Compact the tail files that can not full fill the compactLayout
+                             * Compact the tail files that can not fulfill the compactLayout
                              * defined in the metadata.
                              * Note that if (i + numRowGroupInBlock == statues.size()),
                              * then the remaining files are not tail files.
@@ -551,13 +558,13 @@ public class Main
                             }
                         }
 
-                        String filePath = layout.getCompactPath() + (layout.getCompactPath().endsWith("/") ? "" : "/");
-                        if (compactStorage.getScheme() == Storage.Scheme.s3 || compactStorage.getScheme() == Storage.Scheme.minio)
+                        String targetPath = targetPaths[targetPathId++];
+                        targetPathId %= targetPaths.length;
+                        if (!targetPath.endsWith("/"))
                         {
-                            // Give each compact file a unique prefix to avoid throttling.
-                            filePath += thdId + "/";
+                            targetPath += "/";
                         }
-                        filePath += DateUtil.getCurTime() + "_compact.pxl";
+                        String filePath = targetPath + DateUtil.getCurTime() + "_compact.pxl";
 
                         System.out.println("(" + thdId + ") " + sourcePaths.size() +
                                 " ordered files to be compacted into '" + filePath + "'.");
@@ -620,8 +627,6 @@ public class Main
                 ArgumentParser argumentParser = ArgumentParsers.newArgumentParser("Pixels Update Statistics")
                         .defaultHelp(true);
 
-                argumentParser.addArgument("-d", "--data").required(true)
-                        .help("specify the data directory");
                 argumentParser.addArgument("-s", "--schema").required(true)
                         .help("Specify the schema name");
                 argumentParser.addArgument("-t", "--table").required(true)
@@ -644,29 +649,40 @@ public class Main
 
                 try
                 {
-                    String dataDir = ns.getString("data");
                     String schemaName = ns.getString("schema");
                     String tableName = ns.getString("table");
                     boolean orderedEnabled = Boolean.parseBoolean(ns.getString("ordered_enabled"));
                     boolean compactEnabled = Boolean.parseBoolean(ns.getString("compact_enabled"));
 
-                    if (!dataDir.endsWith("/"))
+                    String metadataHost = ConfigFactory.Instance().getProperty("metadata.server.host");
+                    int metadataPort = Integer.parseInt(ConfigFactory.Instance().getProperty("metadata.server.port"));
+                    MetadataService metadataService = new MetadataService(metadataHost, metadataPort);
+                    List<Layout> layouts = metadataService.getLayouts(schemaName, tableName);
+                    List<String> files = new LinkedList<>();
+                    for (Layout layout : layouts)
                     {
-                        dataDir += "/";
+                        if (layout.isReadable())
+                        {
+                            if (orderedEnabled)
+                            {
+                                String orderedPath = layout.getOrderPath();
+                                validateOrderOrCompactPath(orderedPath);
+                                Storage storage = StorageFactory.Instance().getStorage(orderedPath);
+                                files.addAll(storage.listPaths(orderedPath));
+                            }
+                            if (compactEnabled)
+                            {
+                                String compactPath = layout.getCompactPath();
+                                validateOrderOrCompactPath(compactPath);
+                                Storage storage = StorageFactory.Instance().getStorage(compactPath);
+                                files.addAll(storage.listPaths(compactPath));
+                            }
+                        }
                     }
-
-                    ConfigFactory configFactory = ConfigFactory.Instance();
-                    String host = configFactory.getProperty("metadata.server.host");
-                    int port = Integer.parseInt(configFactory.getProperty("metadata.server.port"));
-
-                    Storage storage = StorageFactory.Instance().getStorage(dataDir);
-
-                    List<String> files =  storage.listPaths(dataDir);
 
                     // get the statistics.
                     long startTime = System.currentTimeMillis();
 
-                    MetadataService metadataService = new MetadataService(host, port);
                     List<Column> columns = metadataService.getColumns(schemaName, tableName, true);
                     Map<String, Column> columnMap = new HashMap<>(columns.size());
                     Map<String, StatsRecorder> columnStatsMap = new HashMap<>(columns.size());
@@ -682,6 +698,11 @@ public class Main
                     long rowCount = 0;
                     for (String path : files)
                     {
+                        if (!path.endsWith("/"))
+                        {
+                            path += "/";
+                        }
+                        Storage storage = StorageFactory.Instance().getStorage(path);
                         PixelsReader pixelsReader = PixelsReaderImpl.newBuilder()
                                 .setPath(path).setStorage(storage).setEnableCache(false)
                                 .setCacheOrder(ImmutableList.of()).setPixelsCacheReader(null)
@@ -785,8 +806,9 @@ public class Main
 
                     long endTime = System.currentTimeMillis();
                     System.out.println("Elapsed time: " + (endTime - startTime) / 1000 + "s.");
+                    metadataService.shutdown();
                 }
-                catch (IOException | MetadataException e)
+                catch (IOException | MetadataException | InterruptedException e)
                 {
                     e.printStackTrace();
                 }
@@ -823,4 +845,27 @@ public class Main
         return end - start;
     }
 
+    /**
+     * Check if the order or compact path from pixels metadata is valid.
+     * @param path the order or compact path from pixels metadata.
+     */
+    public static void validateOrderOrCompactPath(String path)
+    {
+        requireNonNull(path, "path is null");
+        String[] paths = path.split(";");
+        checkArgument(paths.length > 0, "path must contain at least one valid directory");
+        try
+        {
+            Storage.Scheme firstScheme = Storage.Scheme.fromPath(paths[0]);
+            for (int i = 1; i < paths.length; ++i)
+            {
+                Storage.Scheme scheme = Storage.Scheme.fromPath(paths[i]);
+                checkArgument(firstScheme.equals(scheme),
+                        "all the directories in the path must have the same storage scheme");
+            }
+        } catch (Throwable e)
+        {
+            throw new RuntimeException("failed to parse storage scheme from path", e);
+        }
+    }
 }

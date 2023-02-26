@@ -26,6 +26,8 @@ import io.pixelsdb.pixels.common.utils.ConfigFactory;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.pixelsdb.pixels.sink.Main.validateOrderOrCompactPath;
+
 public class Config
 {
     private final String dbName;
@@ -162,19 +164,8 @@ public class Config
         // get path of loading
         if(this.pixelsPath == null)
         {
-            String loadingDataPath = writingLayout.getOrderPath();
-            if (!loadingDataPath.endsWith("/"))
-            {
-                loadingDataPath += "/";
-            }
-            this.pixelsPath = loadingDataPath;
-        }
-        else
-        {
-            if (!this.pixelsPath.endsWith("/"))
-            {
-                this.pixelsPath += "/";
-            }
+            this.pixelsPath = writingLayout.getOrderPath();
+            validateOrderOrCompactPath(this.pixelsPath);
         }
         // init the params
         this.schema = schemaBuilder.toString();
@@ -182,5 +173,4 @@ public class Config
         metadataService.shutdown();
         return true;
     }
-
 }

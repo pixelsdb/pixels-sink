@@ -67,7 +67,7 @@ public class PixelsConsumer extends Consumer
         boolean isRunning = true;
         try
         {
-            String targetDirPath = config.getPixelsPath();
+            String pixelsPath = config.getPixelsPath();
             String schemaStr = config.getSchema();
             int[] orderMapping = config.getOrderMapping();
             int maxRowNum = config.getMaxRowNum();
@@ -85,8 +85,7 @@ public class PixelsConsumer extends Consumer
             short replication = Short.parseShort(prop.getProperty("block.replication"));
 
             TypeDescription schema = TypeDescription.fromString(schemaStr);
-            // System.out.println(schemaStr);
-            // System.out.println(loadingDataPath);
+            final String[] targetPaths = pixelsPath.split(";");
             VectorizedRowBatch rowBatch = schema.createRowBatch();
             ColumnVector[] columnVectors = rowBatch.cols;
 
@@ -98,7 +97,7 @@ public class PixelsConsumer extends Consumer
             PixelsWriter pixelsWriter = null;
             int rowCounter = 0;
 
-            Storage targetStorage = StorageFactory.Instance().getStorage(targetDirPath);
+            int targetPathId = 0;
 
             while (isRunning)
             {
@@ -109,13 +108,20 @@ public class PixelsConsumer extends Consumer
                     Storage originStorage = StorageFactory.Instance().getStorage(originalFilePath);
                     reader = new BufferedReader(new InputStreamReader(originStorage.open(originalFilePath)));
 
+                    // choose the target output directory using round-robin
+                    String targetDirPath = targetPaths[targetPathId++];
+                    targetPathId %= targetPaths.length;
+                    Storage targetStorage = StorageFactory.Instance().getStorage(targetDirPath);
+
+                    System.out.println("loading data into directory: " + targetDirPath);
+
                     while ((line = reader.readLine()) != null)
                     {
-                        if (initPixelsFile == true)
+                        if (initPixelsFile)
                         {
                             if(line.length() == 0)
                             {
-                                System.out.println(currentThread().getName() + "\tcontent: (" + line + ")");
+                                System.err.println("thread: " + currentThread().getName() + " got empty line.");
                                 continue;
                             }
                             // we create a new pixels file if we can read a next line from the source file.
@@ -187,7 +193,6 @@ public class PixelsConsumer extends Consumer
                     // loading is considered to be finished.
                     isRunning = false;
                 }
-
             }
 
             if (rowCounter > 0)
