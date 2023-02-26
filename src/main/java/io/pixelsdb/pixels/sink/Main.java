@@ -58,14 +58,14 @@ import static java.util.Objects.requireNonNull;
 /**
  * pixels loader command line tool
  * <p>
- * LOAD -f pixels -o s3://text-105/source -d pixels -t test_105 -n 275000 -r \t -c 16 -l s3://pixels-105/v-0-order
+ * LOAD -f pixels -o s3://text-105/source -s pixels -t test_105 -n 275000 -r \t -c 16 -l s3://pixels-105/v-0-order
  * -p false [optional, default false]
  * </p>
  * <p>
- * LOAD -f orc -o hdfs://dbiir10:9000/pixels/pixels/test_105/source -d pixels -t test_105 -n 220000 -r \t -c 16
+ * LOAD -f orc -o hdfs://dbiir10:9000/pixels/pixels/test_105/source -s pixels -t test_105 -n 220000 -r \t -c 16
  * -l hdfs://dbiir10:9000/pixels/pixels/test_105/v_0_order_orc/
  * </p>
- * [-l] is optional, assign a path not the 'OrderPath' in db(Defined in Config.java)
+ * [-l] is optional, its default value is the orderPath of the last writable layout of the table.
  *
  * <br>This should be run under root user to execute cache cleaning commands
  * <p>
@@ -137,9 +137,9 @@ public class Main
                         .help("Specify the format of files");
                 argumentParser.addArgument("-o", "--original_data_path").required(true)
                         .help("specify the path of original data");
-                argumentParser.addArgument("-d", "--db_name").required(true)
+                argumentParser.addArgument("-s", "--schema").required(true)
                         .help("specify the name of database");
-                argumentParser.addArgument("-t", "--table_name").required(true)
+                argumentParser.addArgument("-t", "--table").required(true)
                         .help("Specify the name of table");
                 argumentParser.addArgument("-n", "--row_num").required(true)
                         .help("Specify the max number of rows to write in a file");
@@ -168,8 +168,8 @@ public class Main
                 try
                 {
                     String format = ns.getString("format");
-                    String dbName = ns.getString("db_name");
-                    String tableName = ns.getString("table_name");
+                    String schemaName = ns.getString("schema");
+                    String tableName = ns.getString("table");
                     String origin = ns.getString("original_data_path");
                     int rowNum = Integer.parseInt(ns.getString("row_num"));
                     String regex = ns.getString("row_regex");
@@ -192,7 +192,7 @@ public class Main
 
                     if (format != null)
                     {
-                        config = new Config(dbName, tableName, rowNum, regex, format, loadingDataPath, enableEncoding);
+                        config = new Config(schemaName, tableName, rowNum, regex, format, loadingDataPath, enableEncoding);
                     }
 
                     if (producer && config != null)
@@ -477,8 +477,8 @@ public class Main
 
                 try
                 {
-                    String schema = ns.getString("schema");
-                    String table = ns.getString("table");
+                    String schemaName = ns.getString("schema");
+                    String tableName = ns.getString("table");
                     String naive = ns.getString("naive");
                     int threadNum = Integer.parseInt(ns.getString("concurrency"));
                     ExecutorService compactExecutor = Executors.newFixedThreadPool(threadNum);
@@ -488,7 +488,7 @@ public class Main
 
                     // get compact layout
                     MetadataService metadataService = new MetadataService(metadataHost, metadataPort);
-                    List<Layout> layouts = metadataService.getLayouts(schema, table);
+                    List<Layout> layouts = metadataService.getLayouts(schemaName, tableName);
                     metadataService.shutdown();
                     System.out.println("existing number of layouts: " + layouts.size());
                     Layout layout = null;
@@ -501,7 +501,8 @@ public class Main
                         }
                     }
 
-                    requireNonNull(layout, String.format("writable layout is not found for table '%s.%s'.", schema, table));
+                    requireNonNull(layout, String.format("writable layout is not found for table '%s.%s'.",
+                            schemaName, tableName));
                     Compact compact = layout.getCompactObject();
                     int numRowGroupInBlock = compact.getNumRowGroupInBlock();
                     int numColumn = compact.getNumColumn();
