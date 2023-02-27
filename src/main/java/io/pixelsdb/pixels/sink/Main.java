@@ -582,7 +582,8 @@ public class Main
                                          * Deep copy it if it is in-place modified in the future.
                                          */
                                         .setCompactLayout(compactLayout)
-                                        .setStorage(compactStorage)
+                                        .setInputStorage(orderStorage)
+                                        .setOutputStorage(compactStorage)
                                         .setPath(filePath)
                                         .setBlockSize(blockSize)
                                         .setReplication(replication)
