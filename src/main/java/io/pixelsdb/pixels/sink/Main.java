@@ -197,8 +197,7 @@ public class Main
 
                     if (producer && config != null)
                     {
-                        // todo the producer option is true, means that the producer is dynamic
-
+                        // TODO: the producer option is true, means that the producer is dynamic
                     } else if (!producer && config != null)
                     {
                         // source already exist, producer option is false, add list of source to the queue

@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: tao
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 public class PixelsConsumer extends Consumer
 {
 
+    public static final AtomicInteger GlobalTargetPathId = new AtomicInteger(0);
     private final BlockingQueue<String> queue;
     private final Properties prop;
     private final Config config;
@@ -97,8 +99,6 @@ public class PixelsConsumer extends Consumer
             PixelsWriter pixelsWriter = null;
             int rowCounter = 0;
 
-            int targetPathId = 0;
-
             while (isRunning)
             {
                 String originalFilePath = queue.poll(2, TimeUnit.SECONDS);
@@ -109,8 +109,8 @@ public class PixelsConsumer extends Consumer
                     reader = new BufferedReader(new InputStreamReader(originStorage.open(originalFilePath)));
 
                     // choose the target output directory using round-robin
-                    String targetDirPath = targetPaths[targetPathId++];
-                    targetPathId %= targetPaths.length;
+                    int targetPathId = GlobalTargetPathId.getAndIncrement() % targetPaths.length;
+                    String targetDirPath = targetPaths[targetPathId];
                     Storage targetStorage = StorageFactory.Instance().getStorage(targetDirPath);
 
                     System.out.println("loading data into directory: " + targetDirPath);
