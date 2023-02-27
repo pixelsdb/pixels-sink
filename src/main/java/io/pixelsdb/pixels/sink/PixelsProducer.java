@@ -45,7 +45,6 @@ public class PixelsProducer
 
     class Producer extends Thread
     {
-
         private volatile boolean isRunning = true;
         private BlockingQueue<Path> queue;
         Path data = null;

@@ -7,3 +7,6 @@ and run the benchmark queries.
 
 It was previously named `pixels-load` as its earliest functionality was to load data for the evaluations.
 Streaming and real-time loading will be supported in the future.
+
+[TPC-H Evaluation](https://github.com/pixelsdb/pixels#tpc-h-evaluation) provides an example of using the command-line
+tool in `pixels-sink`.

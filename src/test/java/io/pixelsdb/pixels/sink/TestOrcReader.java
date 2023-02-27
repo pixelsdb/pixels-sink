@@ -35,13 +35,12 @@ public class TestOrcReader
     public void testReader()
     {
         Configuration conf = new Configuration();
-        Reader reader = null;
+        Reader reader;
         try
         {
             reader = OrcFile.createReader(new Path(orcPath),
                     OrcFile.readerOptions(conf));
-            RecordReader rows = null;
-            rows = reader.rows();
+            RecordReader rows = reader.rows();
             VectorizedRowBatch batch = reader.getSchema().createRowBatch();
             long num = 0;
             long begin = System.currentTimeMillis();
@@ -75,20 +74,18 @@ public class TestOrcReader
     public void testPixelWriterByOrcReader()
     {
         Configuration conf = new Configuration();
-        Reader reader = null;
+        Reader reader;
         try
         {
             reader = OrcFile.createReader(new Path(TestParams.orcPath),
                     OrcFile.readerOptions(conf));
-            RecordReader rows = null;
-            rows = reader.rows();
+            RecordReader rows = reader.rows();
             VectorizedRowBatch batch = reader.getSchema().createRowBatch();
             long num = 0;
             long begin = System.currentTimeMillis();
             while (rows.nextBatch(batch))
             {
                 num += batch.size;
-//                System.out.println(batch.toString());
                 int i, j, k;
                 StringBuilder b = new StringBuilder();
                 for (i = 0; i < batch.size; ++i)
@@ -99,7 +96,7 @@ public class TestOrcReader
                         ColumnVector cv = batch.cols[projIndex];
                         cv.stringifyValue(b, i);
                     }
-                    System.out.println(b.toString());
+                    System.out.println(b);
                     if (i == 1)
                     {
                         break;

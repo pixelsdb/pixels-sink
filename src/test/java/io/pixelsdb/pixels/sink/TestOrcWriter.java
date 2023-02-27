@@ -38,7 +38,7 @@ public class TestOrcWriter
     {
         Configuration conf = new Configuration();
         TypeDescription schema = TypeDescription.fromString(TestParams.schemaStr);
-        Writer writer = null;
+        Writer writer;
         try
         {
             writer = OrcFile.createWriter(new Path(orcPath),
