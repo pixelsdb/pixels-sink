@@ -1,0 +1,14 @@
+# Kafka Config
+bootstrap.servers=localhost:9092
+group.id=
+auto.offset.reset=earliest
+key.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+
+# Topic & Database Config
+topic.prefix=
+consumer.capture_database=
+consumer.include_tables=
+
+# Sink Config
+output.directory=

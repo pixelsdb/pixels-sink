@@ -1,0 +1,21 @@
+{
+  "name": "pixels-postgres-connector",  
+  "config": {
+    "provide.transaction.metadata": true,
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector", 
+    "tasks.max": "1",  
+    "database.hostname": "pixels_postgres_source_db",  
+    "database.port": "5432",
+    "database.user": "pixels",
+    "database.password": "<$ postgres_password>",
+    "database.dbname" : "pixels_realtime_crud", 
+    "schema.include.list": "public",
+    "database.server.id": "1", 
+    "topic.prefix": "oltp_server",
+
+    "transforms": "topicRouting",
+    "transforms.topicRouting.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.topicRouting.regex": "oltp_server\\.public\\.(.*)",
+    "transforms.topicRouting.replacement": "oltp_server.pixels_realtime_crud.$1"
+  }
+}

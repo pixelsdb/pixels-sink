@@ -1,0 +1,17 @@
+{
+    "name": "pixels-mysql-connector",  
+    "config": {
+      "provide.transaction.metadata": true,
+      "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+      "tasks.max": "1",  
+      "database.hostname": "pixels_mysql_source_db",  
+      "database.port": "3306",
+      "database.user": "pixels",
+      "database.password": "<$ mysql_password>",
+      "database.server.id": "1",  
+      "topic.prefix": "oltp_server",  
+      "database.include.list": "pixels_realtime_crud",  
+      "schema.history.internal.kafka.bootstrap.servers": "pixels_kafka:9092",  
+      "schema.history.internal.kafka.topic": "schema-changes.mysql"  
+    }
+}

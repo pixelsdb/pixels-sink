@@ -7,12 +7,12 @@
     <parent>
         <artifactId>pixels</artifactId>
         <groupId>io.pixelsdb</groupId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.2.0-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <artifactId>pixels-sink</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <description>Pixels Data Sink</description>
     <url>https://github.com/pixelsdb/pixels-sink</url>
     <inceptionYear>2022</inceptionYear>
@@ -29,11 +29,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <mainClass>io.pixelsdb.pixels.sink.Main</mainClass>
+        <mainClass>io.pixelsdb.pixels.sink.PixelsSinkApp</mainClass>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
 
-        <dep.argparse4j.version>0.7.0</dep.argparse4j.version>
+        <dep.argparse4j.version>0.9.0</dep.argparse4j.version>
+        <dep.kafka.version>3.9.0</dep.kafka.version>
+        <dep.opencsv.version>5.8</dep.opencsv.version>
+        <plugin.dockerfile-maven.version>1.4.13</plugin.dockerfile-maven.version>
     </properties>
 
     <dependencies>
@@ -84,6 +87,18 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <!-- the default binding from slf4j to log4j, be careful of other conflict bindings -->
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>${dep.log4j.version}</version>
+        </dependency>
+
         <!-- grpc -->
         <dependency>
             <groupId>io.grpc</groupId>
@@ -107,6 +122,20 @@
             <version>${dep.argparse4j.version}</version>
             <optional>true</optional>
         </dependency>
+
+        <!-- Kafka Consumer Dependency -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${dep.kafka.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${dep.opencsv.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -155,6 +184,20 @@
                     </execution>
                 </executions>
             </plugin>
+        <plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>dockerfile-maven-plugin</artifactId>
+            
+            <version>${plugin.dockerfile-maven.version}</version>
+            <configuration>
+                <repository>${project.artifactId}</repository>
+                <tag>${project.version}</tag>
+                <buildArgs>
+                    <jarFile>${project.build.finalName}-${project.version}-full.jar</jarFile>
+                </buildArgs>
+                <dockerfile>develop/images/pixels-sink/Dockerfile</dockerfile>
+            </configuration>
+        </plugin> 
         </plugins>
     </build>
 </project>
