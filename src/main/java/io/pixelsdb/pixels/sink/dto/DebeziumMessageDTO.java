@@ -1,10 +1,8 @@
-package io.pixelsdb.pixels.sink.deserializer;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package io.pixelsdb.pixels.sink.dto;
 
 import java.util.Map;
 
-public class DebeziumMessage {
+public class DebeziumMessageDTO {
 
     private Map<String, Object> before;
     private Map<String, Object> after;

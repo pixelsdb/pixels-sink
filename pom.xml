@@ -36,6 +36,7 @@
         <dep.argparse4j.version>0.9.0</dep.argparse4j.version>
         <dep.kafka.version>3.9.0</dep.kafka.version>
         <dep.opencsv.version>5.8</dep.opencsv.version>
+        <dep.lombok.version>1.18.36</dep.lombok.version>
         <plugin.dockerfile-maven.version>1.4.13</plugin.dockerfile-maven.version>
     </properties>
 
@@ -136,6 +137,12 @@
             <version>${dep.opencsv.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${dep.lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
