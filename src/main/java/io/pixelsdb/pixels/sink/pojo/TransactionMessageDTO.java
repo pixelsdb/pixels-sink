@@ -1,6 +1,6 @@
-package io.pixelsdb.pixels.sink.dto;
+package io.pixelsdb.pixels.sink.pojo;
 
-import io.pixelsdb.pixels.sink.dto.enums.TransactionStatusEnum;
+import io.pixelsdb.pixels.sink.pojo.enums.TransactionStatusEnum;
 import lombok.Data;
 import java.io.Serializable;
 import java.util.List;

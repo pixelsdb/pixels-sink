@@ -11,4 +11,7 @@ public class PixelsSinkDefaultConfig {
     public static final String VALUE_DESERIALIZER = DebeziumJsonMessageDeserializer.class.getName();
 
     public static final Long CSV_RECORD_FLUSH = 1000L;
+
+
+
 }

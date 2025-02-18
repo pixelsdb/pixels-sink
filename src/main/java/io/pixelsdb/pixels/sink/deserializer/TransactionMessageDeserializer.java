@@ -2,8 +2,8 @@ package io.pixelsdb.pixels.sink.deserializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.pixelsdb.pixels.sink.dto.TransactionMessageDTO;
-import io.pixelsdb.pixels.sink.dto.enums.TransactionStatusEnum;
+import io.pixelsdb.pixels.sink.pojo.TransactionMessageDTO;
+import io.pixelsdb.pixels.sink.pojo.enums.TransactionStatusEnum;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;

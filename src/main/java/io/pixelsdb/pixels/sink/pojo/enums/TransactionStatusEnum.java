@@ -1,4 +1,4 @@
-package io.pixelsdb.pixels.sink.dto.enums;
+package io.pixelsdb.pixels.sink.pojo.enums;
 
 public enum TransactionStatusEnum {
     BEGIN,

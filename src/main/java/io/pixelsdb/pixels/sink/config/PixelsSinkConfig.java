@@ -75,4 +75,12 @@ public class PixelsSinkConfig {
     public String getCsvSinkPath() {
         return properties.getProperty("csv.sink_path", PixelsSinkDefaultConfig.CSV_SINK_PATH);
     }
+
+    public String getTransactionTopicSuffix() {
+        return properties.getProperty("transaction.topic.suffix", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_SUFFIX);
+    }
+
+    public String getTransactionTopicValueDeserializer() {
+        return properties.getProperty("transaction.topic.key.deserializer");
+    }
 }

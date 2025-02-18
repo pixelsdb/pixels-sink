@@ -1,4 +1,4 @@
-package io.pixelsdb.pixels.sink.dto;
+package io.pixelsdb.pixels.sink.pojo;
 
 import java.util.Map;
 

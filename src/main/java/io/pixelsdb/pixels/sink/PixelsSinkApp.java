@@ -17,8 +17,13 @@ package io.pixelsdb.pixels.sink;
 
 import io.pixelsdb.pixels.sink.config.CommandLineConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
+import io.pixelsdb.pixels.sink.config.PixelsSinkConstants;
+import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
+import io.pixelsdb.pixels.sink.config.factory.KafkaPropFactorySelector;
 import io.pixelsdb.pixels.sink.deserializer.DebeziumJsonMessageDeserializer;
 import io.pixelsdb.pixels.sink.monitor.TopicMonitor;
+import io.pixelsdb.pixels.sink.monitor.TransactionMonitor;
+import lombok.val;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -35,17 +40,19 @@ public class PixelsSinkApp {
 
         PixelsSinkConfig pixelsSinkConfig = new PixelsSinkConfig(cmdLineConfig.getConfigPath());
 
-        Properties kafkaProperties = getProperties(pixelsSinkConfig);
-        TopicMonitor topicMonitor = new TopicMonitor(pixelsSinkConfig, kafkaProperties);
-        topicMonitor.start();
-    }
+        KafkaPropFactorySelector kafkaPropFactorySelector = new KafkaPropFactorySelector();
 
-    private static Properties getProperties(PixelsSinkConfig config) {
-        Properties kafkaProperties = new Properties();
-        kafkaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServers());
-        kafkaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, config.getKeyDeserializer());
-        kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, config.getValueDeserializer());
-        kafkaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        return kafkaProperties;
+        Properties transactionKafkaProperties = kafkaPropFactorySelector
+                .getFactory(PixelsSinkConstants.TRANSACTION_KAFKA_PROP_FACTORY)
+                .createKafkaProperties(pixelsSinkConfig);
+        TransactionMonitor transactionMonitor = new TransactionMonitor(pixelsSinkConfig, transactionKafkaProperties);
+        transactionMonitor.run();
+
+
+        Properties topicKafkaProperties = kafkaPropFactorySelector
+                .getFactory(PixelsSinkConstants.ROW_RECORD_KAFKA_PROP_FACTORY)
+                .createKafkaProperties(pixelsSinkConfig);
+        TopicMonitor topicMonitor = new TopicMonitor(pixelsSinkConfig, topicKafkaProperties);
+        topicMonitor.start();
     }
 }

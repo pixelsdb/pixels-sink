@@ -63,18 +63,18 @@ services:
     networks:
       - pixels_network
 
-  pixels-sink:
-      image: pixels-sink:0.2.0-SNAPSHOT
-      container_name: pixels-sink
-      volumes:
-        - ./data:/app/data
-      # command: tail -f /dev/null # debug
-      depends_on:
-        - kafka
-        - pg_debezium
-        - mysql_debezium 
-      networks:
-        - pixels_network
+#  pixels-sink:
+#      image: pixels-sink:0.2.0-SNAPSHOT
+#      container_name: pixels-sink
+#      volumes:
+#        - ./data:/app/data
+#      # command: tail -f /dev/null # debug
+#      depends_on:
+#        - kafka
+#        - pg_debezium
+#        - mysql_debezium
+#      networks:
+#        - pixels_network
   kafka_ui:
     image: obsidiandynamics/kafdrop:latest
     container_name: kafka_ui

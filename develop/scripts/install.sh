@@ -12,8 +12,10 @@ EOF
 develop_debug=off
 need_init=on
 need_build=on
-load_example_data=on
+generate_data=on
 example_data_scale=0.1
+enable_postgres=on
+enable_mysql=on
 
 for arg do
   val=`echo "$arg" | sed -e 's;^--[^=]*=;;'`
@@ -22,7 +24,10 @@ for arg do
     --develop_debug=*)          develop_debug="$val";;
     --debug)                    develop_debug=on ;;
     --need_init=*)              need_init="$val";;
+    --enable_postgres=*)        enable_postgres="$val";;
+    --enable_mysql=*)           enable_mysql="$val";;
     --need_build=*)             need_build="$val" ;;
+    --generate_data=*)          generate_data="$val" ;;
     -h|--help)                  usage ;;
     *)                          echo "wrong options : $arg";
                                 exit 1
@@ -44,7 +49,7 @@ if [[ x${need_build} == x"on" ]]; then
   build_pixels_sink_image
 fi
 
-if [[ x${load_example_data} == x"on" ]]; then
+if [[ x${generate_data} == x"on" ]]; then
   build_generator
   generate_tpch_data ${example_data_scale}
 fi
@@ -59,7 +64,7 @@ log_info "Containers Started"
 
 
 log_info "Start Register Debezium Connectors"
-
+if [[ x${enable_mysql} == x"on" ]]; then
 log_info "Start Register MySQL Debezium Connector"
 gen_config_by_template mysql_password $(cat "${SECRETS_DIR}/mysql-pixels-password.txt") ${CONFIG_DIR}/register-mysql.json.template
 [[ -f ${CONFIG_DIR}/register-mysql.json ]] || { log_fatal_exit "Can't generate mysql debezium connector config"; }
@@ -68,14 +73,19 @@ check_fatal_exit "MySQL Source Kafka Connector Server Fail"
 # register mysql connector
 try_command curl -f -X POST -H "Content-Type: application/json" -d @${CONFIG_DIR}/register-mysql.json http://localhost:8083/connectors -w '\n' # We need to wait here for MySQL to load all the data
 check_fatal_exit "Register MySQL Source Connector Fail"
+fi
 
+
+if [[ x${enable_postgres} == x"on" ]]; then
 log_info "Start Register PostgreSQL Debezium Connector"
 gen_config_by_template postgres_password $(cat "${SECRETS_DIR}/postgres-pixels-password.txt") ${CONFIG_DIR}/register-postgres.json.template
 [[ -f ${CONFIG_DIR}/register-postgres.json ]] || { log_fatal_exit "Can't generate postgres debezium connector config"; }
-wait_for_url http://localhost:8084/connectors
+wait_for_url http://localhost:8084/connectors 20
 check_fatal_exit "Postgres Source Kafka Connector Server Fail"
+# register PostgreSQL connector
 try_command curl -f -X POST -H "Content-Type: application/json" -d @${CONFIG_DIR}/register-postgres.json http://localhost:8084/connectors -w '\n'
 check_fatal_exit "Register PostgreSQL Source Connector Fail"
+fi
 
 log_info "Visit http://localhost:9000 to check kafka status"
 
