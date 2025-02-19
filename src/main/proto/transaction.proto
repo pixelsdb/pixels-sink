@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package io.pixelsdb.pixels.sink.proto;
+
+
+option java_package = "io.pixelsdb.pixels.sink.proto";
+option java_outer_classname = "TransactionMetadataValue";
+
+message TransactionMetadata {
+  string status = 1;
+  string id = 2;
+  int64 event_count = 3;
+  repeated DataCollection data_collections = 4;  // array对应repeated
+  int64 ts_ms = 5;                // JSON中"optional": false对应非optional字段
+
+  message DataCollection {
+    string data_collection = 1;    // 对应JSON结构中的data_collection字段
+    int64 event_count = 2;         // 对应JSON结构中的event_count字段
+  }
+}
