@@ -12,6 +12,7 @@ public class TransactionKafkaPropFactory implements KafkaPropFactory{
     public Properties createKafkaProperties(PixelsSinkConfig config) {
         Properties kafkaProperties =  getCommonKafkaProperties(config);
         kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, config.getTransactionTopicValueDeserializer());
+        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, config.getTransactionTopicGroupId());
         return kafkaProperties;
     }
 }

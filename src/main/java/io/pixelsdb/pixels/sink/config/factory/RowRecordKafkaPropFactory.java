@@ -10,6 +10,7 @@ public class RowRecordKafkaPropFactory implements KafkaPropFactory{
     public Properties createKafkaProperties(PixelsSinkConfig config) {
         Properties kafkaProperties = getCommonKafkaProperties(config);
         kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, config.getValueDeserializer());
+        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, config.getGroupId());
         return kafkaProperties;
     }
 

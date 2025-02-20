@@ -2,7 +2,9 @@ package io.pixelsdb.pixels.sink;
 
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.monitor.TopicMonitor;
+import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
 import io.pixelsdb.pixels.sink.writer.CsvWriter;
+import lombok.val;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -38,7 +40,7 @@ public class TableConsumerTask implements Runnable {
     @Override
     public void run() {
 
-        KafkaConsumer<String, Map<String, Object>> consumer = new KafkaConsumer<>(kafkaProperties);
+        KafkaConsumer<String, RowRecordMessage.RowRecord> consumer = new KafkaConsumer<>(kafkaProperties);
         consumer.subscribe(Collections.singleton(topic));
         TopicPartition partition = new TopicPartition(topic, 0);  // partition 0
         consumer.poll(1);
@@ -46,15 +48,16 @@ public class TableConsumerTask implements Runnable {
         consumer.seek(partition, 0);  // 设置偏移量为 0
 
         while (true) {
-            ConsumerRecords<String, Map<String, Object>> records = consumer.poll(Duration.ofSeconds(5));
+            ConsumerRecords<String, RowRecordMessage.RowRecord> records = consumer.poll(Duration.ofSeconds(5));
             log.info("{} Consumer poll returned {} records", tableName, records.count());
             if (!records.isEmpty()) {
                 records.forEach(record -> {
-                    try {
-                        writer.writeToCsv(record.value());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        writer.writeToCsv(record.value());
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+                    val value = record.value();
                 });
             }
             // TODO stop singal

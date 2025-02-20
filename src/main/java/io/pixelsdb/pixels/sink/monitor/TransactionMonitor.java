@@ -2,6 +2,7 @@ package io.pixelsdb.pixels.sink.monitor;
 
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.pojo.TransactionMessageDTO;
+import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -14,11 +15,11 @@ import java.util.Properties;
 
 public class TransactionMonitor implements Runnable{
     private final String transactionTopic;
-    private final KafkaConsumer<String, TransactionMessageDTO> consumer;
+    private final KafkaConsumer<String, TransactionMetadataValue.TransactionMetadata> consumer;
 
     public TransactionMonitor(PixelsSinkConfig pixelsSinkConfig, Properties kafkaProperties) {
         this.transactionTopic = pixelsSinkConfig.getTopicPrefix() + "." + pixelsSinkConfig.getTransactionTopicSuffix();
-        this.consumer = new KafkaConsumer<String, TransactionMessageDTO>(kafkaProperties);
+        this.consumer = new KafkaConsumer<String, TransactionMetadataValue.TransactionMetadata>(kafkaProperties);
     }
 
 
@@ -26,9 +27,9 @@ public class TransactionMonitor implements Runnable{
     public void run() {
         consumer.subscribe(Collections.singletonList(transactionTopic));
         while(true) {
-            ConsumerRecords<String, TransactionMessageDTO> records = consumer.poll(Duration.ofSeconds(5));
-            for(ConsumerRecord<String, TransactionMessageDTO> record: records) {
-                TransactionMessageDTO transaction = record.value();
+            ConsumerRecords<String, TransactionMetadataValue.TransactionMetadata> records = consumer.poll(Duration.ofSeconds(5));
+            for(ConsumerRecord<String, TransactionMetadataValue.TransactionMetadata> record: records) {
+                TransactionMetadataValue.TransactionMetadata transaction = record.value();
             }
         }
     }

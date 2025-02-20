@@ -21,6 +21,7 @@ import io.pixelsdb.pixels.sink.config.PixelsSinkConstants;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import io.pixelsdb.pixels.sink.config.factory.KafkaPropFactorySelector;
 import io.pixelsdb.pixels.sink.deserializer.DebeziumJsonMessageDeserializer;
+import io.pixelsdb.pixels.sink.monitor.MonitorThreadManager;
 import io.pixelsdb.pixels.sink.monitor.TopicMonitor;
 import io.pixelsdb.pixels.sink.monitor.TransactionMonitor;
 import lombok.val;
@@ -37,22 +38,21 @@ public class PixelsSinkApp {
 
     public static void main(String[] args) throws IOException {
         CommandLineConfig cmdLineConfig = new CommandLineConfig(args);
-
         PixelsSinkConfig pixelsSinkConfig = new PixelsSinkConfig(cmdLineConfig.getConfigPath());
-
         KafkaPropFactorySelector kafkaPropFactorySelector = new KafkaPropFactorySelector();
 
         Properties transactionKafkaProperties = kafkaPropFactorySelector
                 .getFactory(PixelsSinkConstants.TRANSACTION_KAFKA_PROP_FACTORY)
                 .createKafkaProperties(pixelsSinkConfig);
         TransactionMonitor transactionMonitor = new TransactionMonitor(pixelsSinkConfig, transactionKafkaProperties);
-        transactionMonitor.run();
-
 
         Properties topicKafkaProperties = kafkaPropFactorySelector
                 .getFactory(PixelsSinkConstants.ROW_RECORD_KAFKA_PROP_FACTORY)
                 .createKafkaProperties(pixelsSinkConfig);
         TopicMonitor topicMonitor = new TopicMonitor(pixelsSinkConfig, topicKafkaProperties);
-        topicMonitor.start();
+
+        MonitorThreadManager manager = new MonitorThreadManager();
+        manager.startMonitor(transactionMonitor);
+        manager.startMonitor(topicMonitor);
     }
 }

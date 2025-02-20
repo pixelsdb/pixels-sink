@@ -19,16 +19,16 @@ public final class RowRecordMessage {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>bytes before_json = 1;</code>
-     * @return The beforeJson.
+     * <code>bytes before = 1;</code>
+     * @return The before.
      */
-    com.google.protobuf.ByteString getBeforeJson();
+    com.google.protobuf.ByteString getBefore();
 
     /**
-     * <code>bytes after_json = 2;</code>
-     * @return The afterJson.
+     * <code>bytes after = 2;</code>
+     * @return The after.
      */
-    com.google.protobuf.ByteString getAfterJson();
+    com.google.protobuf.ByteString getAfter();
 
     /**
      * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
@@ -103,8 +103,8 @@ public final class RowRecordMessage {
       super(builder);
     }
     private RowRecord() {
-      beforeJson_ = com.google.protobuf.ByteString.EMPTY;
-      afterJson_ = com.google.protobuf.ByteString.EMPTY;
+      before_ = com.google.protobuf.ByteString.EMPTY;
+      after_ = com.google.protobuf.ByteString.EMPTY;
       op_ = "";
     }
 
@@ -140,12 +140,12 @@ public final class RowRecordMessage {
               break;
             case 10: {
 
-              beforeJson_ = input.readBytes();
+              before_ = input.readBytes();
               break;
             }
             case 18: {
 
-              afterJson_ = input.readBytes();
+              after_ = input.readBytes();
               break;
             }
             case 26: {
@@ -227,26 +227,26 @@ public final class RowRecordMessage {
               io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.class, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.Builder.class);
     }
 
-    public static final int BEFORE_JSON_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString beforeJson_;
+    public static final int BEFORE_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString before_;
     /**
-     * <code>bytes before_json = 1;</code>
-     * @return The beforeJson.
+     * <code>bytes before = 1;</code>
+     * @return The before.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getBeforeJson() {
-      return beforeJson_;
+    public com.google.protobuf.ByteString getBefore() {
+      return before_;
     }
 
-    public static final int AFTER_JSON_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString afterJson_;
+    public static final int AFTER_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString after_;
     /**
-     * <code>bytes after_json = 2;</code>
-     * @return The afterJson.
+     * <code>bytes after = 2;</code>
+     * @return The after.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getAfterJson() {
-      return afterJson_;
+    public com.google.protobuf.ByteString getAfter() {
+      return after_;
     }
 
     public static final int SOURCE_FIELD_NUMBER = 3;
@@ -386,11 +386,11 @@ public final class RowRecordMessage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!beforeJson_.isEmpty()) {
-        output.writeBytes(1, beforeJson_);
+      if (!before_.isEmpty()) {
+        output.writeBytes(1, before_);
       }
-      if (!afterJson_.isEmpty()) {
-        output.writeBytes(2, afterJson_);
+      if (!after_.isEmpty()) {
+        output.writeBytes(2, after_);
       }
       if (source_ != null) {
         output.writeMessage(3, getSource());
@@ -419,13 +419,13 @@ public final class RowRecordMessage {
       if (size != -1) return size;
 
       size = 0;
-      if (!beforeJson_.isEmpty()) {
+      if (!before_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, beforeJson_);
+          .computeBytesSize(1, before_);
       }
-      if (!afterJson_.isEmpty()) {
+      if (!after_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, afterJson_);
+          .computeBytesSize(2, after_);
       }
       if (source_ != null) {
         size += com.google.protobuf.CodedOutputStream
@@ -465,10 +465,10 @@ public final class RowRecordMessage {
       }
       io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord other = (io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord) obj;
 
-      if (!getBeforeJson()
-          .equals(other.getBeforeJson())) return false;
-      if (!getAfterJson()
-          .equals(other.getAfterJson())) return false;
+      if (!getBefore()
+          .equals(other.getBefore())) return false;
+      if (!getAfter()
+          .equals(other.getAfter())) return false;
       if (hasSource() != other.hasSource()) return false;
       if (hasSource()) {
         if (!getSource()
@@ -498,10 +498,10 @@ public final class RowRecordMessage {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + BEFORE_JSON_FIELD_NUMBER;
-      hash = (53 * hash) + getBeforeJson().hashCode();
-      hash = (37 * hash) + AFTER_JSON_FIELD_NUMBER;
-      hash = (53 * hash) + getAfterJson().hashCode();
+      hash = (37 * hash) + BEFORE_FIELD_NUMBER;
+      hash = (53 * hash) + getBefore().hashCode();
+      hash = (37 * hash) + AFTER_FIELD_NUMBER;
+      hash = (53 * hash) + getAfter().hashCode();
       if (hasSource()) {
         hash = (37 * hash) + SOURCE_FIELD_NUMBER;
         hash = (53 * hash) + getSource().hashCode();
@@ -654,9 +654,9 @@ public final class RowRecordMessage {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        beforeJson_ = com.google.protobuf.ByteString.EMPTY;
+        before_ = com.google.protobuf.ByteString.EMPTY;
 
-        afterJson_ = com.google.protobuf.ByteString.EMPTY;
+        after_ = com.google.protobuf.ByteString.EMPTY;
 
         if (sourceBuilder_ == null) {
           source_ = null;
@@ -704,8 +704,8 @@ public final class RowRecordMessage {
       @java.lang.Override
       public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord buildPartial() {
         io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord result = new io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord(this);
-        result.beforeJson_ = beforeJson_;
-        result.afterJson_ = afterJson_;
+        result.before_ = before_;
+        result.after_ = after_;
         if (sourceBuilder_ == null) {
           result.source_ = source_;
         } else {
@@ -768,11 +768,11 @@ public final class RowRecordMessage {
 
       public Builder mergeFrom(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord other) {
         if (other == io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.getDefaultInstance()) return this;
-        if (other.getBeforeJson() != com.google.protobuf.ByteString.EMPTY) {
-          setBeforeJson(other.getBeforeJson());
+        if (other.getBefore() != com.google.protobuf.ByteString.EMPTY) {
+          setBefore(other.getBefore());
         }
-        if (other.getAfterJson() != com.google.protobuf.ByteString.EMPTY) {
-          setAfterJson(other.getAfterJson());
+        if (other.getAfter() != com.google.protobuf.ByteString.EMPTY) {
+          setAfter(other.getAfter());
         }
         if (other.hasSource()) {
           mergeSource(other.getSource());
@@ -822,70 +822,70 @@ public final class RowRecordMessage {
         return this;
       }
 
-      private com.google.protobuf.ByteString beforeJson_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString before_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>bytes before_json = 1;</code>
-       * @return The beforeJson.
+       * <code>bytes before = 1;</code>
+       * @return The before.
        */
       @java.lang.Override
-      public com.google.protobuf.ByteString getBeforeJson() {
-        return beforeJson_;
+      public com.google.protobuf.ByteString getBefore() {
+        return before_;
       }
       /**
-       * <code>bytes before_json = 1;</code>
-       * @param value The beforeJson to set.
+       * <code>bytes before = 1;</code>
+       * @param value The before to set.
        * @return This builder for chaining.
        */
-      public Builder setBeforeJson(com.google.protobuf.ByteString value) {
+      public Builder setBefore(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        beforeJson_ = value;
+        before_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>bytes before_json = 1;</code>
+       * <code>bytes before = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearBeforeJson() {
+      public Builder clearBefore() {
         
-        beforeJson_ = getDefaultInstance().getBeforeJson();
+        before_ = getDefaultInstance().getBefore();
         onChanged();
         return this;
       }
 
-      private com.google.protobuf.ByteString afterJson_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString after_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>bytes after_json = 2;</code>
-       * @return The afterJson.
+       * <code>bytes after = 2;</code>
+       * @return The after.
        */
       @java.lang.Override
-      public com.google.protobuf.ByteString getAfterJson() {
-        return afterJson_;
+      public com.google.protobuf.ByteString getAfter() {
+        return after_;
       }
       /**
-       * <code>bytes after_json = 2;</code>
-       * @param value The afterJson to set.
+       * <code>bytes after = 2;</code>
+       * @param value The after to set.
        * @return This builder for chaining.
        */
-      public Builder setAfterJson(com.google.protobuf.ByteString value) {
+      public Builder setAfter(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        afterJson_ = value;
+        after_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>bytes after_json = 2;</code>
+       * <code>bytes after = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearAfterJson() {
+      public Builder clearAfter() {
         
-        afterJson_ = getDefaultInstance().getAfterJson();
+        after_ = getDefaultInstance().getAfter();
         onChanged();
         return this;
       }
@@ -4128,22 +4128,22 @@ public final class RowRecordMessage {
   static {
     java.lang.String[] descriptorData = {
       "\n\014record.proto\022\035io.pixelsdb.pixels.sink." +
-      "proto\"\355\001\n\tRowRecord\022\023\n\013before_json\030\001 \001(\014" +
-      "\022\022\n\nafter_json\030\002 \001(\014\0229\n\006source\030\003 \001(\0132).i" +
-      "o.pixelsdb.pixels.sink.proto.SourceInfo\022" +
-      "C\n\013transaction\030\004 \001(\0132..io.pixelsdb.pixel" +
-      "s.sink.proto.TransactionInfo\022\n\n\002op\030\005 \001(\t" +
-      "\022\r\n\005ts_ms\030\006 \001(\003\022\r\n\005ts_us\030\007 \001(\003\022\r\n\005ts_ns\030" +
-      "\010 \001(\003\"\344\001\n\nSourceInfo\022\017\n\007version\030\001 \001(\t\022\021\n" +
-      "\tconnector\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005ts_ms\030" +
-      "\004 \001(\003\022\020\n\010snapshot\030\005 \001(\t\022\n\n\002db\030\006 \001(\t\022\020\n\010s" +
-      "equence\030\007 \001(\t\022\r\n\005ts_us\030\010 \001(\003\022\r\n\005ts_ns\030\t " +
-      "\001(\003\022\016\n\006schema\030\n \001(\t\022\r\n\005table\030\013 \001(\t\022\r\n\005tx" +
-      "_id\030\014 \001(\003\022\013\n\003lsn\030\r \001(\003\022\014\n\004xmin\030\016 \001(\003\"Q\n\017" +
-      "TransactionInfo\022\n\n\002id\030\001 \001(\t\022\023\n\013total_ord" +
-      "er\030\002 \001(\003\022\035\n\025data_collection_order\030\003 \001(\003B" +
-      "1\n\035io.pixelsdb.pixels.sink.protoB\020RowRec" +
-      "ordMessageb\006proto3"
+      "proto\"\343\001\n\tRowRecord\022\016\n\006before\030\001 \001(\014\022\r\n\005a" +
+      "fter\030\002 \001(\014\0229\n\006source\030\003 \001(\0132).io.pixelsdb" +
+      ".pixels.sink.proto.SourceInfo\022C\n\013transac" +
+      "tion\030\004 \001(\0132..io.pixelsdb.pixels.sink.pro" +
+      "to.TransactionInfo\022\n\n\002op\030\005 \001(\t\022\r\n\005ts_ms\030" +
+      "\006 \001(\003\022\r\n\005ts_us\030\007 \001(\003\022\r\n\005ts_ns\030\010 \001(\003\"\344\001\n\n" +
+      "SourceInfo\022\017\n\007version\030\001 \001(\t\022\021\n\tconnector" +
+      "\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005ts_ms\030\004 \001(\003\022\020\n\010s" +
+      "napshot\030\005 \001(\t\022\n\n\002db\030\006 \001(\t\022\020\n\010sequence\030\007 " +
+      "\001(\t\022\r\n\005ts_us\030\010 \001(\003\022\r\n\005ts_ns\030\t \001(\003\022\016\n\006sch" +
+      "ema\030\n \001(\t\022\r\n\005table\030\013 \001(\t\022\r\n\005tx_id\030\014 \001(\003\022" +
+      "\013\n\003lsn\030\r \001(\003\022\014\n\004xmin\030\016 \001(\003\"Q\n\017Transactio" +
+      "nInfo\022\n\n\002id\030\001 \001(\t\022\023\n\013total_order\030\002 \001(\003\022\035" +
+      "\n\025data_collection_order\030\003 \001(\003B1\n\035io.pixe" +
+      "lsdb.pixels.sink.protoB\020RowRecordMessage" +
+      "b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4154,7 +4154,7 @@ public final class RowRecordMessage {
     internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_descriptor,
-        new java.lang.String[] { "BeforeJson", "AfterJson", "Source", "Transaction", "Op", "TsMs", "TsUs", "TsNs", });
+        new java.lang.String[] { "Before", "After", "Source", "Transaction", "Op", "TsMs", "TsUs", "TsNs", });
     internal_static_io_pixelsdb_pixels_sink_proto_SourceInfo_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_io_pixelsdb_pixels_sink_proto_SourceInfo_fieldAccessorTable = new

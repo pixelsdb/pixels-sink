@@ -7,9 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TransactionCoordinator {
     private final ConcurrentHashMap<String, TransactionState> txStateCache = new ConcurrentHashMap<>();
 
-    public void onTransactionBegin(TransactionMessageDTO txMeta) {
-        String txId = txMeta.getId();
-        txStateCache.put(txId, new TransactionState(txMeta));
-    }
+//    public void onTransactionBegin(TransactionMessageDTO txMeta) {
+//        String txId = txMeta.getId();
+//        txStateCache.put(txId, new TransactionState(txMeta));
+//    }
 
 }
