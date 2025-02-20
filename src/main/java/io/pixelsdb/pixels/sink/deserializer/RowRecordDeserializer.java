@@ -3,7 +3,6 @@ package io.pixelsdb.pixels.sink.deserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.util.JsonFormat;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
-import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

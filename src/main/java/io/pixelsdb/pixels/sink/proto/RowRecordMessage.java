@@ -14,1340 +14,11 @@ public final class RowRecordMessage {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  public interface RowRecordOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:io.pixelsdb.pixels.sink.proto.RowRecord)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>bytes before = 1;</code>
-     * @return The before.
-     */
-    com.google.protobuf.ByteString getBefore();
-
-    /**
-     * <code>bytes after = 2;</code>
-     * @return The after.
-     */
-    com.google.protobuf.ByteString getAfter();
-
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-     * @return Whether the source field is set.
-     */
-    boolean hasSource();
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-     * @return The source.
-     */
-    io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo getSource();
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-     */
-    io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder getSourceOrBuilder();
-
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-     * @return Whether the transaction field is set.
-     */
-    boolean hasTransaction();
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-     * @return The transaction.
-     */
-    io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo getTransaction();
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-     */
-    io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder getTransactionOrBuilder();
-
-    /**
-     * <code>string op = 5;</code>
-     * @return The op.
-     */
-    java.lang.String getOp();
-    /**
-     * <code>string op = 5;</code>
-     * @return The bytes for op.
-     */
-    com.google.protobuf.ByteString
-        getOpBytes();
-
-    /**
-     * <code>int64 ts_ms = 6;</code>
-     * @return The tsMs.
-     */
-    long getTsMs();
-
-    /**
-     * <code>int64 ts_us = 7;</code>
-     * @return The tsUs.
-     */
-    long getTsUs();
-
-    /**
-     * <code>int64 ts_ns = 8;</code>
-     * @return The tsNs.
-     */
-    long getTsNs();
-  }
-  /**
-   * Protobuf type {@code io.pixelsdb.pixels.sink.proto.RowRecord}
-   */
-  public static final class RowRecord extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:io.pixelsdb.pixels.sink.proto.RowRecord)
-      RowRecordOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use RowRecord.newBuilder() to construct.
-    private RowRecord(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private RowRecord() {
-      before_ = com.google.protobuf.ByteString.EMPTY;
-      after_ = com.google.protobuf.ByteString.EMPTY;
-      op_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new RowRecord();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private RowRecord(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-
-              before_ = input.readBytes();
-              break;
-            }
-            case 18: {
-
-              after_ = input.readBytes();
-              break;
-            }
-            case 26: {
-              io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder subBuilder = null;
-              if (source_ != null) {
-                subBuilder = source_.toBuilder();
-              }
-              source_ = input.readMessage(io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(source_);
-                source_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 34: {
-              io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder subBuilder = null;
-              if (transaction_ != null) {
-                subBuilder = transaction_.toBuilder();
-              }
-              transaction_ = input.readMessage(io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(transaction_);
-                transaction_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              op_ = s;
-              break;
-            }
-            case 48: {
-
-              tsMs_ = input.readInt64();
-              break;
-            }
-            case 56: {
-
-              tsUs_ = input.readInt64();
-              break;
-            }
-            case 64: {
-
-              tsNs_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.class, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.Builder.class);
-    }
-
-    public static final int BEFORE_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString before_;
-    /**
-     * <code>bytes before = 1;</code>
-     * @return The before.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getBefore() {
-      return before_;
-    }
-
-    public static final int AFTER_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString after_;
-    /**
-     * <code>bytes after = 2;</code>
-     * @return The after.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getAfter() {
-      return after_;
-    }
-
-    public static final int SOURCE_FIELD_NUMBER = 3;
-    private io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo source_;
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-     * @return Whether the source field is set.
-     */
-    @java.lang.Override
-    public boolean hasSource() {
-      return source_ != null;
-    }
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-     * @return The source.
-     */
-    @java.lang.Override
-    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo getSource() {
-      return source_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.getDefaultInstance() : source_;
-    }
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-     */
-    @java.lang.Override
-    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder getSourceOrBuilder() {
-      return getSource();
-    }
-
-    public static final int TRANSACTION_FIELD_NUMBER = 4;
-    private io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo transaction_;
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-     * @return Whether the transaction field is set.
-     */
-    @java.lang.Override
-    public boolean hasTransaction() {
-      return transaction_ != null;
-    }
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-     * @return The transaction.
-     */
-    @java.lang.Override
-    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo getTransaction() {
-      return transaction_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.getDefaultInstance() : transaction_;
-    }
-    /**
-     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-     */
-    @java.lang.Override
-    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder getTransactionOrBuilder() {
-      return getTransaction();
-    }
-
-    public static final int OP_FIELD_NUMBER = 5;
-    private volatile java.lang.Object op_;
-    /**
-     * <code>string op = 5;</code>
-     * @return The op.
-     */
-    @java.lang.Override
-    public java.lang.String getOp() {
-      java.lang.Object ref = op_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        op_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string op = 5;</code>
-     * @return The bytes for op.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getOpBytes() {
-      java.lang.Object ref = op_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        op_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int TS_MS_FIELD_NUMBER = 6;
-    private long tsMs_;
-    /**
-     * <code>int64 ts_ms = 6;</code>
-     * @return The tsMs.
-     */
-    @java.lang.Override
-    public long getTsMs() {
-      return tsMs_;
-    }
-
-    public static final int TS_US_FIELD_NUMBER = 7;
-    private long tsUs_;
-    /**
-     * <code>int64 ts_us = 7;</code>
-     * @return The tsUs.
-     */
-    @java.lang.Override
-    public long getTsUs() {
-      return tsUs_;
-    }
-
-    public static final int TS_NS_FIELD_NUMBER = 8;
-    private long tsNs_;
-    /**
-     * <code>int64 ts_ns = 8;</code>
-     * @return The tsNs.
-     */
-    @java.lang.Override
-    public long getTsNs() {
-      return tsNs_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!before_.isEmpty()) {
-        output.writeBytes(1, before_);
-      }
-      if (!after_.isEmpty()) {
-        output.writeBytes(2, after_);
-      }
-      if (source_ != null) {
-        output.writeMessage(3, getSource());
-      }
-      if (transaction_ != null) {
-        output.writeMessage(4, getTransaction());
-      }
-      if (!getOpBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, op_);
-      }
-      if (tsMs_ != 0L) {
-        output.writeInt64(6, tsMs_);
-      }
-      if (tsUs_ != 0L) {
-        output.writeInt64(7, tsUs_);
-      }
-      if (tsNs_ != 0L) {
-        output.writeInt64(8, tsNs_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!before_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, before_);
-      }
-      if (!after_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, after_);
-      }
-      if (source_ != null) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, getSource());
-      }
-      if (transaction_ != null) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, getTransaction());
-      }
-      if (!getOpBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, op_);
-      }
-      if (tsMs_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(6, tsMs_);
-      }
-      if (tsUs_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(7, tsUs_);
-      }
-      if (tsNs_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(8, tsNs_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord)) {
-        return super.equals(obj);
-      }
-      io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord other = (io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord) obj;
-
-      if (!getBefore()
-          .equals(other.getBefore())) return false;
-      if (!getAfter()
-          .equals(other.getAfter())) return false;
-      if (hasSource() != other.hasSource()) return false;
-      if (hasSource()) {
-        if (!getSource()
-            .equals(other.getSource())) return false;
-      }
-      if (hasTransaction() != other.hasTransaction()) return false;
-      if (hasTransaction()) {
-        if (!getTransaction()
-            .equals(other.getTransaction())) return false;
-      }
-      if (!getOp()
-          .equals(other.getOp())) return false;
-      if (getTsMs()
-          != other.getTsMs()) return false;
-      if (getTsUs()
-          != other.getTsUs()) return false;
-      if (getTsNs()
-          != other.getTsNs()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + BEFORE_FIELD_NUMBER;
-      hash = (53 * hash) + getBefore().hashCode();
-      hash = (37 * hash) + AFTER_FIELD_NUMBER;
-      hash = (53 * hash) + getAfter().hashCode();
-      if (hasSource()) {
-        hash = (37 * hash) + SOURCE_FIELD_NUMBER;
-        hash = (53 * hash) + getSource().hashCode();
-      }
-      if (hasTransaction()) {
-        hash = (37 * hash) + TRANSACTION_FIELD_NUMBER;
-        hash = (53 * hash) + getTransaction().hashCode();
-      }
-      hash = (37 * hash) + OP_FIELD_NUMBER;
-      hash = (53 * hash) + getOp().hashCode();
-      hash = (37 * hash) + TS_MS_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getTsMs());
-      hash = (37 * hash) + TS_US_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getTsUs());
-      hash = (37 * hash) + TS_NS_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getTsNs());
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code io.pixelsdb.pixels.sink.proto.RowRecord}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:io.pixelsdb.pixels.sink.proto.RowRecord)
-        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecordOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.class, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.Builder.class);
-      }
-
-      // Construct using io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        before_ = com.google.protobuf.ByteString.EMPTY;
-
-        after_ = com.google.protobuf.ByteString.EMPTY;
-
-        if (sourceBuilder_ == null) {
-          source_ = null;
-        } else {
-          source_ = null;
-          sourceBuilder_ = null;
-        }
-        if (transactionBuilder_ == null) {
-          transaction_ = null;
-        } else {
-          transaction_ = null;
-          transactionBuilder_ = null;
-        }
-        op_ = "";
-
-        tsMs_ = 0L;
-
-        tsUs_ = 0L;
-
-        tsNs_ = 0L;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_descriptor;
-      }
-
-      @java.lang.Override
-      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord getDefaultInstanceForType() {
-        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord build() {
-        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord buildPartial() {
-        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord result = new io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord(this);
-        result.before_ = before_;
-        result.after_ = after_;
-        if (sourceBuilder_ == null) {
-          result.source_ = source_;
-        } else {
-          result.source_ = sourceBuilder_.build();
-        }
-        if (transactionBuilder_ == null) {
-          result.transaction_ = transaction_;
-        } else {
-          result.transaction_ = transactionBuilder_.build();
-        }
-        result.op_ = op_;
-        result.tsMs_ = tsMs_;
-        result.tsUs_ = tsUs_;
-        result.tsNs_ = tsNs_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord) {
-          return mergeFrom((io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord other) {
-        if (other == io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.getDefaultInstance()) return this;
-        if (other.getBefore() != com.google.protobuf.ByteString.EMPTY) {
-          setBefore(other.getBefore());
-        }
-        if (other.getAfter() != com.google.protobuf.ByteString.EMPTY) {
-          setAfter(other.getAfter());
-        }
-        if (other.hasSource()) {
-          mergeSource(other.getSource());
-        }
-        if (other.hasTransaction()) {
-          mergeTransaction(other.getTransaction());
-        }
-        if (!other.getOp().isEmpty()) {
-          op_ = other.op_;
-          onChanged();
-        }
-        if (other.getTsMs() != 0L) {
-          setTsMs(other.getTsMs());
-        }
-        if (other.getTsUs() != 0L) {
-          setTsUs(other.getTsUs());
-        }
-        if (other.getTsNs() != 0L) {
-          setTsNs(other.getTsNs());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private com.google.protobuf.ByteString before_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>bytes before = 1;</code>
-       * @return The before.
-       */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getBefore() {
-        return before_;
-      }
-      /**
-       * <code>bytes before = 1;</code>
-       * @param value The before to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBefore(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        before_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>bytes before = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearBefore() {
-        
-        before_ = getDefaultInstance().getBefore();
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.ByteString after_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>bytes after = 2;</code>
-       * @return The after.
-       */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getAfter() {
-        return after_;
-      }
-      /**
-       * <code>bytes after = 2;</code>
-       * @param value The after to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAfter(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        after_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>bytes after = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearAfter() {
-        
-        after_ = getDefaultInstance().getAfter();
-        onChanged();
-        return this;
-      }
-
-      private io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo source_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder> sourceBuilder_;
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-       * @return Whether the source field is set.
-       */
-      public boolean hasSource() {
-        return sourceBuilder_ != null || source_ != null;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-       * @return The source.
-       */
-      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo getSource() {
-        if (sourceBuilder_ == null) {
-          return source_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.getDefaultInstance() : source_;
-        } else {
-          return sourceBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-       */
-      public Builder setSource(io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo value) {
-        if (sourceBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          source_ = value;
-          onChanged();
-        } else {
-          sourceBuilder_.setMessage(value);
-        }
-
-        return this;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-       */
-      public Builder setSource(
-          io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder builderForValue) {
-        if (sourceBuilder_ == null) {
-          source_ = builderForValue.build();
-          onChanged();
-        } else {
-          sourceBuilder_.setMessage(builderForValue.build());
-        }
-
-        return this;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-       */
-      public Builder mergeSource(io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo value) {
-        if (sourceBuilder_ == null) {
-          if (source_ != null) {
-            source_ =
-              io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.newBuilder(source_).mergeFrom(value).buildPartial();
-          } else {
-            source_ = value;
-          }
-          onChanged();
-        } else {
-          sourceBuilder_.mergeFrom(value);
-        }
-
-        return this;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-       */
-      public Builder clearSource() {
-        if (sourceBuilder_ == null) {
-          source_ = null;
-          onChanged();
-        } else {
-          source_ = null;
-          sourceBuilder_ = null;
-        }
-
-        return this;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-       */
-      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder getSourceBuilder() {
-        
-        onChanged();
-        return getSourceFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-       */
-      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder getSourceOrBuilder() {
-        if (sourceBuilder_ != null) {
-          return sourceBuilder_.getMessageOrBuilder();
-        } else {
-          return source_ == null ?
-              io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.getDefaultInstance() : source_;
-        }
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder> 
-          getSourceFieldBuilder() {
-        if (sourceBuilder_ == null) {
-          sourceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder>(
-                  getSource(),
-                  getParentForChildren(),
-                  isClean());
-          source_ = null;
-        }
-        return sourceBuilder_;
-      }
-
-      private io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo transaction_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder> transactionBuilder_;
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-       * @return Whether the transaction field is set.
-       */
-      public boolean hasTransaction() {
-        return transactionBuilder_ != null || transaction_ != null;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-       * @return The transaction.
-       */
-      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo getTransaction() {
-        if (transactionBuilder_ == null) {
-          return transaction_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.getDefaultInstance() : transaction_;
-        } else {
-          return transactionBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-       */
-      public Builder setTransaction(io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo value) {
-        if (transactionBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          transaction_ = value;
-          onChanged();
-        } else {
-          transactionBuilder_.setMessage(value);
-        }
-
-        return this;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-       */
-      public Builder setTransaction(
-          io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder builderForValue) {
-        if (transactionBuilder_ == null) {
-          transaction_ = builderForValue.build();
-          onChanged();
-        } else {
-          transactionBuilder_.setMessage(builderForValue.build());
-        }
-
-        return this;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-       */
-      public Builder mergeTransaction(io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo value) {
-        if (transactionBuilder_ == null) {
-          if (transaction_ != null) {
-            transaction_ =
-              io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.newBuilder(transaction_).mergeFrom(value).buildPartial();
-          } else {
-            transaction_ = value;
-          }
-          onChanged();
-        } else {
-          transactionBuilder_.mergeFrom(value);
-        }
-
-        return this;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-       */
-      public Builder clearTransaction() {
-        if (transactionBuilder_ == null) {
-          transaction_ = null;
-          onChanged();
-        } else {
-          transaction_ = null;
-          transactionBuilder_ = null;
-        }
-
-        return this;
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-       */
-      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder getTransactionBuilder() {
-        
-        onChanged();
-        return getTransactionFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-       */
-      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder getTransactionOrBuilder() {
-        if (transactionBuilder_ != null) {
-          return transactionBuilder_.getMessageOrBuilder();
-        } else {
-          return transaction_ == null ?
-              io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.getDefaultInstance() : transaction_;
-        }
-      }
-      /**
-       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder> 
-          getTransactionFieldBuilder() {
-        if (transactionBuilder_ == null) {
-          transactionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder>(
-                  getTransaction(),
-                  getParentForChildren(),
-                  isClean());
-          transaction_ = null;
-        }
-        return transactionBuilder_;
-      }
-
-      private java.lang.Object op_ = "";
-      /**
-       * <code>string op = 5;</code>
-       * @return The op.
-       */
-      public java.lang.String getOp() {
-        java.lang.Object ref = op_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          op_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string op = 5;</code>
-       * @return The bytes for op.
-       */
-      public com.google.protobuf.ByteString
-          getOpBytes() {
-        java.lang.Object ref = op_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          op_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string op = 5;</code>
-       * @param value The op to set.
-       * @return This builder for chaining.
-       */
-      public Builder setOp(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        op_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string op = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearOp() {
-        
-        op_ = getDefaultInstance().getOp();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string op = 5;</code>
-       * @param value The bytes for op to set.
-       * @return This builder for chaining.
-       */
-      public Builder setOpBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        op_ = value;
-        onChanged();
-        return this;
-      }
-
-      private long tsMs_ ;
-      /**
-       * <code>int64 ts_ms = 6;</code>
-       * @return The tsMs.
-       */
-      @java.lang.Override
-      public long getTsMs() {
-        return tsMs_;
-      }
-      /**
-       * <code>int64 ts_ms = 6;</code>
-       * @param value The tsMs to set.
-       * @return This builder for chaining.
-       */
-      public Builder setTsMs(long value) {
-        
-        tsMs_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 ts_ms = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearTsMs() {
-        
-        tsMs_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long tsUs_ ;
-      /**
-       * <code>int64 ts_us = 7;</code>
-       * @return The tsUs.
-       */
-      @java.lang.Override
-      public long getTsUs() {
-        return tsUs_;
-      }
-      /**
-       * <code>int64 ts_us = 7;</code>
-       * @param value The tsUs to set.
-       * @return This builder for chaining.
-       */
-      public Builder setTsUs(long value) {
-        
-        tsUs_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 ts_us = 7;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearTsUs() {
-        
-        tsUs_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long tsNs_ ;
-      /**
-       * <code>int64 ts_ns = 8;</code>
-       * @return The tsNs.
-       */
-      @java.lang.Override
-      public long getTsNs() {
-        return tsNs_;
-      }
-      /**
-       * <code>int64 ts_ns = 8;</code>
-       * @param value The tsNs to set.
-       * @return This builder for chaining.
-       */
-      public Builder setTsNs(long value) {
-        
-        tsNs_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 ts_ns = 8;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearTsNs() {
-        
-        tsNs_ = 0L;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:io.pixelsdb.pixels.sink.proto.RowRecord)
-    }
-
-    // @@protoc_insertion_point(class_scope:io.pixelsdb.pixels.sink.proto.RowRecord)
-    private static final io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord();
-    }
-
-    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<RowRecord>
-        PARSER = new com.google.protobuf.AbstractParser<RowRecord>() {
-      @java.lang.Override
-      public RowRecord parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RowRecord(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<RowRecord> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<RowRecord> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
+  private static final
+  com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internal_static_io_pixelsdb_pixels_sink_proto_SourceInfo_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+          internal_static_io_pixelsdb_pixels_sink_proto_TransactionInfo_descriptor;
 
   public interface SourceInfoOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.pixelsdb.pixels.sink.proto.SourceInfo)
@@ -4102,6 +2773,11 @@ public final class RowRecordMessage {
     }
 
   }
+  private static final
+  com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internal_static_io_pixelsdb_pixels_sink_proto_TransactionInfo_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+          internal_static_io_pixelsdb_pixels_sink_proto_RowData_descriptor;
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_descriptor;
@@ -4110,26 +2786,22 @@ public final class RowRecordMessage {
       internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_io_pixelsdb_pixels_sink_proto_SourceInfo_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_io_pixelsdb_pixels_sink_proto_SourceInfo_fieldAccessorTable;
+  private static final
+  com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_io_pixelsdb_pixels_sink_proto_RowData_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_io_pixelsdb_pixels_sink_proto_TransactionInfo_descriptor;
-  private static final 
+    internal_static_io_pixelsdb_pixels_sink_proto_RowData_AttributesEntry_descriptor;
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_io_pixelsdb_pixels_sink_proto_TransactionInfo_fieldAccessorTable;
+          internal_static_io_pixelsdb_pixels_sink_proto_RowData_AttributesEntry_fieldAccessorTable;
 
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
-    return descriptor;
-  }
-  private static  com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
   static {
     java.lang.String[] descriptorData = {
       "\n\014record.proto\022\035io.pixelsdb.pixels.sink." +
-      "proto\"\343\001\n\tRowRecord\022\016\n\006before\030\001 \001(\014\022\r\n\005a" +
-      "fter\030\002 \001(\014\0229\n\006source\030\003 \001(\0132).io.pixelsdb" +
+      "proto\"\263\002\n\tRowRecord\0226\n\006before\030\001 \001(\0132&.io" +
+      ".pixelsdb.pixels.sink.proto.RowData\0225\n\005a" +
+      "fter\030\002 \001(\0132&.io.pixelsdb.pixels.sink.pro" +
+      "to.RowData\0229\n\006source\030\003 \001(\0132).io.pixelsdb" +
       ".pixels.sink.proto.SourceInfo\022C\n\013transac" +
       "tion\030\004 \001(\0132..io.pixelsdb.pixels.sink.pro" +
       "to.TransactionInfo\022\n\n\002op\030\005 \001(\t\022\r\n\005ts_ms\030" +
@@ -4137,13 +2809,17 @@ public final class RowRecordMessage {
       "SourceInfo\022\017\n\007version\030\001 \001(\t\022\021\n\tconnector" +
       "\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005ts_ms\030\004 \001(\003\022\020\n\010s" +
       "napshot\030\005 \001(\t\022\n\n\002db\030\006 \001(\t\022\020\n\010sequence\030\007 " +
-      "\001(\t\022\r\n\005ts_us\030\010 \001(\003\022\r\n\005ts_ns\030\t \001(\003\022\016\n\006sch" +
-      "ema\030\n \001(\t\022\r\n\005table\030\013 \001(\t\022\r\n\005tx_id\030\014 \001(\003\022" +
-      "\013\n\003lsn\030\r \001(\003\022\014\n\004xmin\030\016 \001(\003\"Q\n\017Transactio" +
-      "nInfo\022\n\n\002id\030\001 \001(\t\022\023\n\013total_order\030\002 \001(\003\022\035" +
-      "\n\025data_collection_order\030\003 \001(\003B1\n\035io.pixe" +
-      "lsdb.pixels.sink.protoB\020RowRecordMessage" +
-      "b\006proto3"
+              "\001(\t\022\r\n\005ts_us\030\010 \001(\003\022\r\n\005ts_ns\030\t \001(\003\022\016\n\006sch" +
+              "ema\030\n \001(\t\022\r\n\005table\030\013 \001(\t\022\r\n\005tx_id\030\014 \001(\003\022" +
+              "\013\n\003lsn\030\r \001(\003\022\014\n\004xmin\030\016 \001(\003\"Q\n\017Transactio" +
+              "nInfo\022\n\n\002id\030\001 \001(\t\022\023\n\013total_order\030\002 \001(\003\022\035" +
+              "\n\025data_collection_order\030\003 \001(\003\"\242\001\n\007RowDat" +
+      "a\022\n\n\002id\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022J\n\nattribute" +
+      "s\030\003 \003(\01326.io.pixelsdb.pixels.sink.proto." +
+      "RowData.AttributesEntry\0321\n\017AttributesEnt" +
+      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B1\n\035io" +
+      ".pixelsdb.pixels.sink.protoB\020RowRecordMe" +
+      "ssageb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4160,13 +2836,2703 @@ public final class RowRecordMessage {
     internal_static_io_pixelsdb_pixels_sink_proto_SourceInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_pixelsdb_pixels_sink_proto_SourceInfo_descriptor,
-        new java.lang.String[] { "Version", "Connector", "Name", "TsMs", "Snapshot", "Db", "Sequence", "TsUs", "TsNs", "Schema", "Table", "TxId", "Lsn", "Xmin", });
+        new java.lang.String[] { "Version", "Connector", "Name", "TsMs", "Snapshot", "Db", "Sequence", "TsUs", "TsNs", "Schema", "Table", "TxId", "Lsn", "Xmin",});
     internal_static_io_pixelsdb_pixels_sink_proto_TransactionInfo_descriptor =
-      getDescriptor().getMessageTypes().get(2);
+            getDescriptor().getMessageTypes().get(2);
     internal_static_io_pixelsdb_pixels_sink_proto_TransactionInfo_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_io_pixelsdb_pixels_sink_proto_TransactionInfo_descriptor,
+            new java.lang.String[]{"Id", "TotalOrder", "DataCollectionOrder",});
+    internal_static_io_pixelsdb_pixels_sink_proto_RowData_descriptor =
+            getDescriptor().getMessageTypes().get(3);
+    internal_static_io_pixelsdb_pixels_sink_proto_RowData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_io_pixelsdb_pixels_sink_proto_RowData_descriptor,
+            new java.lang.String[]{"Id", "Name", "Attributes",});
+    internal_static_io_pixelsdb_pixels_sink_proto_RowData_AttributesEntry_descriptor =
+      internal_static_io_pixelsdb_pixels_sink_proto_RowData_descriptor.getNestedTypes().get(0);
+    internal_static_io_pixelsdb_pixels_sink_proto_RowData_AttributesEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_io_pixelsdb_pixels_sink_proto_TransactionInfo_descriptor,
-        new java.lang.String[] { "Id", "TotalOrder", "DataCollectionOrder", });
+        internal_static_io_pixelsdb_pixels_sink_proto_RowData_AttributesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+  }
+
+  public static com.google.protobuf.Descriptors.FileDescriptor
+  getDescriptor() {
+    return descriptor;
+  }
+  public interface RowRecordOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:io.pixelsdb.pixels.sink.proto.RowRecord)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+     * @return Whether the before field is set.
+     */
+    boolean hasBefore();
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+     * @return The before.
+     */
+    io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData getBefore();
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+     */
+    io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder getBeforeOrBuilder();
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+     *
+     * @return Whether the after field is set.
+     */
+    boolean hasAfter();
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+     * @return The after.
+     */
+    io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData getAfter();
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+     */
+    io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder getAfterOrBuilder();
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+     * @return Whether the source field is set.
+     */
+    boolean hasSource();
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+     * @return The source.
+     */
+    io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo getSource();
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+     */
+    io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder getSourceOrBuilder();
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+     * @return Whether the transaction field is set.
+     */
+    boolean hasTransaction();
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+     * @return The transaction.
+     */
+    io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo getTransaction();
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+     */
+    io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder getTransactionOrBuilder();
+
+    /**
+     * <code>string op = 5;</code>
+     * @return The op.
+     */
+    java.lang.String getOp();
+    /**
+     * <code>string op = 5;</code>
+     * @return The bytes for op.
+     */
+    com.google.protobuf.ByteString
+        getOpBytes();
+
+    /**
+     * <code>int64 ts_ms = 6;</code>
+     * @return The tsMs.
+     */
+    long getTsMs();
+
+    /**
+     * <code>int64 ts_us = 7;</code>
+     * @return The tsUs.
+     */
+    long getTsUs();
+
+    /**
+     * <code>int64 ts_ns = 8;</code>
+     * @return The tsNs.
+     */
+    long getTsNs();
+  }
+  public interface RowDataOrBuilder extends
+          // @@protoc_insertion_point(interface_extends:io.pixelsdb.pixels.sink.proto.RowData)
+          com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 id = 1;</code>
+     *
+     * @return The id.
+     */
+    long getId();
+
+    /**
+     * <code>string name = 2;</code>
+     *
+     * @return The name.
+     */
+    java.lang.String getName();
+
+    /**
+     * <code>string name = 2;</code>
+     *
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+    getNameBytes();
+
+    /**
+     * <code>map&lt;string, string&gt; attributes = 3;</code>
+     */
+    int getAttributesCount();
+
+    /**
+     * <code>map&lt;string, string&gt; attributes = 3;</code>
+     */
+    boolean containsAttributes(
+            java.lang.String key);
+
+    /**
+     * Use {@link #getAttributesMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getAttributes();
+
+    /**
+     * <code>map&lt;string, string&gt; attributes = 3;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getAttributesMap();
+
+    /**
+     * <code>map&lt;string, string&gt; attributes = 3;</code>
+     */
+
+    java.lang.String getAttributesOrDefault(
+            java.lang.String key,
+            java.lang.String defaultValue);
+
+    /**
+     * <code>map&lt;string, string&gt; attributes = 3;</code>
+     */
+
+    java.lang.String getAttributesOrThrow(
+            java.lang.String key);
+  }
+
+  /**
+   * Protobuf type {@code io.pixelsdb.pixels.sink.proto.RowRecord}
+   */
+  public static final class RowRecord extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:io.pixelsdb.pixels.sink.proto.RowRecord)
+      RowRecordOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RowRecord.newBuilder() to construct.
+    private RowRecord(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RowRecord() {
+      op_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RowRecord();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData before_;
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.class, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.Builder.class);
+    }
+
+    public static final int BEFORE_FIELD_NUMBER = 1;
+    private io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData after_;
+
+    private RowRecord(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder subBuilder = null;
+              if (before_ != null) {
+                subBuilder = before_.toBuilder();
+              }
+              before_ = input.readMessage(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(before_);
+                before_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 18: {
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder subBuilder = null;
+              if (after_ != null) {
+                subBuilder = after_.toBuilder();
+              }
+              after_ = input.readMessage(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(after_);
+                after_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 26: {
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder subBuilder = null;
+              if (source_ != null) {
+                subBuilder = source_.toBuilder();
+              }
+              source_ = input.readMessage(io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(source_);
+                source_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 34: {
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder subBuilder = null;
+              if (transaction_ != null) {
+                subBuilder = transaction_.toBuilder();
+              }
+              transaction_ = input.readMessage(io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(transaction_);
+                transaction_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              op_ = s;
+              break;
+            }
+            case 48: {
+
+              tsMs_ = input.readInt64();
+              break;
+            }
+            case 56: {
+
+              tsUs_ = input.readInt64();
+              break;
+            }
+            case 64: {
+
+              tsNs_ = input.readInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+     *
+     * @return Whether the before field is set.
+     */
+    @java.lang.Override
+    public boolean hasBefore() {
+      return before_ != null;
+    }
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+     * @return The before.
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData getBefore() {
+      return before_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.getDefaultInstance() : before_;
+    }
+
+    public static final int AFTER_FIELD_NUMBER = 2;
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder getBeforeOrBuilder() {
+      return getBefore();
+    }
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+     *
+     * @return Whether the after field is set.
+     */
+    @java.lang.Override
+    public boolean hasAfter() {
+      return after_ != null;
+    }
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+     * @return The after.
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData getAfter() {
+      return after_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.getDefaultInstance() : after_;
+    }
+
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder getAfterOrBuilder() {
+      return getAfter();
+    }
+
+    public static final int SOURCE_FIELD_NUMBER = 3;
+    private io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo source_;
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+     * @return Whether the source field is set.
+     */
+    @java.lang.Override
+    public boolean hasSource() {
+      return source_ != null;
+    }
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+     * @return The source.
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo getSource() {
+      return source_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.getDefaultInstance() : source_;
+    }
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder getSourceOrBuilder() {
+      return getSource();
+    }
+
+    public static final int TRANSACTION_FIELD_NUMBER = 4;
+    private io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo transaction_;
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+     * @return Whether the transaction field is set.
+     */
+    @java.lang.Override
+    public boolean hasTransaction() {
+      return transaction_ != null;
+    }
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+     * @return The transaction.
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo getTransaction() {
+      return transaction_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.getDefaultInstance() : transaction_;
+    }
+    /**
+     * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder getTransactionOrBuilder() {
+      return getTransaction();
+    }
+
+    public static final int OP_FIELD_NUMBER = 5;
+    private volatile java.lang.Object op_;
+    /**
+     * <code>string op = 5;</code>
+     * @return The op.
+     */
+    @java.lang.Override
+    public java.lang.String getOp() {
+      java.lang.Object ref = op_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        op_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string op = 5;</code>
+     * @return The bytes for op.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getOpBytes() {
+      java.lang.Object ref = op_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        op_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TS_MS_FIELD_NUMBER = 6;
+    private long tsMs_;
+    /**
+     * <code>int64 ts_ms = 6;</code>
+     * @return The tsMs.
+     */
+    @java.lang.Override
+    public long getTsMs() {
+      return tsMs_;
+    }
+
+    public static final int TS_US_FIELD_NUMBER = 7;
+    private long tsUs_;
+    /**
+     * <code>int64 ts_us = 7;</code>
+     * @return The tsUs.
+     */
+    @java.lang.Override
+    public long getTsUs() {
+      return tsUs_;
+    }
+
+    public static final int TS_NS_FIELD_NUMBER = 8;
+    private long tsNs_;
+    /**
+     * <code>int64 ts_ns = 8;</code>
+     * @return The tsNs.
+     */
+    @java.lang.Override
+    public long getTsNs() {
+      return tsNs_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+            throws java.io.IOException {
+      if (before_ != null) {
+        output.writeMessage(1, getBefore());
+      }
+      if (after_ != null) {
+        output.writeMessage(2, getAfter());
+      }
+      if (source_ != null) {
+        output.writeMessage(3, getSource());
+      }
+      if (transaction_ != null) {
+        output.writeMessage(4, getTransaction());
+      }
+      if (!getOpBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, op_);
+      }
+      if (tsMs_ != 0L) {
+        output.writeInt64(6, tsMs_);
+      }
+      if (tsUs_ != 0L) {
+        output.writeInt64(7, tsUs_);
+      }
+      if (tsNs_ != 0L) {
+        output.writeInt64(8, tsNs_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (before_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getBefore());
+      }
+      if (after_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getAfter());
+      }
+      if (source_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getSource());
+      }
+      if (transaction_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getTransaction());
+      }
+      if (!getOpBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, op_);
+      }
+      if (tsMs_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(6, tsMs_);
+      }
+      if (tsUs_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(7, tsUs_);
+      }
+      if (tsNs_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(8, tsNs_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord)) {
+        return super.equals(obj);
+      }
+      io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord other = (io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord) obj;
+
+      if (hasBefore() != other.hasBefore()) return false;
+      if (hasBefore()) {
+        if (!getBefore()
+                .equals(other.getBefore())) return false;
+      }
+      if (hasAfter() != other.hasAfter()) return false;
+      if (hasAfter()) {
+        if (!getAfter()
+            .equals(other.getAfter())) return false;
+      }
+      if (hasSource() != other.hasSource()) return false;
+      if (hasSource()) {
+        if (!getSource()
+            .equals(other.getSource())) return false;
+      }
+      if (hasTransaction() != other.hasTransaction()) return false;
+      if (hasTransaction()) {
+        if (!getTransaction()
+            .equals(other.getTransaction())) return false;
+      }
+      if (!getOp()
+          .equals(other.getOp())) return false;
+      if (getTsMs()
+          != other.getTsMs()) return false;
+      if (getTsUs()
+          != other.getTsUs()) return false;
+      if (getTsNs()
+          != other.getTsNs()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasBefore()) {
+        hash = (37 * hash) + BEFORE_FIELD_NUMBER;
+        hash = (53 * hash) + getBefore().hashCode();
+      }
+      if (hasAfter()) {
+        hash = (37 * hash) + AFTER_FIELD_NUMBER;
+        hash = (53 * hash) + getAfter().hashCode();
+      }
+      if (hasSource()) {
+        hash = (37 * hash) + SOURCE_FIELD_NUMBER;
+        hash = (53 * hash) + getSource().hashCode();
+      }
+      if (hasTransaction()) {
+        hash = (37 * hash) + TRANSACTION_FIELD_NUMBER;
+        hash = (53 * hash) + getTransaction().hashCode();
+      }
+      hash = (37 * hash) + OP_FIELD_NUMBER;
+      hash = (53 * hash) + getOp().hashCode();
+      hash = (37 * hash) + TS_MS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTsMs());
+      hash = (37 * hash) + TS_US_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTsUs());
+      hash = (37 * hash) + TS_NS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTsNs());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code io.pixelsdb.pixels.sink.proto.RowRecord}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:io.pixelsdb.pixels.sink.proto.RowRecord)
+        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecordOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.class, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.Builder.class);
+      }
+
+      // Construct using io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+
+      private io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData before_;
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowRecord_descriptor;
+      }
+
+      @java.lang.Override
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord getDefaultInstanceForType() {
+        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord build() {
+        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+      private com.google.protobuf.SingleFieldBuilderV3<
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder> beforeBuilder_;
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord) {
+          return mergeFrom((io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+      private io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData after_;
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private com.google.protobuf.SingleFieldBuilderV3<
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder> afterBuilder_;
+
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (beforeBuilder_ == null) {
+          before_ = null;
+        } else {
+          before_ = null;
+          beforeBuilder_ = null;
+        }
+        if (afterBuilder_ == null) {
+          after_ = null;
+        } else {
+          after_ = null;
+          afterBuilder_ = null;
+        }
+        if (sourceBuilder_ == null) {
+          source_ = null;
+        } else {
+          source_ = null;
+          sourceBuilder_ = null;
+        }
+        if (transactionBuilder_ == null) {
+          transaction_ = null;
+        } else {
+          transaction_ = null;
+          transactionBuilder_ = null;
+        }
+        op_ = "";
+
+        tsMs_ = 0L;
+
+        tsUs_ = 0L;
+
+        tsNs_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord buildPartial() {
+        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord result = new io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord(this);
+        if (beforeBuilder_ == null) {
+          result.before_ = before_;
+        } else {
+          result.before_ = beforeBuilder_.build();
+        }
+        if (afterBuilder_ == null) {
+          result.after_ = after_;
+        } else {
+          result.after_ = afterBuilder_.build();
+        }
+        if (sourceBuilder_ == null) {
+          result.source_ = source_;
+        } else {
+          result.source_ = sourceBuilder_.build();
+        }
+        if (transactionBuilder_ == null) {
+          result.transaction_ = transaction_;
+        } else {
+          result.transaction_ = transactionBuilder_.build();
+        }
+        result.op_ = op_;
+        result.tsMs_ = tsMs_;
+        result.tsUs_ = tsUs_;
+        result.tsNs_ = tsNs_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord other) {
+        if (other == io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord.getDefaultInstance()) return this;
+        if (other.hasBefore()) {
+          mergeBefore(other.getBefore());
+        }
+        if (other.hasAfter()) {
+          mergeAfter(other.getAfter());
+        }
+        if (other.hasSource()) {
+          mergeSource(other.getSource());
+        }
+        if (other.hasTransaction()) {
+          mergeTransaction(other.getTransaction());
+        }
+        if (!other.getOp().isEmpty()) {
+          op_ = other.op_;
+          onChanged();
+        }
+        if (other.getTsMs() != 0L) {
+          setTsMs(other.getTsMs());
+        }
+        if (other.getTsUs() != 0L) {
+          setTsUs(other.getTsUs());
+        }
+        if (other.getTsNs() != 0L) {
+          setTsNs(other.getTsNs());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+       *
+       * @return Whether the before field is set.
+       */
+      public boolean hasBefore() {
+        return beforeBuilder_ != null || before_ != null;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+       *
+       * @return The before.
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData getBefore() {
+        if (beforeBuilder_ == null) {
+          return before_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.getDefaultInstance() : before_;
+        } else {
+          return beforeBuilder_.getMessage();
+        }
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+       */
+      public Builder setBefore(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData value) {
+        if (beforeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          before_ = value;
+          onChanged();
+        } else {
+          beforeBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+       */
+      public Builder setBefore(
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder builderForValue) {
+        if (beforeBuilder_ == null) {
+          before_ = builderForValue.build();
+          onChanged();
+        } else {
+          beforeBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+       */
+      public Builder mergeBefore(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData value) {
+        if (beforeBuilder_ == null) {
+          if (before_ != null) {
+            before_ =
+                    io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.newBuilder(before_).mergeFrom(value).buildPartial();
+          } else {
+            before_ = value;
+          }
+          onChanged();
+        } else {
+          beforeBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+       */
+      public Builder clearBefore() {
+        if (beforeBuilder_ == null) {
+          before_ = null;
+          onChanged();
+        } else {
+          before_ = null;
+          beforeBuilder_ = null;
+        }
+
+        return this;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder getBeforeBuilder() {
+
+        onChanged();
+        return getBeforeFieldBuilder().getBuilder();
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder getBeforeOrBuilder() {
+        if (beforeBuilder_ != null) {
+          return beforeBuilder_.getMessageOrBuilder();
+        } else {
+          return before_ == null ?
+                  io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.getDefaultInstance() : before_;
+        }
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData before = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder>
+      getBeforeFieldBuilder() {
+        if (beforeBuilder_ == null) {
+          beforeBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                  io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder>(
+                  getBefore(),
+                  getParentForChildren(),
+                  isClean());
+          before_ = null;
+        }
+        return beforeBuilder_;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+       * @return Whether the after field is set.
+       */
+      public boolean hasAfter() {
+        return afterBuilder_ != null || after_ != null;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+       *
+       * @return The after.
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData getAfter() {
+        if (afterBuilder_ == null) {
+          return after_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.getDefaultInstance() : after_;
+        } else {
+          return afterBuilder_.getMessage();
+        }
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+       */
+      public Builder setAfter(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData value) {
+        if (afterBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          after_ = value;
+          onChanged();
+        } else {
+          afterBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+       */
+      public Builder setAfter(
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder builderForValue) {
+        if (afterBuilder_ == null) {
+          after_ = builderForValue.build();
+          onChanged();
+        } else {
+          afterBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+       */
+      public Builder mergeAfter(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData value) {
+        if (afterBuilder_ == null) {
+          if (after_ != null) {
+            after_ =
+                    io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.newBuilder(after_).mergeFrom(value).buildPartial();
+          } else {
+            after_ = value;
+          }
+          onChanged();
+        } else {
+          afterBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+       */
+      public Builder clearAfter() {
+        if (afterBuilder_ == null) {
+          after_ = null;
+          onChanged();
+        } else {
+          after_ = null;
+          afterBuilder_ = null;
+        }
+
+        return this;
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder getAfterBuilder() {
+
+        onChanged();
+        return getAfterFieldBuilder().getBuilder();
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder getAfterOrBuilder() {
+        if (afterBuilder_ != null) {
+          return afterBuilder_.getMessageOrBuilder();
+        } else {
+          return after_ == null ?
+                  io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.getDefaultInstance() : after_;
+        }
+      }
+
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.RowData after = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder>
+      getAfterFieldBuilder() {
+        if (afterBuilder_ == null) {
+          afterBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                  io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder>(
+                  getAfter(),
+                  getParentForChildren(),
+                  isClean());
+          after_ = null;
+        }
+        return afterBuilder_;
+      }
+
+      private io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo source_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder> sourceBuilder_;
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+       * @return Whether the source field is set.
+       */
+      public boolean hasSource() {
+        return sourceBuilder_ != null || source_ != null;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+       * @return The source.
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo getSource() {
+        if (sourceBuilder_ == null) {
+          return source_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.getDefaultInstance() : source_;
+        } else {
+          return sourceBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+       */
+      public Builder setSource(io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo value) {
+        if (sourceBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          source_ = value;
+          onChanged();
+        } else {
+          sourceBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+       */
+      public Builder setSource(
+          io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder builderForValue) {
+        if (sourceBuilder_ == null) {
+          source_ = builderForValue.build();
+          onChanged();
+        } else {
+          sourceBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+       */
+      public Builder mergeSource(io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo value) {
+        if (sourceBuilder_ == null) {
+          if (source_ != null) {
+            source_ =
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.newBuilder(source_).mergeFrom(value).buildPartial();
+          } else {
+            source_ = value;
+          }
+          onChanged();
+        } else {
+          sourceBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+       */
+      public Builder clearSource() {
+        if (sourceBuilder_ == null) {
+          source_ = null;
+          onChanged();
+        } else {
+          source_ = null;
+          sourceBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder getSourceBuilder() {
+
+        onChanged();
+        return getSourceFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder getSourceOrBuilder() {
+        if (sourceBuilder_ != null) {
+          return sourceBuilder_.getMessageOrBuilder();
+        } else {
+          return source_ == null ?
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.getDefaultInstance() : source_;
+        }
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.SourceInfo source = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder>
+          getSourceFieldBuilder() {
+        if (sourceBuilder_ == null) {
+          sourceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.SourceInfoOrBuilder>(
+                  getSource(),
+                  getParentForChildren(),
+                  isClean());
+          source_ = null;
+        }
+        return sourceBuilder_;
+      }
+
+      private io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo transaction_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder> transactionBuilder_;
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+       * @return Whether the transaction field is set.
+       */
+      public boolean hasTransaction() {
+        return transactionBuilder_ != null || transaction_ != null;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+       * @return The transaction.
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo getTransaction() {
+        if (transactionBuilder_ == null) {
+          return transaction_ == null ? io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.getDefaultInstance() : transaction_;
+        } else {
+          return transactionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+       */
+      public Builder setTransaction(io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo value) {
+        if (transactionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          transaction_ = value;
+          onChanged();
+        } else {
+          transactionBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+       */
+      public Builder setTransaction(
+          io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder builderForValue) {
+        if (transactionBuilder_ == null) {
+          transaction_ = builderForValue.build();
+          onChanged();
+        } else {
+          transactionBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+       */
+      public Builder mergeTransaction(io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo value) {
+        if (transactionBuilder_ == null) {
+          if (transaction_ != null) {
+            transaction_ =
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.newBuilder(transaction_).mergeFrom(value).buildPartial();
+          } else {
+            transaction_ = value;
+          }
+          onChanged();
+        } else {
+          transactionBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+       */
+      public Builder clearTransaction() {
+        if (transactionBuilder_ == null) {
+          transaction_ = null;
+          onChanged();
+        } else {
+          transaction_ = null;
+          transactionBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder getTransactionBuilder() {
+
+        onChanged();
+        return getTransactionFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+       */
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder getTransactionOrBuilder() {
+        if (transactionBuilder_ != null) {
+          return transactionBuilder_.getMessageOrBuilder();
+        } else {
+          return transaction_ == null ?
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.getDefaultInstance() : transaction_;
+        }
+      }
+      /**
+       * <code>.io.pixelsdb.pixels.sink.proto.TransactionInfo transaction = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder>
+          getTransactionFieldBuilder() {
+        if (transactionBuilder_ == null) {
+          transactionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfo.Builder, io.pixelsdb.pixels.sink.proto.RowRecordMessage.TransactionInfoOrBuilder>(
+                  getTransaction(),
+                  getParentForChildren(),
+                  isClean());
+          transaction_ = null;
+        }
+        return transactionBuilder_;
+      }
+
+      private java.lang.Object op_ = "";
+      /**
+       * <code>string op = 5;</code>
+       * @return The op.
+       */
+      public java.lang.String getOp() {
+        java.lang.Object ref = op_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          op_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string op = 5;</code>
+       * @return The bytes for op.
+       */
+      public com.google.protobuf.ByteString
+          getOpBytes() {
+        java.lang.Object ref = op_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          op_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string op = 5;</code>
+       * @param value The op to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOp(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+
+        op_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string op = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOp() {
+
+        op_ = getDefaultInstance().getOp();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string op = 5;</code>
+       * @param value The bytes for op to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOpBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+
+        op_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long tsMs_ ;
+      /**
+       * <code>int64 ts_ms = 6;</code>
+       * @return The tsMs.
+       */
+      @java.lang.Override
+      public long getTsMs() {
+        return tsMs_;
+      }
+      /**
+       * <code>int64 ts_ms = 6;</code>
+       * @param value The tsMs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTsMs(long value) {
+
+        tsMs_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 ts_ms = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTsMs() {
+
+        tsMs_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long tsUs_ ;
+      /**
+       * <code>int64 ts_us = 7;</code>
+       * @return The tsUs.
+       */
+      @java.lang.Override
+      public long getTsUs() {
+        return tsUs_;
+      }
+      /**
+       * <code>int64 ts_us = 7;</code>
+       * @param value The tsUs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTsUs(long value) {
+
+        tsUs_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 ts_us = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTsUs() {
+
+        tsUs_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long tsNs_ ;
+      /**
+       * <code>int64 ts_ns = 8;</code>
+       * @return The tsNs.
+       */
+      @java.lang.Override
+      public long getTsNs() {
+        return tsNs_;
+      }
+      /**
+       * <code>int64 ts_ns = 8;</code>
+       * @param value The tsNs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTsNs(long value) {
+
+        tsNs_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 ts_ns = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTsNs() {
+
+        tsNs_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:io.pixelsdb.pixels.sink.proto.RowRecord)
+    }
+
+    // @@protoc_insertion_point(class_scope:io.pixelsdb.pixels.sink.proto.RowRecord)
+    private static final io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord();
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RowRecord>
+        PARSER = new com.google.protobuf.AbstractParser<RowRecord>() {
+      @java.lang.Override
+      public RowRecord parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RowRecord(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RowRecord> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RowRecord> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowRecord getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  private static  com.google.protobuf.Descriptors.FileDescriptor
+      descriptor;
+
+  /**
+   * Protobuf type {@code io.pixelsdb.pixels.sink.proto.RowData}
+   */
+  public static final class RowData extends
+          com.google.protobuf.GeneratedMessageV3 implements
+          // @@protoc_insertion_point(message_implements:io.pixelsdb.pixels.sink.proto.RowData)
+          RowDataOrBuilder {
+    public static final int ID_FIELD_NUMBER = 1;
+    public static final int NAME_FIELD_NUMBER = 2;
+    public static final int ATTRIBUTES_FIELD_NUMBER = 3;
+    private static final long serialVersionUID = 0L;
+    // @@protoc_insertion_point(class_scope:io.pixelsdb.pixels.sink.proto.RowData)
+    private static final io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData DEFAULT_INSTANCE;
+    private static final com.google.protobuf.Parser<RowData>
+            PARSER = new com.google.protobuf.AbstractParser<RowData>() {
+      @java.lang.Override
+      public RowData parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RowData(input, extensionRegistry);
+      }
+    };
+
+    static {
+      DEFAULT_INSTANCE = new io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData();
+    }
+
+    private long id_;
+    private volatile java.lang.Object name_;
+    private com.google.protobuf.MapField<
+            java.lang.String, java.lang.String> attributes_;
+    private byte memoizedIsInitialized = -1;
+
+    // Use RowData.newBuilder() to construct.
+    private RowData(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+
+    private RowData() {
+      name_ = "";
+    }
+    private RowData(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+              com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              id_ = input.readInt64();
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              name_ = s;
+              break;
+            }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                attributes_ = com.google.protobuf.MapField.newMapField(
+                        AttributesDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000001;
+              }
+              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                      attributes__ = input.readMessage(
+                      AttributesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              attributes_.getMutableMap().put(
+                      attributes__.getKey(), attributes__.getValue());
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                      input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+                e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+    getDescriptor() {
+      return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowData_descriptor;
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(
+            java.nio.ByteBuffer data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(
+            java.nio.ByteBuffer data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(
+            com.google.protobuf.ByteString data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(
+            com.google.protobuf.ByteString data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(byte[] data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(
+            byte[] data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(java.io.InputStream input)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseDelimitedFrom(java.io.InputStream input)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseDelimitedFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(
+            com.google.protobuf.CodedInputStream input)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parseFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+
+    public static Builder newBuilder(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    public static io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    public static com.google.protobuf.Parser<RowData> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+            UnusedPrivateParameter unused) {
+      return new RowData();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    @java.lang.Override
+    protected com.google.protobuf.MapField internalGetMapField(
+            int number) {
+      switch (number) {
+        case 3:
+          return internalGetAttributes();
+        default:
+          throw new RuntimeException(
+                  "Invalid map field number: " + number);
+      }
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    internalGetFieldAccessorTable() {
+      return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowData_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                      io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.class, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder.class);
+    }
+
+    /**
+     * <code>int64 id = 1;</code>
+     * @return The id.
+     */
+    @java.lang.Override
+    public long getId() {
+      return id_;
+    }
+
+    /**
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+
+    /**
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+    getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+                com.google.protobuf.ByteString.copyFromUtf8(
+                        (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetAttributes() {
+      if (attributes_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+                AttributesDefaultEntryHolder.defaultEntry);
+      }
+      return attributes_;
+    }
+
+    public int getAttributesCount() {
+      return internalGetAttributes().getMap().size();
+    }
+
+    /**
+     * <code>map&lt;string, string&gt; attributes = 3;</code>
+     */
+
+    @java.lang.Override
+    public boolean containsAttributes(
+            java.lang.String key) {
+      if (key == null) {
+        throw new java.lang.NullPointerException();
+      }
+      return internalGetAttributes().getMap().containsKey(key);
+    }
+
+    /**
+     * Use {@link #getAttributesMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getAttributes() {
+      return getAttributesMap();
+    }
+
+    /**
+     * <code>map&lt;string, string&gt; attributes = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
+      return internalGetAttributes().getMap();
+    }
+
+    /**
+     * <code>map&lt;string, string&gt; attributes = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getAttributesOrDefault(
+            java.lang.String key,
+            java.lang.String defaultValue) {
+      if (key == null) {
+        throw new java.lang.NullPointerException();
+      }
+      java.util.Map<java.lang.String, java.lang.String> map =
+              internalGetAttributes().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+
+    /**
+     * <code>map&lt;string, string&gt; attributes = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getAttributesOrThrow(
+            java.lang.String key) {
+      if (key == null) {
+        throw new java.lang.NullPointerException();
+      }
+      java.util.Map<java.lang.String, java.lang.String> map =
+              internalGetAttributes().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+            throws java.io.IOException {
+      if (id_ != 0L) {
+        output.writeInt64(1, id_);
+      }
+      if (!getNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      }
+      com.google.protobuf.GeneratedMessageV3
+              .serializeStringMapTo(
+                      output,
+                      internalGetAttributes(),
+                      AttributesDefaultEntryHolder.defaultEntry,
+                      3);
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (id_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+                .computeInt64Size(1, id_);
+      }
+      if (!getNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      }
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+              : internalGetAttributes().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                attributes__ = AttributesDefaultEntryHolder.defaultEntry.newBuilderForType()
+                .setKey(entry.getKey())
+                .setValue(entry.getValue())
+                .build();
+        size += com.google.protobuf.CodedOutputStream
+                .computeMessageSize(3, attributes__);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (!(obj instanceof io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData)) {
+        return super.equals(obj);
+      }
+      io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData other = (io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData) obj;
+
+      if (getId()
+              != other.getId()) return false;
+      if (!getName()
+              .equals(other.getName())) return false;
+      if (!internalGetAttributes().equals(
+              other.internalGetAttributes())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+              getId());
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      if (!internalGetAttributes().getMap().isEmpty()) {
+        hash = (37 * hash) + ATTRIBUTES_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetAttributes().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+              ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RowData> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final class AttributesDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+              java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+                      .<java.lang.String, java.lang.String>newDefaultInstance(
+                              io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowData_AttributesEntry_descriptor,
+                              com.google.protobuf.WireFormat.FieldType.STRING,
+                              "",
+                              com.google.protobuf.WireFormat.FieldType.STRING,
+                              "");
+    }
+
+    /**
+     * Protobuf type {@code io.pixelsdb.pixels.sink.proto.RowData}
+     */
+    public static final class Builder extends
+            com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+            // @@protoc_insertion_point(builder_implements:io.pixelsdb.pixels.sink.proto.RowData)
+            io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowDataOrBuilder {
+      private int bitField0_;
+      private long id_;
+      private java.lang.Object name_ = "";
+      private com.google.protobuf.MapField<
+              java.lang.String, java.lang.String> attributes_;
+
+      // Construct using io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+              com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+
+      public static final com.google.protobuf.Descriptors.Descriptor
+      getDescriptor() {
+        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowData_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMapField(
+              int number) {
+        switch (number) {
+          case 3:
+            return internalGetAttributes();
+          default:
+            throw new RuntimeException(
+                    "Invalid map field number: " + number);
+        }
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMutableMapField(
+              int number) {
+        switch (number) {
+          case 3:
+            return internalGetMutableAttributes();
+          default:
+            throw new RuntimeException(
+                    "Invalid map field number: " + number);
+        }
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowData_fieldAccessorTable
+                .ensureFieldAccessorsInitialized(
+                        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.class, io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.Builder.class);
+      }
+
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        id_ = 0L;
+
+        name_ = "";
+
+        internalGetMutableAttributes().clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+      getDescriptorForType() {
+        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.internal_static_io_pixelsdb_pixels_sink_proto_RowData_descriptor;
+      }
+
+      @java.lang.Override
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData getDefaultInstanceForType() {
+        return io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData build() {
+        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData buildPartial() {
+        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData result = new io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData(this);
+        int from_bitField0_ = bitField0_;
+        result.id_ = id_;
+        result.name_ = name_;
+        result.attributes_ = internalGetAttributes();
+        result.attributes_.makeImmutable();
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+
+      @java.lang.Override
+      public Builder setField(
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
+        return super.setField(field, value);
+      }
+
+      @java.lang.Override
+      public Builder clearField(
+              com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+
+      @java.lang.Override
+      public Builder clearOneof(
+              com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+
+      @java.lang.Override
+      public Builder setRepeatedField(
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+
+      @java.lang.Override
+      public Builder addRepeatedField(
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData) {
+          return mergeFrom((io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData) other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData other) {
+        if (other == io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData.getDefaultInstance()) return this;
+        if (other.getId() != 0L) {
+          setId(other.getId());
+        }
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          onChanged();
+        }
+        internalGetMutableAttributes().mergeFrom(
+                other.internalGetAttributes());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+        io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (io.pixelsdb.pixels.sink.proto.RowRecordMessage.RowData) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      /**
+       * <code>int64 id = 1;</code>
+       * @return The id.
+       */
+      @java.lang.Override
+      public long getId() {
+        return id_;
+      }
+
+      /**
+       * <code>int64 id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(long value) {
+
+        id_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>int64 id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+
+        id_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>string name = 2;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+                  (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+
+      /**
+       * <code>string name = 2;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+              java.lang.String value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>string name = 2;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+      getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+                  com.google.protobuf.ByteString.copyFromUtf8(
+                          (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      /**
+       * <code>string name = 2;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+              com.google.protobuf.ByteString value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        checkByteStringIsUtf8(value);
+
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>string name = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+      internalGetAttributes() {
+        if (attributes_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+                  AttributesDefaultEntryHolder.defaultEntry);
+        }
+        return attributes_;
+      }
+
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+      internalGetMutableAttributes() {
+        onChanged();
+        ;
+        if (attributes_ == null) {
+          attributes_ = com.google.protobuf.MapField.newMapField(
+                  AttributesDefaultEntryHolder.defaultEntry);
+        }
+        if (!attributes_.isMutable()) {
+          attributes_ = attributes_.copy();
+        }
+        return attributes_;
+      }
+
+      public int getAttributesCount() {
+        return internalGetAttributes().getMap().size();
+      }
+
+      /**
+       * <code>map&lt;string, string&gt; attributes = 3;</code>
+       */
+
+      @java.lang.Override
+      public boolean containsAttributes(
+              java.lang.String key) {
+        if (key == null) {
+          throw new java.lang.NullPointerException();
+        }
+        return internalGetAttributes().getMap().containsKey(key);
+      }
+
+      /**
+       * Use {@link #getAttributesMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getAttributes() {
+        return getAttributesMap();
+      }
+
+      /**
+       * <code>map&lt;string, string&gt; attributes = 3;</code>
+       */
+      @java.lang.Override
+
+      public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
+        return internalGetAttributes().getMap();
+      }
+
+      /**
+       * <code>map&lt;string, string&gt; attributes = 3;</code>
+       */
+      @java.lang.Override
+
+      public java.lang.String getAttributesOrDefault(
+              java.lang.String key,
+              java.lang.String defaultValue) {
+        if (key == null) {
+          throw new java.lang.NullPointerException();
+        }
+        java.util.Map<java.lang.String, java.lang.String> map =
+                internalGetAttributes().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+
+      /**
+       * <code>map&lt;string, string&gt; attributes = 3;</code>
+       */
+      @java.lang.Override
+
+      public java.lang.String getAttributesOrThrow(
+              java.lang.String key) {
+        if (key == null) {
+          throw new java.lang.NullPointerException();
+        }
+        java.util.Map<java.lang.String, java.lang.String> map =
+                internalGetAttributes().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearAttributes() {
+        internalGetMutableAttributes().getMutableMap()
+                .clear();
+        return this;
+      }
+
+      /**
+       * <code>map&lt;string, string&gt; attributes = 3;</code>
+       */
+
+      public Builder removeAttributes(
+              java.lang.String key) {
+        if (key == null) {
+          throw new java.lang.NullPointerException();
+        }
+        internalGetMutableAttributes().getMutableMap()
+                .remove(key);
+        return this;
+      }
+
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+      getMutableAttributes() {
+        return internalGetMutableAttributes().getMutableMap();
+      }
+
+      /**
+       * <code>map&lt;string, string&gt; attributes = 3;</code>
+       */
+      public Builder putAttributes(
+              java.lang.String key,
+              java.lang.String value) {
+        if (key == null) {
+          throw new java.lang.NullPointerException();
+        }
+        if (value == null) {
+          throw new java.lang.NullPointerException();
+        }
+        internalGetMutableAttributes().getMutableMap()
+                .put(key, value);
+        return this;
+      }
+
+      /**
+       * <code>map&lt;string, string&gt; attributes = 3;</code>
+       */
+
+      public Builder putAllAttributes(
+              java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableAttributes().getMutableMap()
+                .putAll(values);
+        return this;
+      }
+
+      @java.lang.Override
+      public final Builder setUnknownFields(
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:io.pixelsdb.pixels.sink.proto.RowData)
+    }
+
   }
 
   // @@protoc_insertion_point(outer_class_scope)
