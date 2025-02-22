@@ -1,41 +1,65 @@
 package io.pixelsdb.pixels.sink.core.concurrent;
 
-import io.pixelsdb.pixels.sink.pojo.DataCollectionInfo;
-import io.pixelsdb.pixels.sink.pojo.TransactionInfoBO;
-import io.pixelsdb.pixels.sink.pojo.TransactionMessageDTO;
+import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 public class TransactionState {
-//    private final TransactionMessageDTO metadata;
-//    private final List<RowRecord> records = new CopyOnWriteArrayList<>();
-//    private final Map<String, AtomicLong> eventCounts = new ConcurrentHashMap<>();
-//    private boolean committed = false;
-//
-//    public TransactionState(TransactionMessageDTO metadata) {
-//        this.metadata = metadata;
-//        // 初始化事件计数器
-//        if (metadata.getDataCollections() != null) {
-//            for (DataCollection dc : metadata.getDataCollections()) {
-//                eventCounts.put(dc.getDataCollection(), new AtomicLong(0));
-//            }
-//        }
-//    }
-//
-//    public void incrementEventCount(String table) {
-//        AtomicLong counter = eventCounts.get(table);
-//        if (counter != null) {
-//            counter.incrementAndGet();
-//        }
-//    }
-//
-//    public long getReceivedEventCount(String table) {
-//        AtomicLong counter = eventCounts.get(table);
-//        return counter != null ? counter.get() : 0;
-//    }
-//
-//    // Getters and Setters
+    private final String txId;
+    private final long beginTs;
+    private final Map<String, AtomicInteger> receivedCounts = new ConcurrentHashMap<>();
+    private final CopyOnWriteArrayList<RowChangeEvent> rowEvents = new CopyOnWriteArrayList<>();
+    private Map<String, Long> expectedCounts; // update this when receive END message
+    private volatile boolean endReceived = false;
+
+    public TransactionState(String txId) {
+        this.txId = txId;
+        this.beginTs = System.currentTimeMillis();
+        this.expectedCounts = new HashMap<>();
+    }
+
+    public void addRowEvent(RowChangeEvent event) {
+        rowEvents.add(event);
+        String table = event.getTable();
+        receivedCounts.computeIfPresent(table, (k, v) -> {
+            v.incrementAndGet();
+            return v;
+        });
+    }
+
+    public boolean isComplete() {
+        return endReceived &&
+                expectedCounts.entrySet().stream()
+                        .allMatch(e -> receivedCounts.getOrDefault(e.getKey(), new AtomicInteger(0)).get() >= e.getValue());
+    }
+
+    public void markEndReceived() {
+        this.endReceived = true;
+    }
+
+    public boolean isExpired(long timeoutMs) {
+        return System.currentTimeMillis() - beginTs > timeoutMs;
+    }
+
+    public void setExpectedCounts(List<TransactionMetadataValue.TransactionMetadata.DataCollection> dataCollectionList) {
+        this.expectedCounts = dataCollectionList.stream()
+                .collect(Collectors.toMap(
+                        TransactionMetadataValue.TransactionMetadata.DataCollection::getDataCollection,
+                        TransactionMetadataValue.TransactionMetadata.DataCollection::getEventCount
+                ));
+    }
+
+    public void setExpectedCounts(Map<String, Long> dataCollectionMap) {
+        this.expectedCounts = dataCollectionMap;
+    }
+
+    public List<RowChangeEvent> getRowEvents() {
+        return rowEvents;
+    }
 }

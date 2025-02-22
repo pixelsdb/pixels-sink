@@ -15,10 +15,10 @@
  */
 package io.pixelsdb.pixels.sink.config;
 
-import java.io.FileNotFoundException;
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class PixelsSinkConfig {
@@ -86,5 +86,9 @@ public class PixelsSinkConfig {
 
     public String getTransactionTopicGroupId() {
         return properties.getProperty("transaction.topic.group_id", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_GROUP_ID);
+    }
+
+    public Long getTransactionTimeout() {
+        return Long.valueOf(properties.getProperty("transaction.timeout", String.valueOf(TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT)));
     }
 }

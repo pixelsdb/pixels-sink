@@ -33,5 +33,8 @@ public class RowChangeEvent {
         return rowRecord.getTransaction();
     }
 
-    public
+    public String getTable() {
+        return rowRecord.getSource().getTable();
+    }
+
 }
