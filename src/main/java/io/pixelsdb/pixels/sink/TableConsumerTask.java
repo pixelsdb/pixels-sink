@@ -1,22 +1,20 @@
 package io.pixelsdb.pixels.sink;
 
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
-import io.pixelsdb.pixels.sink.monitor.TopicMonitor;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
 import io.pixelsdb.pixels.sink.writer.CsvWriter;
 import lombok.val;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Properties;
 
 public class TableConsumerTask implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(TableConsumerTask.class);
@@ -45,7 +43,7 @@ public class TableConsumerTask implements Runnable {
         TopicPartition partition = new TopicPartition(topic, 0);  // partition 0
         consumer.poll(1);
         log.info("Poll Success");
-        consumer.seek(partition, 0);  // 设置偏移量为 0
+        consumer.seek(partition, 0);
 
         while (true) {
             ConsumerRecords<String, RowRecordMessage.RowRecord> records = consumer.poll(Duration.ofSeconds(5));

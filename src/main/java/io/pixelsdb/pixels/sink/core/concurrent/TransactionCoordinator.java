@@ -2,6 +2,8 @@ package io.pixelsdb.pixels.sink.core.concurrent;
 
 import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +16,15 @@ public class TransactionCoordinator {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionCoordinator.class);
     private final ConcurrentHashMap<String, TransactionState> txStateCache = new ConcurrentHashMap<>();
 
-
+    @Getter
     private final ConcurrentMap<String, TransactionState> activeTransactions = new ConcurrentHashMap<>();
+    @Getter
     private final ConcurrentMap<String, List<RowChangeEvent>> orphanEvents = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    @Getter
+    @Setter
+    private Long transactionTimeoutMs = 30000L;
 
     public TransactionCoordinator() {
         scheduler.scheduleAtFixedRate(this::checkTimeouts, 0, 10, TimeUnit.SECONDS);
@@ -58,6 +64,7 @@ public class TransactionCoordinator {
             state.addRowEvent(event);
             tryCommitIfReady(txId, state);
         } else {
+            LOGGER.info("Register orphan event {}", txId);
             orphanEvents.computeIfAbsent(txId, k -> new CopyOnWriteArrayList<>()).add(event);
         }
     }
@@ -103,9 +110,9 @@ public class TransactionCoordinator {
     }
 
 
-    private void checkTimeouts() {
+    void checkTimeouts() {
         activeTransactions.forEach((txId, state) -> {
-            if (state.isExpired(30000L)) { // TODO
+            if (state.isExpired(transactionTimeoutMs)) { // TODO
                 LOGGER.warn("TX {} timed out, rolling back", txId);
                 activeTransactions.remove(txId);
                 orphanEvents.remove(txId);

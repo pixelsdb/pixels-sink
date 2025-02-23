@@ -3,19 +3,14 @@ package io.pixelsdb.pixels.sink.monitor;
 import io.pixelsdb.pixels.sink.TableConsumerTask;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.common.internals.Topic;
+import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.TimerTask;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Timer;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.Properties;
 
 public class TopicMonitor extends Thread {
 
@@ -40,42 +35,22 @@ public class TopicMonitor extends Thread {
 
     @Override
     public void run() {
+        String topicPrefix = baseTopic + ".";
+        Properties props = new Properties();
+        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootsTrapServers);
+        AdminClient adminClient = AdminClient.create(props);
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TopicMonitorTask(this.bootsTrapServers, baseTopic), 0, 5000);
+        timer.scheduleAtFixedRate(new TopicMonitorTask(adminClient, topicPrefix), 0, 5000);
         // timer.schedule(new TopicMonitorTask(this.bootsTrapServers, baseTopic), 0);
     }
 
-    private class TopicMonitorTask extends TimerTask {
-        private final String bootsTrapServers;
-        private final String topicPrefix;
-
-        TopicMonitorTask(String bootsTrapServers, String baseTopic) {
-            this.bootsTrapServers = bootsTrapServers;
-            this.topicPrefix = baseTopic + ".";
-        }
-
-        @Override
-        public void run() {
-            Properties props = new Properties();
-            props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootsTrapServers);
-            try (AdminClient adminClient = AdminClient.create(props)) {
-                ListTopicsResult listTopicsResult = adminClient.listTopics();
-                Set<String> currentTopics = listTopicsResult.names().get();
-                Set<String> filteredTopics = filterTopics(currentTopics, this.topicPrefix);
-
-                Set<String> newTopics = detectNewTopics(filteredTopics);
-                if (!newTopics.isEmpty()) {
-                    for (String newTopic : newTopics) {
-                        log.info("Discover new topic: " + newTopic);
-                        TableConsumerTask task = new TableConsumerTask(pixelsSinkConfig, kafkaProperties, newTopic);
-                        executorService.submit(task);
-                        subscribedTopics.add(newTopic);
-                    }
-                }
-            } catch (Exception e) {
-                log.error(e.toString());
-            }
-        }
+    private Set<String> detectNewTopics(Set<String> currentTopics) {
+        Set<String> newTopics = new java.util.HashSet<>(currentTopics);
+        newTopics.removeAll(subscribedTopics);
+        Set<String> filteredNewTopics = newTopics.stream()
+                .filter(this::shouldProcessTable)
+                .collect(java.util.stream.Collectors.toSet());
+        return newTopics;
     }
 
     private static Set<String> filterTopics(Set<String> topics, String prefix) {
@@ -101,13 +76,35 @@ public class TopicMonitor extends Thread {
         return parts[parts.length - 1];
     }
 
-    private Set<String> detectNewTopics(Set<String> currentTopics) {
-        Set<String> newTopics = new java.util.HashSet<>(currentTopics);
-        newTopics.removeAll(subscribedTopics);
-        Set<String> filteredNewTopics = newTopics.stream()
-                .filter(topic -> shouldProcessTable(topic))
-                .collect(java.util.stream.Collectors.toSet());
-        return newTopics;
+    private class TopicMonitorTask extends TimerTask {
+        private final AdminClient adminClient;
+        private final String topicPrefix;
+
+        TopicMonitorTask(AdminClient adminClient, String topicPrefix) {
+            this.adminClient = adminClient;
+            this.topicPrefix = topicPrefix;
+        }
+
+        @Override
+        public void run() {
+            try {
+                ListTopicsResult listTopicsResult = adminClient.listTopics();
+                Set<String> currentTopics = listTopicsResult.names().get();
+                Set<String> filteredTopics = filterTopics(currentTopics, this.topicPrefix);
+
+                Set<String> newTopics = detectNewTopics(filteredTopics);
+                if (!newTopics.isEmpty()) {
+                    for (String newTopic : newTopics) {
+                        log.info("Discover new topic: " + newTopic);
+                        TableConsumerTask task = new TableConsumerTask(pixelsSinkConfig, kafkaProperties, newTopic);
+                        executorService.submit(task);
+                        subscribedTopics.add(newTopic);
+                    }
+                }
+            } catch (Exception e) {
+                log.error(e.toString());
+            }
+        }
     }
 
 }

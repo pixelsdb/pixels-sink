@@ -5,7 +5,8 @@ import java.util.Objects;
 public enum OperationType {
     INSERT,
     UPDATE,
-    DELETE;
+    DELETE,
+    UNKNOWN;
 
     public static OperationType fromString(String op) {
         if (Objects.equals(op, "c")) {
