@@ -27,7 +27,7 @@ public class TransactionCoordinator {
     private Long transactionTimeoutMs = 30000L;
 
     public TransactionCoordinator() {
-        scheduler.scheduleAtFixedRate(this::checkTimeouts, 0, 10, TimeUnit.SECONDS);
+        // scheduler.scheduleAtFixedRate(this::checkTimeouts, 0, 10, TimeUnit.SECONDS);
     }
 
     public void processBegin(TransactionMetadataValue.TransactionMetadata txBegin) {
@@ -59,6 +59,7 @@ public class TransactionCoordinator {
             LOGGER.warn("Received event for unknown TX {}, caching as orphan", id);
             return null;
         });
+
 
         if (state != null) {
             state.addRowEvent(event);

@@ -27,9 +27,13 @@ public class TransactionState {
     public void addRowEvent(RowChangeEvent event) {
         rowEvents.add(event);
         String table = event.getTable();
-        receivedCounts.computeIfPresent(table, (k, v) -> {
-            v.incrementAndGet();
-            return v;
+        receivedCounts.compute(table, (k, v) -> {
+            if (v == null) {
+                return new AtomicInteger(1);
+            } else {
+                v.incrementAndGet();
+                return v;
+            }
         });
     }
 

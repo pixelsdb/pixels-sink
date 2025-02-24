@@ -24,7 +24,7 @@ class TransactionCoordinatorTest {
 
     @BeforeEach
     void setUp() {
-        coordinator = new TransactionCoordinator();
+        coordinator = TransactionCoordinatorFactory.getCoordinator();
     }
 
     @Test
@@ -64,11 +64,11 @@ class TransactionCoordinatorTest {
         RowRecordMessage.RowRecord rowRecord = RowRecordMessage.RowRecord.newBuilder()
                 .setSource(
                         RowRecordMessage.SourceInfo.newBuilder()
-                                .setTable("public.nation") // 设置必要字段
+                                .setTable("public.nation")
                                 .setDb("test_db")
                                 .build()
                 )
-                .setOp("INSERT")
+                .setOp("c")
                 .setTsMs(System.currentTimeMillis())
                 .build();
 
@@ -79,7 +79,6 @@ class TransactionCoordinatorTest {
         assertFalse(coordinator.getActiveTransactions().containsKey(virtualTxId));
     }
 
-    // ==== 测试场景 4：事务超时 ====
     @Test
     void testTransactionTimeout() throws InterruptedException {
         TransactionMetadataValue.TransactionMetadata begin = createBeginMetadata(TX_ID);
@@ -92,22 +91,17 @@ class TransactionCoordinatorTest {
         assertFalse(coordinator.getActiveTransactions().containsKey(TX_ID));
     }
 
-    // ==== 测试场景 5：完整性检查失败 ====
     @Test
     void testIntegrityCheckFailure() {
-        // 发送 BEGIN
         TransactionMetadataValue.TransactionMetadata begin = createBeginMetadata(TX_ID);
         coordinator.processBegin(begin);
 
-        // 发送行事件（数量不足）
         RowChangeEvent event = createRowEvent(TX_ID, TABLE_NATION, 1);
         coordinator.processRowEvent(event);
 
-        // 发送 END（要求 2 个事件）
         TransactionMetadataValue.TransactionMetadata end = createEndMetadata(TX_ID, Collections.singletonMap(TABLE_NATION, 2));
         coordinator.processEnd(end);
 
-        // 验证事务未提交
         assertTrue(coordinator.getActiveTransactions().containsKey(TX_ID));
     }
 
@@ -146,7 +140,7 @@ class TransactionCoordinatorTest {
                                 .setDb("test_db")
                                 .build()
                 )
-                .setOp("INSERT")
+                .setOp("c")
                 .setTransaction(txInfo)
                 .build());
     }
