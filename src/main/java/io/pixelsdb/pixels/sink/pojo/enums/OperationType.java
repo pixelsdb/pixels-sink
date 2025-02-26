@@ -6,6 +6,7 @@ public enum OperationType {
     INSERT,
     UPDATE,
     DELETE,
+    SNAPSHOT,
     UNKNOWN;
 
     public static OperationType fromString(String op) {
@@ -17,6 +18,10 @@ public enum OperationType {
         }
         if (Objects.equals(op, "d")) {
             return DELETE;
+        }
+
+        if (Objects.equals(op, "r")) {
+            return SNAPSHOT;
         }
         throw new RuntimeException(String.format("Can't convert %s to operation type", op));
     }

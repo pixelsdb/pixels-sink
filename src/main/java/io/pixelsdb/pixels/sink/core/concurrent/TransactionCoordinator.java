@@ -30,6 +30,20 @@ public class TransactionCoordinator {
         // scheduler.scheduleAtFixedRate(this::checkTimeouts, 0, 10, TimeUnit.SECONDS);
     }
 
+    public void processTx(TransactionMetadataValue.TransactionMetadata txMeta) {
+        if (txMeta.getStatus().equals("BEGIN")) {
+            processBegin(txMeta);
+            return;
+        }
+
+        if (txMeta.getStatus().equals("END")) {
+            processEnd(txMeta);
+            return;
+        }
+        LOGGER.error("Tx status {} isn't supported", txMeta.getStatus());
+        throw new RuntimeException("");
+    }
+
     public void processBegin(TransactionMetadataValue.TransactionMetadata txBegin) {
         String txId = txBegin.getId();
         TransactionState state = activeTransactions.compute(txId, (k, v) -> {
@@ -49,7 +63,8 @@ public class TransactionCoordinator {
     }
 
     public void processRowEvent(RowChangeEvent event) {
-        if (event.getTransaction() == null) {
+        LOGGER.info("Process Record from {}, op: {}", event.getSourceTable(), event.getOp());
+        if (event.getTransaction() == null || event.getTransaction().getId() == "") {
             handleSnapshotEvent(event);
             return;
         }
@@ -96,7 +111,7 @@ public class TransactionCoordinator {
     }
 
     private void commitTransaction(String txId, TransactionState state) {
-        // TODO RPC接口
+        // TODO
         LOGGER.info("Committing TX {} with events: {}", txId, state.getRowEvents().size());
     }
 
