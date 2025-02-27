@@ -37,6 +37,7 @@
         <dep.kafka.version>3.9.0</dep.kafka.version>
         <dep.opencsv.version>5.8</dep.opencsv.version>
         <dep.lombok.version>1.18.36</dep.lombok.version>
+        <dep.debezium.version>3.0.7.Final</dep.debezium.version>
         <plugin.dockerfile-maven.version>1.4.13</plugin.dockerfile-maven.version>
     </properties>
 
@@ -45,41 +46,6 @@
             <groupId>io.pixelsdb</groupId>
             <artifactId>pixels-common</artifactId>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-cache</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-storage-localfs</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-storage-hdfs</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-storage-s3</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.facebook.presto</groupId>
-            <artifactId>presto-jdbc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.trino</groupId>
-            <artifactId>trino-jdbc</artifactId>
         </dependency>
 
         <dependency>
@@ -148,6 +114,24 @@
             <artifactId>lombok</artifactId>
             <version>${dep.lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+
+        <!-- debezium-->
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-api</artifactId>
+            <version>${dep.debezium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-embedded</artifactId>
+            <version>${dep.debezium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-sink</artifactId>
+            <version>${dep.debezium.version}</version>
         </dependency>
 
         <!-- testing -->

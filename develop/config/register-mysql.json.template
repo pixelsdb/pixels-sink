@@ -12,6 +12,9 @@
       "topic.prefix": "oltp_server",  
       "database.include.list": "pixels_realtime_crud",  
       "schema.history.internal.kafka.bootstrap.servers": "pixels_kafka:9092",  
-      "schema.history.internal.kafka.topic": "schema-changes.mysql"  
+      "schema.history.internal.kafka.topic": "schema-changes.mysql",
+
+      "key.converter.schemas.enable": "false",
+      "value.converter.schemas.enable": "false"
     }
 }

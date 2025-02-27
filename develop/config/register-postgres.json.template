@@ -16,6 +16,9 @@
     "transforms": "topicRouting",
     "transforms.topicRouting.type": "org.apache.kafka.connect.transforms.RegexRouter",
     "transforms.topicRouting.regex": "oltp_server\\.public\\.(.*)",
-    "transforms.topicRouting.replacement": "oltp_server.pixels_realtime_crud.$1"
+    "transforms.topicRouting.replacement": "oltp_server.pixels_realtime_crud.$1",
+
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false"
   }
 }
