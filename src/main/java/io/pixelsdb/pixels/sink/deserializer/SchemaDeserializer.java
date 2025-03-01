@@ -25,7 +25,7 @@ public class SchemaDeserializer {
         return null;
     }
 
-    private static TypeDescription parseStruct(JsonNode fields) {
+    static TypeDescription parseStruct(JsonNode fields) {
         TypeDescription structType = TypeDescription.createStruct();
         fields.forEach(field -> {
             String name = field.get("field").asText();
