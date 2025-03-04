@@ -15,6 +15,7 @@ message RowRecord {
   int64 ts_ms = 6;
   int64 ts_us = 7;
   int64 ts_ns = 8;
+  ErrorInfo error = 9;
 }
 
 message SourceInfo {
@@ -44,4 +45,10 @@ message RowData {
   int64 id = 1;
   string name = 2;
   map<string, string> attributes = 3;
+}
+
+message ErrorInfo {
+  string message = 1;
+  string stack_trace = 2;
+  bytes original_data = 3;
 }

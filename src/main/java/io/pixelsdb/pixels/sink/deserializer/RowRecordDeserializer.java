@@ -1,6 +1,7 @@
 package io.pixelsdb.pixels.sink.deserializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -21,7 +22,6 @@ public class RowRecordDeserializer implements Deserializer<RowRecordMessage.RowR
         if (data == null || data.length == 0) {
             return null;
         }
-
         try {
             Map<String, Object> rawMessage = OBJECT_MAPPER.readValue(data, Map.class);
             return parseRowRecord(rawMessage);
@@ -31,10 +31,14 @@ public class RowRecordDeserializer implements Deserializer<RowRecordMessage.RowR
         }
     }
 
-    private RowRecordMessage.RowRecord parseRowRecord(Map<String, Object> rawMessage) throws IOException {
+    static RowRecordMessage.RowRecord parseRowRecord(Map<String, Object> rawMessage) throws IOException {
         RowRecordMessage.RowRecord.Builder builder = RowRecordMessage.RowRecord.newBuilder();
         String json = OBJECT_MAPPER.writeValueAsString(rawMessage.get("payload"));
         //TODO optimize
+        return getRowRecord(json, builder);
+    }
+
+    private static RowRecordMessage.RowRecord getRowRecord(String json, RowRecordMessage.RowRecord.Builder builder) throws InvalidProtocolBufferException {
         PROTO_PARSER.merge(json, builder);
         return builder.build();
     }

@@ -19,9 +19,6 @@ public class DebeziumJsonMessageDeserializer implements Deserializer<Map<String,
                 return null;
             }
             Map<String, Object> after = (Map<String, Object>) payload.get("after");
-            if(after == null) {
-                return null;
-            }
             return after;
         } catch (Exception e) {
             e.printStackTrace();

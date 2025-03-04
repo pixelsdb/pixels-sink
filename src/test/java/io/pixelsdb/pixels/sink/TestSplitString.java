@@ -28,7 +28,7 @@ public class TestSplitString
     {
         String s = "1|3689999|O|224560.83|1996-01-02|5-LOW|Clerk#000095055|0|nstructions sleep furiously among |";
         String reg = "\\\\|";
-        String splits[] = s.split(reg);
+        String[] splits = s.split(reg);
         System.out.println(splits.length);
     }
 }

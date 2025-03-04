@@ -19,23 +19,24 @@ import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 public class CsvWriter implements Closeable {
     private final FileWriter writer;
     private static final Logger log = LoggerFactory.getLogger(CsvWriter.class);
     private Long recordCnt = 0L;
 
     private final ReentrantLock lock = new ReentrantLock();
-    private ScheduledExecutorService scheduler;
+    private final ScheduledExecutorService scheduler;
 
     public CsvWriter(PixelsSinkConfig pixelsSinkConfig, String tableName) throws IOException {
         String outputDirectory = pixelsSinkConfig.getCsvSinkPath()  + File.separator + pixelsSinkConfig.getCaptureDatabase();
@@ -64,8 +65,6 @@ public class CsvWriter implements Closeable {
             writer.append(message.values().stream().map(String::valueOf).collect(Collectors.joining("|")));
         } catch (IOException e) {
             throw e;
-        } finally {
-
         }
 
         writer.append("\n");

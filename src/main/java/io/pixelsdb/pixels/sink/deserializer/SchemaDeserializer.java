@@ -35,7 +35,10 @@ public class SchemaDeserializer {
         return structType;
     }
 
-    private static TypeDescription parseFieldType(JsonNode fieldNode) {
+    static TypeDescription parseFieldType(JsonNode fieldNode) {
+        if (!fieldNode.has("type")) {
+            throw new IllegalArgumentException("Field is missing required 'type' property");
+        }
         String typeName = fieldNode.get("type").asText();
         String logicalType = fieldNode.has("name") ? fieldNode.get("name").asText() : null;
 

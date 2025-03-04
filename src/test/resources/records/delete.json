@@ -1,0 +1,235 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "int32",
+            "optional": false,
+            "field": "R_REGIONKEY"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "R_NAME"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "R_COMMENT"
+          }
+        ],
+        "optional": true,
+        "name": "oltp_server.pixels_realtime_crud.region.Value",
+        "field": "before"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "int32",
+            "optional": false,
+            "field": "R_REGIONKEY"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "R_NAME"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "R_COMMENT"
+          }
+        ],
+        "optional": true,
+        "name": "oltp_server.pixels_realtime_crud.region.Value",
+        "field": "after"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": false,
+            "field": "version"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "connector"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "name"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "ts_ms"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "name": "io.debezium.data.Enum",
+            "version": 1,
+            "parameters": {
+              "allowed": "true,first,first_in_data_collection,last_in_data_collection,last,false,incremental"
+            },
+            "default": "false",
+            "field": "snapshot"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "db"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "sequence"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "ts_us"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "ts_ns"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "table"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "server_id"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "gtid"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "file"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "pos"
+          },
+          {
+            "type": "int32",
+            "optional": false,
+            "field": "row"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "thread"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "query"
+          }
+        ],
+        "optional": false,
+        "name": "io.debezium.connector.mysql.Source",
+        "field": "source"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": false,
+            "field": "id"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "total_order"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "data_collection_order"
+          }
+        ],
+        "optional": true,
+        "name": "event.block",
+        "version": 1,
+        "field": "transaction"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "op"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "field": "ts_ms"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "field": "ts_us"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "field": "ts_ns"
+      }
+    ],
+    "optional": false,
+    "name": "oltp_server.pixels_realtime_crud.region.Envelope",
+    "version": 2
+  },
+  "payload": {
+    "before": {
+      "R_REGIONKEY": 3,
+      "R_NAME": "EUROPE",
+      "R_COMMENT": "ly final courts cajole furiously final excuse"
+    },
+    "after": null,
+    "source": {
+      "version": "3.0.7.Final",
+      "connector": "mysql",
+      "name": "oltp_server",
+      "ts_ms": 1741071109000,
+      "snapshot": "false",
+      "db": "pixels_realtime_crud",
+      "sequence": null,
+      "ts_us": 1741071109000000,
+      "ts_ns": 1741071109000000000,
+      "table": "region",
+      "server_id": 1,
+      "gtid": null,
+      "file": "binlog.000002",
+      "pos": 1926,
+      "row": 0,
+      "thread": 13,
+      "query": null
+    },
+    "transaction": {
+      "id": "file=binlog.000002,pos=1384",
+      "total_order": 2,
+      "data_collection_order": 2
+    },
+    "op": "d",
+    "ts_ms": 1741071112443,
+    "ts_us": 1741071112443522,
+    "ts_ns": 1741071112443523000
+  }
+}

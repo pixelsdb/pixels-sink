@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class PixelsSinkConfig {
-    private Properties properties;
+    private final Properties properties;
 
     public PixelsSinkConfig(String configFilePath) throws IOException {
         properties = new Properties();
@@ -89,6 +89,6 @@ public class PixelsSinkConfig {
     }
 
     public Long getTransactionTimeout() {
-        return Long.valueOf(properties.getProperty("transaction.timeout", String.valueOf(TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT)));
+        return Long.valueOf(properties.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
     }
 }

@@ -102,6 +102,25 @@ public final class TransactionMetadataValue {
      */
     long getTsMs();
   }
+  private static final com.google.protobuf.Descriptors.FileDescriptor
+      descriptor;
+
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_DataCollection_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_DataCollection_fieldAccessorTable;
+
+  public static com.google.protobuf.Descriptors.FileDescriptor
+      getDescriptor() {
+    return descriptor;
+  }
+
   /**
    * Protobuf type {@code io.pixelsdb.pixels.sink.proto.TransactionMetadata}
    */
@@ -127,11 +146,6 @@ public final class TransactionMetadataValue {
       return new TransactionMetadata();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     private TransactionMetadata(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -169,7 +183,7 @@ public final class TransactionMetadataValue {
               break;
             }
             case 34: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              if ((mutable_bitField0_ & 0x00000001) == 0) {
                 dataCollections_ = new java.util.ArrayList<io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -204,9 +218,16 @@ public final class TransactionMetadataValue {
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
+
+    public static com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_descriptor;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
     }
 
     @java.lang.Override
@@ -251,6 +272,254 @@ public final class TransactionMetadataValue {
        */
       long getEventCount();
     }
+
+    @java.lang.Override
+    public boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 1;
+    private volatile java.lang.Object status_;
+    /**
+     * <code>string status = 1;</code>
+     * @return The status.
+     */
+    @java.lang.Override
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string status = 1;</code>
+     * @return The bytes for status.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object id_;
+    /**
+     * <code>string id = 2;</code>
+     * @return The id.
+     */
+    @java.lang.Override
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string id = 2;</code>
+     * @return The bytes for id.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int EVENT_COUNT_FIELD_NUMBER = 3;
+    private long eventCount_;
+    /**
+     * <code>int64 event_count = 3;</code>
+     * @return The eventCount.
+     */
+    @java.lang.Override
+    public long getEventCount() {
+      return eventCount_;
+    }
+
+    public static final int DATA_COLLECTIONS_FIELD_NUMBER = 4;
+    private java.util.List<io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection> dataCollections_;
+    /**
+     * <pre>
+     * array对应repeated
+     * </pre>
+     *
+     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection> getDataCollectionsList() {
+      return dataCollections_;
+    }
+    /**
+     * <pre>
+     * array对应repeated
+     * </pre>
+     *
+     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollectionOrBuilder>
+        getDataCollectionsOrBuilderList() {
+      return dataCollections_;
+    }
+    /**
+     * <pre>
+     * array对应repeated
+     * </pre>
+     *
+     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
+     */
+    @java.lang.Override
+    public int getDataCollectionsCount() {
+      return dataCollections_.size();
+    }
+    /**
+     * <pre>
+     * array对应repeated
+     * </pre>
+     *
+     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection getDataCollections(int index) {
+      return dataCollections_.get(index);
+    }
+    /**
+     * <pre>
+     * array对应repeated
+     * </pre>
+     *
+     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
+     */
+    @java.lang.Override
+    public io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollectionOrBuilder getDataCollectionsOrBuilder(
+        int index) {
+      return dataCollections_.get(index);
+    }
+
+    public static final int TS_MS_FIELD_NUMBER = 5;
+    private long tsMs_;
+    /**
+     * <pre>
+     * JSON中"optional": false对应非optional字段
+     * </pre>
+     *
+     * <code>int64 ts_ms = 5;</code>
+     * @return The tsMs.
+     */
+    @java.lang.Override
+    public long getTsMs() {
+      return tsMs_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata)) {
+        return super.equals(obj);
+      }
+      io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata other = (io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata) obj;
+
+      if (!getStatus()
+          .equals(other.getStatus())) return false;
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (getEventCount()
+          != other.getEventCount()) return false;
+      if (!getDataCollectionsList()
+          .equals(other.getDataCollectionsList())) return false;
+      if (getTsMs()
+          != other.getTsMs()) return false;
+      return unknownFields.equals(other.unknownFields);
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getStatusBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, status_);
+      }
+      if (!getIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, id_);
+      }
+      if (eventCount_ != 0L) {
+        output.writeInt64(3, eventCount_);
+      }
+      for (int i = 0; i < dataCollections_.size(); i++) {
+        output.writeMessage(4, dataCollections_.get(i));
+      }
+      if (tsMs_ != 0L) {
+        output.writeInt64(5, tsMs_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getStatusBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, status_);
+      }
+      if (!getIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, id_);
+      }
+      if (eventCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, eventCount_);
+      }
+      for (int i = 0; i < dataCollections_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, dataCollections_.get(i));
+      }
+      if (tsMs_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, tsMs_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
     /**
      * Protobuf type {@code io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection}
      */
@@ -274,10 +543,9 @@ public final class TransactionMetadataValue {
         return new DataCollection();
       }
 
-      @java.lang.Override
-      public final com.google.protobuf.UnknownFieldSet
-      getUnknownFields() {
-        return this.unknownFields;
+      public static com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_DataCollection_descriptor;
       }
       private DataCollection(
           com.google.protobuf.CodedInputStream input,
@@ -327,9 +595,11 @@ public final class TransactionMetadataValue {
           makeExtensionsImmutable();
         }
       }
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_DataCollection_descriptor;
+
+      @java.lang.Override
+      public com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
       }
 
       @java.lang.Override
@@ -356,7 +626,7 @@ public final class TransactionMetadataValue {
         if (ref instanceof java.lang.String) {
           return (java.lang.String) ref;
         } else {
-          com.google.protobuf.ByteString bs = 
+          com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           dataCollection_ = s;
@@ -376,7 +646,7 @@ public final class TransactionMetadataValue {
           getDataCollectionBytes() {
         java.lang.Object ref = dataCollection_;
         if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           dataCollection_ = b;
@@ -402,8 +672,9 @@ public final class TransactionMetadataValue {
       }
 
       private byte memoizedIsInitialized = -1;
+
       @java.lang.Override
-      public final boolean isInitialized() {
+      public boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
         if (isInitialized == 1) return true;
         if (isInitialized == 0) return false;
@@ -456,8 +727,7 @@ public final class TransactionMetadataValue {
             .equals(other.getDataCollection())) return false;
         if (getEventCount()
             != other.getEventCount()) return false;
-        if (!unknownFields.equals(other.unknownFields)) return false;
-        return true;
+        return unknownFields.equals(other.unknownFields);
       }
 
       @java.lang.Override
@@ -574,7 +844,7 @@ public final class TransactionMetadataValue {
           com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
           // @@protoc_insertion_point(builder_implements:io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection)
           io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollectionOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
+        public static com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
           return io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_DataCollection_descriptor;
         }
@@ -698,7 +968,7 @@ public final class TransactionMetadataValue {
         }
 
         @java.lang.Override
-        public final boolean isInitialized() {
+        public boolean isInitialized() {
           return true;
         }
 
@@ -754,7 +1024,7 @@ public final class TransactionMetadataValue {
             getDataCollectionBytes() {
           java.lang.Object ref = dataCollection_;
           if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString b =
                 com.google.protobuf.ByteString.copyFromUtf8(
                     (java.lang.String) ref);
             dataCollection_ = b;
@@ -777,7 +1047,7 @@ public final class TransactionMetadataValue {
           if (value == null) {
     throw new NullPointerException();
   }
-  
+
           dataCollection_ = value;
           onChanged();
           return this;
@@ -791,7 +1061,7 @@ public final class TransactionMetadataValue {
          * @return This builder for chaining.
          */
         public Builder clearDataCollection() {
-          
+
           dataCollection_ = getDefaultInstance().getDataCollection();
           onChanged();
           return this;
@@ -811,7 +1081,7 @@ public final class TransactionMetadataValue {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-          
+
           dataCollection_ = value;
           onChanged();
           return this;
@@ -840,7 +1110,7 @@ public final class TransactionMetadataValue {
          * @return This builder for chaining.
          */
         public Builder setEventCount(long value) {
-          
+
           eventCount_ = value;
           onChanged();
           return this;
@@ -854,20 +1124,20 @@ public final class TransactionMetadataValue {
          * @return This builder for chaining.
          */
         public Builder clearEventCount() {
-          
+
           eventCount_ = 0L;
           onChanged();
           return this;
         }
         @java.lang.Override
-        public final Builder setUnknownFields(
-            final com.google.protobuf.UnknownFieldSet unknownFields) {
+        public Builder setUnknownFields(
+                final com.google.protobuf.UnknownFieldSet unknownFields) {
           return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
-        public final Builder mergeUnknownFields(
-            final com.google.protobuf.UnknownFieldSet unknownFields) {
+        public Builder mergeUnknownFields(
+                final com.google.protobuf.UnknownFieldSet unknownFields) {
           return super.mergeUnknownFields(unknownFields);
         }
 
@@ -910,253 +1180,6 @@ public final class TransactionMetadataValue {
         return DEFAULT_INSTANCE;
       }
 
-    }
-
-    public static final int STATUS_FIELD_NUMBER = 1;
-    private volatile java.lang.Object status_;
-    /**
-     * <code>string status = 1;</code>
-     * @return The status.
-     */
-    @java.lang.Override
-    public java.lang.String getStatus() {
-      java.lang.Object ref = status_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        status_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string status = 1;</code>
-     * @return The bytes for status.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getStatusBytes() {
-      java.lang.Object ref = status_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        status_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int ID_FIELD_NUMBER = 2;
-    private volatile java.lang.Object id_;
-    /**
-     * <code>string id = 2;</code>
-     * @return The id.
-     */
-    @java.lang.Override
-    public java.lang.String getId() {
-      java.lang.Object ref = id_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        id_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string id = 2;</code>
-     * @return The bytes for id.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getIdBytes() {
-      java.lang.Object ref = id_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        id_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int EVENT_COUNT_FIELD_NUMBER = 3;
-    private long eventCount_;
-    /**
-     * <code>int64 event_count = 3;</code>
-     * @return The eventCount.
-     */
-    @java.lang.Override
-    public long getEventCount() {
-      return eventCount_;
-    }
-
-    public static final int DATA_COLLECTIONS_FIELD_NUMBER = 4;
-    private java.util.List<io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection> dataCollections_;
-    /**
-     * <pre>
-     * array对应repeated
-     * </pre>
-     *
-     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
-     */
-    @java.lang.Override
-    public java.util.List<io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection> getDataCollectionsList() {
-      return dataCollections_;
-    }
-    /**
-     * <pre>
-     * array对应repeated
-     * </pre>
-     *
-     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollectionOrBuilder> 
-        getDataCollectionsOrBuilderList() {
-      return dataCollections_;
-    }
-    /**
-     * <pre>
-     * array对应repeated
-     * </pre>
-     *
-     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
-     */
-    @java.lang.Override
-    public int getDataCollectionsCount() {
-      return dataCollections_.size();
-    }
-    /**
-     * <pre>
-     * array对应repeated
-     * </pre>
-     *
-     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
-     */
-    @java.lang.Override
-    public io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection getDataCollections(int index) {
-      return dataCollections_.get(index);
-    }
-    /**
-     * <pre>
-     * array对应repeated
-     * </pre>
-     *
-     * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
-     */
-    @java.lang.Override
-    public io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollectionOrBuilder getDataCollectionsOrBuilder(
-        int index) {
-      return dataCollections_.get(index);
-    }
-
-    public static final int TS_MS_FIELD_NUMBER = 5;
-    private long tsMs_;
-    /**
-     * <pre>
-     * JSON中"optional": false对应非optional字段
-     * </pre>
-     *
-     * <code>int64 ts_ms = 5;</code>
-     * @return The tsMs.
-     */
-    @java.lang.Override
-    public long getTsMs() {
-      return tsMs_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!getStatusBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, status_);
-      }
-      if (!getIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, id_);
-      }
-      if (eventCount_ != 0L) {
-        output.writeInt64(3, eventCount_);
-      }
-      for (int i = 0; i < dataCollections_.size(); i++) {
-        output.writeMessage(4, dataCollections_.get(i));
-      }
-      if (tsMs_ != 0L) {
-        output.writeInt64(5, tsMs_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!getStatusBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, status_);
-      }
-      if (!getIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, id_);
-      }
-      if (eventCount_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, eventCount_);
-      }
-      for (int i = 0; i < dataCollections_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, dataCollections_.get(i));
-      }
-      if (tsMs_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(5, tsMs_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata)) {
-        return super.equals(obj);
-      }
-      io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata other = (io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata) obj;
-
-      if (!getStatus()
-          .equals(other.getStatus())) return false;
-      if (!getId()
-          .equals(other.getId())) return false;
-      if (getEventCount()
-          != other.getEventCount()) return false;
-      if (!getDataCollectionsList()
-          .equals(other.getDataCollectionsList())) return false;
-      if (getTsMs()
-          != other.getTsMs()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
     }
 
     @java.lang.Override
@@ -1275,6 +1298,7 @@ public final class TransactionMetadataValue {
       Builder builder = new Builder(parent);
       return builder;
     }
+
     /**
      * Protobuf type {@code io.pixelsdb.pixels.sink.proto.TransactionMetadata}
      */
@@ -1282,7 +1306,7 @@ public final class TransactionMetadataValue {
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.pixelsdb.pixels.sink.proto.TransactionMetadata)
         io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadataOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
+      public static com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_descriptor;
       }
@@ -1445,7 +1469,7 @@ public final class TransactionMetadataValue {
               dataCollectionsBuilder_ = null;
               dataCollections_ = other.dataCollections_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              dataCollectionsBuilder_ = 
+              dataCollectionsBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDataCollectionsFieldBuilder() : null;
             } else {
@@ -1462,7 +1486,7 @@ public final class TransactionMetadataValue {
       }
 
       @java.lang.Override
-      public final boolean isInitialized() {
+      public boolean isInitialized() {
         return true;
       }
 
@@ -1511,7 +1535,7 @@ public final class TransactionMetadataValue {
           getStatusBytes() {
         java.lang.Object ref = status_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           status_ = b;
@@ -1530,7 +1554,7 @@ public final class TransactionMetadataValue {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         status_ = value;
         onChanged();
         return this;
@@ -1540,7 +1564,7 @@ public final class TransactionMetadataValue {
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
-        
+
         status_ = getDefaultInstance().getStatus();
         onChanged();
         return this;
@@ -1556,7 +1580,7 @@ public final class TransactionMetadataValue {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         status_ = value;
         onChanged();
         return this;
@@ -1587,7 +1611,7 @@ public final class TransactionMetadataValue {
           getIdBytes() {
         java.lang.Object ref = id_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           id_ = b;
@@ -1606,7 +1630,7 @@ public final class TransactionMetadataValue {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         id_ = value;
         onChanged();
         return this;
@@ -1616,7 +1640,7 @@ public final class TransactionMetadataValue {
        * @return This builder for chaining.
        */
       public Builder clearId() {
-        
+
         id_ = getDefaultInstance().getId();
         onChanged();
         return this;
@@ -1632,7 +1656,7 @@ public final class TransactionMetadataValue {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         id_ = value;
         onChanged();
         return this;
@@ -1653,7 +1677,7 @@ public final class TransactionMetadataValue {
        * @return This builder for chaining.
        */
       public Builder setEventCount(long value) {
-        
+
         eventCount_ = value;
         onChanged();
         return this;
@@ -1663,7 +1687,7 @@ public final class TransactionMetadataValue {
        * @return This builder for chaining.
        */
       public Builder clearEventCount() {
-        
+
         eventCount_ = 0L;
         onChanged();
         return this;
@@ -1672,7 +1696,7 @@ public final class TransactionMetadataValue {
       private java.util.List<io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection> dataCollections_ =
         java.util.Collections.emptyList();
       private void ensureDataCollectionsIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if ((bitField0_ & 0x00000001) == 0) {
           dataCollections_ = new java.util.ArrayList<io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection>(dataCollections_);
           bitField0_ |= 0x00000001;
          }
@@ -1924,7 +1948,7 @@ public final class TransactionMetadataValue {
        *
        * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
        */
-      public java.util.List<? extends io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollectionOrBuilder> 
+      public java.util.List<? extends io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollectionOrBuilder>
            getDataCollectionsOrBuilderList() {
         if (dataCollectionsBuilder_ != null) {
           return dataCollectionsBuilder_.getMessageOrBuilderList();
@@ -1962,12 +1986,12 @@ public final class TransactionMetadataValue {
        *
        * <code>repeated .io.pixelsdb.pixels.sink.proto.TransactionMetadata.DataCollection data_collections = 4;</code>
        */
-      public java.util.List<io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection.Builder> 
+      public java.util.List<io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection.Builder>
            getDataCollectionsBuilderList() {
         return getDataCollectionsFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection, io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection.Builder, io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollectionOrBuilder> 
+          io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection, io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollection.Builder, io.pixelsdb.pixels.sink.proto.TransactionMetadataValue.TransactionMetadata.DataCollectionOrBuilder>
           getDataCollectionsFieldBuilder() {
         if (dataCollectionsBuilder_ == null) {
           dataCollectionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
@@ -2004,7 +2028,7 @@ public final class TransactionMetadataValue {
        * @return This builder for chaining.
        */
       public Builder setTsMs(long value) {
-        
+
         tsMs_ = value;
         onChanged();
         return this;
@@ -2018,20 +2042,20 @@ public final class TransactionMetadataValue {
        * @return This builder for chaining.
        */
       public Builder clearTsMs() {
-        
+
         tsMs_ = 0L;
         onChanged();
         return this;
       }
       @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
+      public Builder setUnknownFields(
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
+      public Builder mergeUnknownFields(
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -2075,24 +2099,6 @@ public final class TransactionMetadataValue {
     }
 
   }
-
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_DataCollection_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_io_pixelsdb_pixels_sink_proto_TransactionMetadata_DataCollection_fieldAccessorTable;
-
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
-    return descriptor;
-  }
-  private static  com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
   static {
     java.lang.String[] descriptorData = {
       "\n\021transaction.proto\022\035io.pixelsdb.pixels." +

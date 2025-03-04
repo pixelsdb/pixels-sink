@@ -1,5 +1,6 @@
 package io.pixelsdb.pixels.sink;
 
+import io.pixelsdb.pixels.core.TypeDescription;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinator;
 import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinatorFactory;
@@ -20,13 +21,13 @@ import java.util.Properties;
 
 public class TableConsumerTask implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(TableConsumerTask.class);
-    private PixelsSinkConfig pixelsSinkConfig;
-    private Properties kafkaProperties;
-    private String topic;
-    private CsvWriter writer; // bind a writer
-    private String tableName;
-
-    private static TransactionCoordinator transactionCoordinator = TransactionCoordinatorFactory.getCoordinator();
+    private static final TransactionCoordinator transactionCoordinator = TransactionCoordinatorFactory.getCoordinator();
+    private final PixelsSinkConfig pixelsSinkConfig;
+    private final Properties kafkaProperties;
+    private final String topic;
+    private final CsvWriter writer; // bind a writer
+    private final String tableName;
+    private TypeDescription schema; // assume schema will not change here
     // TODO writer should be an abstract class. I will implement it later
     public TableConsumerTask(PixelsSinkConfig pixelsSinkConfig, Properties kafkaProperties, String topic) throws IOException {
         this.pixelsSinkConfig = pixelsSinkConfig;
