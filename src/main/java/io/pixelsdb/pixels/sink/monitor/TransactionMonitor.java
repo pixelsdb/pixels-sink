@@ -30,7 +30,7 @@ public class TransactionMonitor implements Runnable{
             ConsumerRecords<String, TransactionMetadataValue.TransactionMetadata> records = consumer.poll(Duration.ofSeconds(5));
             for(ConsumerRecord<String, TransactionMetadataValue.TransactionMetadata> record: records) {
                 TransactionMetadataValue.TransactionMetadata transaction = record.value();
-                transactionCoordinator.processTx(transaction);
+                transactionCoordinator.processTransactionEvent(transaction);
             }
         }
     }

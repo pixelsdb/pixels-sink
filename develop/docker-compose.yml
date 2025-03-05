@@ -14,6 +14,7 @@ services:
       - ./example/sql:/var/lib/mysql-files/sql
       - ./example/tpch_data:/var/lib/mysql-files/tpch_data
       - ./example/mysql_init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./example/mysql_load.sql:/load.sql
     secrets:
       - mysql-root-password
       - mysql-pixels-password
@@ -33,6 +34,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./example/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./example:/example
+      - ./example/postgres_load.sql:/load.sql
     secrets:
       - postgres-password
     networks:

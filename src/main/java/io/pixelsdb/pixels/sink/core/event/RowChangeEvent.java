@@ -59,6 +59,9 @@ public class RowChangeEvent {
         return topic;
     }
 
+    public String getDb() {
+        return rowRecord.getSource().getDb();
+    }
     public boolean isDelete() {
         return op == OperationType.DELETE;
     }

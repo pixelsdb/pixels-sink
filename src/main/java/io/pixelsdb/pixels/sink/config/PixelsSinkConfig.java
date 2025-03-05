@@ -23,7 +23,7 @@ import java.util.Properties;
 
 public class PixelsSinkConfig {
     private final Properties properties;
-
+    private final Long transactionTimeout;
     public PixelsSinkConfig(String configFilePath) throws IOException {
         properties = new Properties();
         if (configFilePath != null && !configFilePath.isEmpty()) {
@@ -40,8 +40,10 @@ public class PixelsSinkConfig {
                     throw new FileNotFoundException("Resource file not found: " + configFilePath);
                 }
                 properties.load(input);
+
             }
         }
+        transactionTimeout = Long.valueOf(properties.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
     }
 
     public String getTopicPrefix() {
@@ -89,6 +91,6 @@ public class PixelsSinkConfig {
     }
 
     public Long getTransactionTimeout() {
-        return Long.valueOf(properties.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
+        return transactionTimeout;
     }
 }

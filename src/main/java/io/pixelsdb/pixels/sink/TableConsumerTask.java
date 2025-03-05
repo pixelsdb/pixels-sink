@@ -5,7 +5,6 @@ import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinator;
 import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
-import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
 import io.pixelsdb.pixels.sink.writer.CsvWriter;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -42,7 +41,7 @@ public class TableConsumerTask implements Runnable {
 
     @Override
     public void run() {
-        KafkaConsumer<String, RowRecordMessage.RowRecord> consumer = new KafkaConsumer<>(kafkaProperties);
+        KafkaConsumer<String, RowChangeEvent> consumer = new KafkaConsumer<>(kafkaProperties);
         consumer.subscribe(Collections.singleton(topic));
         TopicPartition partition = new TopicPartition(topic, 0);  // partition 0
         consumer.poll(1);
@@ -50,11 +49,11 @@ public class TableConsumerTask implements Runnable {
         consumer.seek(partition, 0);
 
         while (true) {
-            ConsumerRecords<String, RowRecordMessage.RowRecord> records = consumer.poll(Duration.ofSeconds(5));
+            ConsumerRecords<String, RowChangeEvent> records = consumer.poll(Duration.ofSeconds(5));
             if (!records.isEmpty()) {
                 log.info("{} Consumer poll returned {} records", tableName, records.count());
                 records.forEach(record -> {
-                    transactionCoordinator.processRowEvent(new RowChangeEvent(record.value()));
+                    transactionCoordinator.processRowEvent(record.value());
                 });
             }
             // TODO stop singal

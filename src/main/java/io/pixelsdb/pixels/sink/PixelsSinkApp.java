@@ -18,27 +18,20 @@ package io.pixelsdb.pixels.sink;
 import io.pixelsdb.pixels.sink.config.CommandLineConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConstants;
-import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import io.pixelsdb.pixels.sink.config.factory.KafkaPropFactorySelector;
-import io.pixelsdb.pixels.sink.deserializer.DebeziumJsonMessageDeserializer;
+import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.monitor.MonitorThreadManager;
 import io.pixelsdb.pixels.sink.monitor.TopicMonitor;
 import io.pixelsdb.pixels.sink.monitor.TransactionMonitor;
-import lombok.val;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Properties;
 
 public class PixelsSinkApp {
 
     public static void main(String[] args) throws IOException {
-        CommandLineConfig cmdLineConfig = new CommandLineConfig(args);
-        PixelsSinkConfig pixelsSinkConfig = new PixelsSinkConfig(cmdLineConfig.getConfigPath());
+        init(args);
+        PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
         KafkaPropFactorySelector kafkaPropFactorySelector = new KafkaPropFactorySelector();
 
         Properties transactionKafkaProperties = kafkaPropFactorySelector
@@ -54,5 +47,10 @@ public class PixelsSinkApp {
         MonitorThreadManager manager = new MonitorThreadManager();
         manager.startMonitor(transactionMonitor);
         manager.startMonitor(topicMonitor);
+    }
+
+    private static void init(String[] args) throws IOException {
+        CommandLineConfig cmdLineConfig = new CommandLineConfig(args);
+        PixelsSinkConfigFactory.initialize(cmdLineConfig.getConfigPath());
     }
 }

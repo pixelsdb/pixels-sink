@@ -12,10 +12,15 @@ EOF
 develop_debug=off
 need_init=on
 need_build=on
+
 generate_data=on
 example_data_scale=0.1
+
 enable_postgres=on
+load_postgres=on
+
 enable_mysql=on
+load_mysql=on
 
 for arg do
   val=`echo "$arg" | sed -e 's;^--[^=]*=;;'`
@@ -73,6 +78,9 @@ check_fatal_exit "MySQL Source Kafka Connector Server Fail"
 # register mysql connector
 try_command curl -f -X POST -H "Content-Type: application/json" -d @${CONFIG_DIR}/register-mysql.json http://localhost:8083/connectors -w '\n' # We need to wait here for MySQL to load all the data
 check_fatal_exit "Register MySQL Source Connector Fail"
+  if [[ x${load_mysql} == x"on" ]]; then
+    docker exec pixels_mysql_source_db sh -c "mysql -upixels -p$(cat "${SECRETS_DIR}/mysql-pixels-password.txt") -D pixels_realtime_crud < /load.sql"
+  fi
 fi
 
 
@@ -85,6 +93,9 @@ check_fatal_exit "Postgres Source Kafka Connector Server Fail"
 # register PostgreSQL connector
 try_command curl -f -X POST -H "Content-Type: application/json" -d @${CONFIG_DIR}/register-postgres.json http://localhost:8084/connectors -w '\n'
 check_fatal_exit "Register PostgreSQL Source Connector Fail"
+  if [[ x${load_postgres} == x"on" ]]; then
+    docker exec pixels_postgres_source_db sh -c " psql -Upixels -d pixels_realtime_crud < /load.sql"
+  fi
 fi
 
 log_info "Visit http://localhost:9000 to check kafka status"
