@@ -7,8 +7,8 @@ import java.util.Map;
 public class RowChangeEvent {
     private final OperationType op;
     private final RowRecordMessage.RowRecord rowRecord;
-    private Map<String, Object> before;
-    private Map<String, Object> after;
+    private Map<String, Object> before = null;
+    private Map<String, Object> after = null;
     private String topic;
 
     public RowChangeEvent(RowRecordMessage.RowRecord rowRecord) {

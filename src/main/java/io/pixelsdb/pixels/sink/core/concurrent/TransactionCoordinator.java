@@ -17,12 +17,13 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TransactionCoordinator {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionCoordinator.class);
     public static final int INITIAL_CAPACITY = 11;
-    private static final long DEFAULT_TX_TIMEOUT_MS = PixelsSinkConfigFactory.getInstance().getTransactionTimeout();
-    private final ConcurrentMap<String, TransactionContext> activeTxContexts = new ConcurrentHashMap<>();
+
+    final ConcurrentMap<String, TransactionContext> activeTxContexts = new ConcurrentHashMap<>();
+    final ExecutorService dispatchExecutor = Executors.newFixedThreadPool(PixelsSinkDefaultConfig.SINK_THREAD);
     private final ConcurrentMap<String, List<BufferedEvent>> orphanedEvents = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, PriorityBlockingQueue<OrderedEvent>> orderedBuffers = new ConcurrentHashMap<>();
     private final BlockingQueue<RowChangeEvent> nonTxQueue = new LinkedBlockingQueue<>();
-    private final ExecutorService dispatchExecutor = Executors.newFixedThreadPool(PixelsSinkDefaultConfig.SINK_THREAD);
+    private long TX_TIMEOUT_MS = PixelsSinkConfigFactory.getInstance().getTransactionTimeout();
     private final ScheduledExecutorService timeoutScheduler =
             Executors.newSingleThreadScheduledExecutor();
 
@@ -66,15 +67,16 @@ public class TransactionCoordinator {
         }
     }
 
-
     private void handleTxBegin(TransactionMetadataValue.TransactionMetadata txBegin) {
         String txId = txBegin.getId();
         TransactionContext ctx = new TransactionContext(txId);
         activeTxContexts.put(txId, ctx);
         List<BufferedEvent> buffered = getBufferedEvents(txId);
-        buffered.stream()
-                .sorted(Comparator.comparingLong(BufferedEvent::getTotalOrder))
-                .forEach(be -> processBufferedEvent(ctx, be));
+        if (buffered != null) {
+            buffered.stream()
+                    .sorted(Comparator.comparingLong(BufferedEvent::getTotalOrder))
+                    .forEach(be -> processBufferedEvent(ctx, be));
+        }
     }
 
     private void handleTxEnd(TransactionMetadataValue.TransactionMetadata txEnd) {
@@ -163,7 +165,7 @@ public class TransactionCoordinator {
         });
     }
 
-    private void dispatchImmediately(RowChangeEvent event) {
+    protected void dispatchImmediately(RowChangeEvent event) {
         dispatchExecutor.execute(() -> {
             LOGGER.info("Dispatching [{}] {}.{} (Order: {}/{})",
                     event.getOp().name(),
@@ -211,40 +213,8 @@ public class TransactionCoordinator {
         timeoutScheduler.shutdown();
     }
 
-    private static class TransactionContext {
-        final String txId;
-        final Map<String, AtomicLong> tableCursors = new ConcurrentHashMap<>();
-        final long createTime = System.currentTimeMillis();
-        volatile boolean completed = false;
-
-        TransactionContext(String txId) {
-            this.txId = txId;
-        }
-
-        boolean isReadyForDispatch(String table, long collectionOrder) {
-            return tableCursors
-                    .computeIfAbsent(table, k -> new AtomicLong(0))
-                    .get() == collectionOrder;
-        }
-
-        void updateCursor(String table, long currentOrder) {
-            tableCursors.compute(table, (k, v) ->
-                    (v == null) ? new AtomicLong(currentOrder + 1) :
-                            new AtomicLong(Math.max(v.get(), currentOrder + 1))
-            );
-        }
-
-        Set<String> getTrackedTables() {
-            return tableCursors.keySet();
-        }
-
-        void markCompleted() {
-            this.completed = true;
-        }
-
-        boolean isExpired() {
-            return System.currentTimeMillis() - createTime > DEFAULT_TX_TIMEOUT_MS;
-        }
+    public void setTxTimeoutMs(long txTimeoutMs) {
+        TX_TIMEOUT_MS = txTimeoutMs;
     }
 
     private static class OrderedEvent {
@@ -282,6 +252,42 @@ public class TransactionCoordinator {
 
         long getTotalOrder() {
             return totalOrder;
+        }
+    }
+
+    private class TransactionContext {
+        final String txId;
+        final Map<String, AtomicLong> tableCursors = new ConcurrentHashMap<>();
+        final long createTime = System.currentTimeMillis();
+        volatile boolean completed = false;
+
+        TransactionContext(String txId) {
+            this.txId = txId;
+        }
+
+        boolean isReadyForDispatch(String table, long collectionOrder) {
+            return tableCursors
+                    .computeIfAbsent(table, k -> new AtomicLong(0))
+                    .get() == collectionOrder;
+        }
+
+        void updateCursor(String table, long currentOrder) {
+            tableCursors.compute(table, (k, v) ->
+                    (v == null) ? new AtomicLong(currentOrder + 1) :
+                            new AtomicLong(Math.max(v.get(), currentOrder + 1))
+            );
+        }
+
+        Set<String> getTrackedTables() {
+            return tableCursors.keySet();
+        }
+
+        void markCompleted() {
+            this.completed = true;
+        }
+
+        boolean isExpired() {
+            return System.currentTimeMillis() - createTime > TX_TIMEOUT_MS;
         }
     }
 }
