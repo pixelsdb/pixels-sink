@@ -20,17 +20,33 @@ import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConstants;
 import io.pixelsdb.pixels.sink.config.factory.KafkaPropFactorySelector;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
+import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.monitor.MonitorThreadManager;
 import io.pixelsdb.pixels.sink.monitor.TopicMonitor;
 import io.pixelsdb.pixels.sink.monitor.TransactionMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Properties;
 
 public class PixelsSinkApp {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PixelsSinkApp.class);
+    private static MonitorThreadManager manager;
+    private static volatile boolean running = true;
 
     public static void main(String[] args) throws IOException {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            running = false;
+            if (manager != null) {
+                manager.shutdown();
+            }
+            TransactionCoordinatorFactory.shutdown();
+            LOGGER.info("Pixels Sink Server shutdown complete");
+        }));
+
         init(args);
+
         PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
         KafkaPropFactorySelector kafkaPropFactorySelector = new KafkaPropFactorySelector();
 
@@ -44,9 +60,10 @@ public class PixelsSinkApp {
                 .createKafkaProperties(pixelsSinkConfig);
         TopicMonitor topicMonitor = new TopicMonitor(pixelsSinkConfig, topicKafkaProperties);
 
-        MonitorThreadManager manager = new MonitorThreadManager();
+        manager = new MonitorThreadManager();
         manager.startMonitor(transactionMonitor);
         manager.startMonitor(topicMonitor);
+
     }
 
     private static void init(String[] args) throws IOException {
