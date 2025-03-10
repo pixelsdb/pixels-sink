@@ -8,6 +8,7 @@ import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +32,8 @@ public class TopicMonitor extends Thread implements StoppableMonitor {
     private final AtomicBoolean running = new AtomicBoolean(true);
     private AdminClient adminClient;
     private Timer timer;
+
+    private final Map<String, TableConsumerTask> activeTasks = new ConcurrentHashMap<>(); // track row event consumer
 
     public TopicMonitor(PixelsSinkConfig pixelsSinkConfig, Properties kafkaProperties) {
         this.pixelsSinkConfig = pixelsSinkConfig;
@@ -63,6 +66,28 @@ public class TopicMonitor extends Thread implements StoppableMonitor {
         log.info("Initiating topic monitor shutdown...");
         running.set(false);
         interruptMonitoring();
+        shutdownConsumerTasks();
+        awaitTermination();
+    }
+
+    private void shutdownConsumerTasks() {
+        log.info("Shutting down {} active consumer tasks", activeTasks.size());
+        activeTasks.forEach((topic, task) -> {
+            log.info("Stopping consumer for topic: {}", topic);
+            task.shutdown();
+        });
+        activeTasks.clear();
+    }
+
+    private void awaitTermination() {
+        try {
+            if (executorService != null && !executorService.awaitTermination(30, TimeUnit.SECONDS)) {
+                log.warn("Forcing shutdown of remaining tasks");
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void initializeResources() {
@@ -171,9 +196,14 @@ public class TopicMonitor extends Thread implements StoppableMonitor {
             newTopics.stream()
                     .filter(this::shouldProcessTable)
                     .forEach(topic -> {
-                        log.info("Discovering new topic: {}", topic);
-                        launchConsumerTask(topic);
-                        subscribedTopics.add(topic);
+                        try {
+                            TableConsumerTask task = new TableConsumerTask(pixelsSinkConfig, kafkaProperties, topic);
+                            executorService.submit(task);
+                            activeTasks.put(topic, task);
+                            subscribedTopics.add(topic);
+                        } catch (IOException e) {
+                            log.error("Failed to create consumer for {}: {}", topic, e.getMessage());
+                        }
                     });
         }
 

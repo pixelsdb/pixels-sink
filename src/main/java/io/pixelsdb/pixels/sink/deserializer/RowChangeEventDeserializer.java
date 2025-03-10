@@ -11,13 +11,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> {
@@ -179,72 +173,3 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
     }
 }
 
-class RowDataParser {
-    private final TypeDescription schema;
-
-    public RowDataParser(TypeDescription schema) {
-        this.schema = schema;
-    }
-
-    public Map<String, Object> parse(JsonNode dataNode, OperationType operation) {
-        if (dataNode.isNull() && operation == OperationType.DELETE) {
-            return parseDeleteRecord();
-        }
-        return parseNode(dataNode, schema);
-    }
-
-    private Map<String, Object> parseNode(JsonNode node, TypeDescription schema) {
-        Map<String, Object> result = new HashMap<>();
-        for (int i = 0; i < schema.getFieldNames().size(); i++) {
-            String fieldName = schema.getFieldNames().get(i);
-            TypeDescription fieldType = schema.getChildren().get(i);
-            result.put(fieldName, parseValue(node.get(fieldName), fieldType));
-        }
-        return result;
-    }
-
-    private Object parseValue(JsonNode valueNode, TypeDescription type) {
-        if (valueNode.isNull()) return null;
-
-        switch (type.getCategory()) {
-            case INT:
-                return valueNode.asInt();
-            case LONG:
-                return valueNode.asLong();
-            case STRING:
-                return valueNode.asText().trim();
-            case DECIMAL:
-                return parseDecimal(valueNode, type);
-            case DATE:
-                return parseDate(valueNode);
-            case STRUCT:
-                return parseNode(valueNode, type);
-            case BINARY:
-                return parseBinary(valueNode);
-            default:
-                throw new IllegalArgumentException("Unsupported type: " + type);
-        }
-    }
-
-    private Map<String, Object> parseDeleteRecord() {
-        // Implement tombstone handling logic
-        return Collections.singletonMap("__deleted", true);
-    }
-
-    private BigDecimal parseDecimal(JsonNode node, TypeDescription type) {
-        return new BigDecimal(node.asText())
-                .setScale(type.getScale(), RoundingMode.HALF_UP);
-    }
-
-    private LocalDate parseDate(JsonNode node) {
-        return LocalDate.ofEpochDay(node.asLong());
-    }
-
-    private byte[] parseBinary(JsonNode node) {
-        try {
-            return node.binaryValue();
-        } catch (IOException e) {
-            throw new RuntimeException("Binary parsing failed", e);
-        }
-    }
-}

@@ -41,7 +41,7 @@ public class PixelsSinkApp {
             if (manager != null) {
                 manager.shutdown();
             }
-            TransactionCoordinatorFactory.shutdown();
+            TransactionCoordinatorFactory.reset();
             LOGGER.info("Pixels Sink Server shutdown complete");
         }));
 

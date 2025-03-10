@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.pixelsdb.pixels.sink.writer;
+package io.pixelsdb.pixels.sink.sink;
 
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,7 +29,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-public class CsvWriter implements Closeable {
+
+public class CsvWriter implements PixelsSinkWriter {
     private final FileWriter writer;
     private static final Logger log = LoggerFactory.getLogger(CsvWriter.class);
     private Long recordCnt = 0L;
@@ -57,22 +57,9 @@ public class CsvWriter implements Closeable {
         this.scheduler.scheduleAtFixedRate(this::flush, 3, 3, TimeUnit.SECONDS);
     }
 
-    public void writeToCsv(Map<String, Object> message) throws IOException {
 
-        lock.lock();
-        try {
-            recordCnt+=message.size();
-            writer.append(message.values().stream().map(String::valueOf).collect(Collectors.joining("|")));
-        } catch (IOException e) {
-            throw e;
-        }
-
-        writer.append("\n");
-        if(recordCnt >= PixelsSinkDefaultConfig.CSV_RECORD_FLUSH) {
-            writer.flush();
-        }
-    }
-    private void flush() {
+    @Override
+    public void flush() {
         lock.lock();
         try {
             writer.flush();
@@ -81,6 +68,32 @@ public class CsvWriter implements Closeable {
             lock.unlock();
         }
     }
+
+    @Override
+    public void write(Map<String, Object> message) {
+        lock.lock();
+        try {
+            recordCnt+=message.size();
+            writer.append(message.values().stream().map(String::valueOf).collect(Collectors.joining("|")));
+        } catch (IOException ignored) {
+
+        }
+
+        try {
+            writer.append("\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if(recordCnt >= PixelsSinkDefaultConfig.CSV_RECORD_FLUSH) {
+            try {
+                writer.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @Override
     public void close() throws IOException {
         scheduler.shutdown();
