@@ -1,0 +1,31 @@
+syntax = "proto3";
+package io.pixelsdb.pixels.sink.proto;
+
+option java_multiple_files = false;
+option java_package = "io.pixelsdb.pixels.sink.proto";
+option java_outer_classname = "SinkProto";
+
+service PixelsSinkService {
+  rpc WriteData(WriteRequest) returns (WriteResponse);
+  rpc Flush(FlushRequest) returns (FlushResponse);
+}
+
+message WriteRequest {
+  map<string, bytes> data = 1;
+}
+
+message WriteResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message FlushRequest {}
+
+message FlushResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+
+
+

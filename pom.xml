@@ -93,6 +93,10 @@
             <version>3.25.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>
@@ -233,7 +237,36 @@
                 </buildArgs>
                 <dockerfile>develop/images/pixels-sink/Dockerfile</dockerfile>
             </configuration>
-        </plugin> 
+        </plugin>
+            <plugin>
+                <groupId>com.github.os72</groupId>
+                <artifactId>protoc-jar-maven-plugin</artifactId>
+                <version>3.3.0.1</version>
+                <executions>
+                    <!--                    <execution>-->
+                    <!--                        <phase>generate-sources</phase>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>run</goal>-->
+                    <!--                        </goals>-->
+                    <!--                        <configuration>-->
+                    <!--                            <inputDirectories>-->
+                    <!--                                <directory>src/main/proto</directory>-->
+                    <!--                            </inputDirectories>-->
+                    <!--                            <outputTargets>-->
+                    <!--                                <outputTarget>-->
+                    <!--                                    <type>java</type>-->
+                    <!--                                    <outputDirectory>src/main/java</outputDirectory>-->
+                    <!--                                </outputTarget>-->
+                    <!--                                <outputTarget>-->
+                    <!--                                    <type>grpc-java</type>-->
+                    <!--                                    <outputDirectory>src/main/java</outputDirectory>-->
+                    <!--                                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.53.0</pluginArtifact>-->
+                    <!--                                </outputTarget>-->
+                    <!--                            </outputTargets>-->
+                    <!--                        </configuration>-->
+                    <!--                    </execution>-->
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

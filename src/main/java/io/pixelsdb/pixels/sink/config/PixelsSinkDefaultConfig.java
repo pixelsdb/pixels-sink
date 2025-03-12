@@ -10,6 +10,8 @@ public class PixelsSinkDefaultConfig {
     public static final String KEY_DESERIALIZER = StringDeserializer.class.getName(); // org.apache.kafka.common.serialization.StringDeserializer
     public static final String VALUE_DESERIALIZER = RowChangeEventDeserializer.class.getName();
 
+    public static final String SINK_MODE = "csv";
+
     public static final Long CSV_RECORD_FLUSH = 1000L;
 
     public static final int SINK_THREAD = 4;

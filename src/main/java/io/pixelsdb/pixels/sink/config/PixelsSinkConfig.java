@@ -15,6 +15,8 @@
  */
 package io.pixelsdb.pixels.sink.config;
 
+import io.pixelsdb.pixels.sink.sink.PixelsSinkMode;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,6 +26,8 @@ import java.util.Properties;
 public class PixelsSinkConfig {
     private final Properties properties;
     private final Long transactionTimeout;
+    private final PixelsSinkMode pixelsSinkMode;
+
     public PixelsSinkConfig(String configFilePath) throws IOException {
         properties = new Properties();
         if (configFilePath != null && !configFilePath.isEmpty()) {
@@ -44,6 +48,8 @@ public class PixelsSinkConfig {
             }
         }
         transactionTimeout = Long.valueOf(properties.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
+        pixelsSinkMode = PixelsSinkMode.fromValue(properties.getProperty("sink.mode", PixelsSinkDefaultConfig.SINK_MODE));
+
     }
 
     public String getTopicPrefix() {
@@ -92,5 +98,9 @@ public class PixelsSinkConfig {
 
     public Long getTransactionTimeout() {
         return transactionTimeout;
+    }
+
+    public PixelsSinkMode getPixelsSinkMode() {
+        return pixelsSinkMode;
     }
 }
