@@ -16,6 +16,7 @@
 package io.pixelsdb.pixels.sink.config;
 
 import io.pixelsdb.pixels.sink.sink.PixelsSinkMode;
+import lombok.Getter;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,6 +28,17 @@ public class PixelsSinkConfig {
     private final Properties properties;
     private final Long transactionTimeout;
     private final PixelsSinkMode pixelsSinkMode;
+
+    @Getter
+    private final short remotePort;
+    @Getter
+    private final int batchSize;
+    @Getter
+    private final int timeoutMs;
+    @Getter
+    private final int flushIntervalMs;
+    @Getter
+    private final int maxRetries;
 
     public PixelsSinkConfig(String configFilePath) throws IOException {
         properties = new Properties();
@@ -47,9 +59,15 @@ public class PixelsSinkConfig {
 
             }
         }
-        transactionTimeout = Long.valueOf(properties.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
-        pixelsSinkMode = PixelsSinkMode.fromValue(properties.getProperty("sink.mode", PixelsSinkDefaultConfig.SINK_MODE));
+        this.transactionTimeout = Long.valueOf(properties.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
+        this.pixelsSinkMode = PixelsSinkMode.fromValue(properties.getProperty("sink.mode", PixelsSinkDefaultConfig.SINK_MODE));
 
+        String remotePortStr = properties.getProperty("sink.remote.port");
+        this.remotePort = (remotePortStr != null) ? Short.parseShort(remotePortStr) : PixelsSinkDefaultConfig.SINK_REMOTE_PORT;
+        this.batchSize = parseInt(properties.getProperty("sink.batch.size"), PixelsSinkDefaultConfig.SINK_BATCH_SIZE);
+        this.timeoutMs = parseInt(properties.getProperty("sink.timeout.ms"), PixelsSinkDefaultConfig.SINK_TIMEOUT_MS);
+        this.flushIntervalMs = parseInt(properties.getProperty("sink.flush.interval.ms"), PixelsSinkDefaultConfig.SINK_FLUSH_INTERVAL_MS);
+        this.maxRetries = parseInt(properties.getProperty("sink.max.retries"), PixelsSinkDefaultConfig.SINK_MAX_RETRIES);
     }
 
     public String getTopicPrefix() {
@@ -102,5 +120,14 @@ public class PixelsSinkConfig {
 
     public PixelsSinkMode getPixelsSinkMode() {
         return pixelsSinkMode;
+    }
+
+    public String getSinkRemoteHost() {
+        return properties.getProperty("sink.remote.host", PixelsSinkDefaultConfig.SINK_REMOTE_HOST);
+    }
+
+
+    private int parseInt(String valueStr, int defaultValue) {
+        return (valueStr != null) ? Integer.parseInt(valueStr) : defaultValue;
     }
 }

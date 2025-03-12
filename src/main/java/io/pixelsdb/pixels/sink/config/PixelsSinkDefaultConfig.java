@@ -15,4 +15,17 @@ public class PixelsSinkDefaultConfig {
     public static final Long CSV_RECORD_FLUSH = 1000L;
 
     public static final int SINK_THREAD = 4;
+    //    sink.remote.host=localhost
+//    sink.remote.port=229422
+//    sink.batch.size=100
+//    sink.timeout.ms=5000
+//    sink.flush.interval.ms=5000
+//    sink.max.retries=3
+    // REMOTE BUFFER
+    public static final String SINK_REMOTE_HOST = "localhost";
+    public static final short SINK_REMOTE_PORT = 22942;
+    public static final int SINK_BATCH_SIZE = 100;
+    public static final int SINK_TIMEOUT_MS = 5000;
+    public static final int SINK_FLUSH_INTERVAL_MS = 5000;
+    public static final int SINK_MAX_RETRIES = 3;
 }

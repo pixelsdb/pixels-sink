@@ -70,7 +70,7 @@ public class CsvWriter implements PixelsSinkWriter {
     }
 
     @Override
-    public void write(Map<String, Object> message) {
+    public boolean write(Map<String, Object> message) {
         lock.lock();
         try {
             recordCnt+=message.size();
@@ -92,6 +92,7 @@ public class CsvWriter implements PixelsSinkWriter {
                 throw new RuntimeException(e);
             }
         }
+        return true;
     }
 
     @Override
