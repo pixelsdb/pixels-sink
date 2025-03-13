@@ -12,7 +12,7 @@ public class PixelsSinkDefaultConfig {
 
     public static final String SINK_MODE = "csv";
 
-    public static final Long CSV_RECORD_FLUSH = 1000L;
+    public static final int SINK_CSV_RECORD_FLUSH = 1000;
 
     public static final int SINK_THREAD = 4;
     //    sink.remote.host=localhost
@@ -28,4 +28,5 @@ public class PixelsSinkDefaultConfig {
     public static final int SINK_TIMEOUT_MS = 5000;
     public static final int SINK_FLUSH_INTERVAL_MS = 5000;
     public static final int SINK_MAX_RETRIES = 3;
+    public static final boolean SINK_CSV_ENABLE_HEADER = false;
 }

@@ -2,7 +2,7 @@ package io.pixelsdb.pixels.sink.deserializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.pixelsdb.pixels.core.TypeDescription;
-import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
+import io.pixelsdb.pixels.sink.proto.SinkProto;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -20,8 +20,8 @@ class RowDataParser {
         this.schema = schema;
     }
 
-    public Map<String, Object> parse(JsonNode dataNode, OperationType operation) {
-        if (dataNode.isNull() && operation == OperationType.DELETE) {
+    public Map<String, Object> parse(JsonNode dataNode, SinkProto.OperationType operation) {
+        if (dataNode.isNull() && operation == SinkProto.OperationType.DELETE) {
             return parseDeleteRecord();
         }
         return parseNode(dataNode, schema);

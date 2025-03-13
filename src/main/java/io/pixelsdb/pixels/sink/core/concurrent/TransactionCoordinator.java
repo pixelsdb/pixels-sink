@@ -1,12 +1,16 @@
 package io.pixelsdb.pixels.sink.core.concurrent;
 
+import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
+import io.pixelsdb.pixels.sink.sink.PixelsSinkWriter;
+import io.pixelsdb.pixels.sink.sink.PixelsSinkWriterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TransactionCoordinator {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionCoordinator.class);
     public static final int INITIAL_CAPACITY = 11;
+    private final PixelsSinkWriter writer;
 
     final ConcurrentMap<String, TransactionContext> activeTxContexts = new ConcurrentHashMap<>();
     final ExecutorService dispatchExecutor = Executors.newFixedThreadPool(PixelsSinkDefaultConfig.SINK_THREAD);
@@ -29,10 +34,15 @@ public class TransactionCoordinator {
             Executors.newSingleThreadScheduledExecutor();
 
     public TransactionCoordinator() {
+        PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
+        try {
+            this.writer = PixelsSinkWriterFactory.getWriterByConfig(pixelsSinkConfig);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         startDispatchWorker();
         startTimeoutChecker();
     }
-
     public void processTransactionEvent(TransactionMetadataValue.TransactionMetadata txMeta) {
         if ("BEGIN".equals(txMeta.getStatus())) {
             handleTxBegin(txMeta);
@@ -196,6 +206,11 @@ public class TransactionCoordinator {
                                 event.getTransaction().getDataCollectionOrder() : "N/A",
                         event.getTransaction() != null ?
                                 event.getTransaction().getTotalOrder() : "N/A");
+                boolean success = writer.write(event);
+                if (success) {
+                } else {
+                    // TODO retry?
+                }
             } finally {
                 if (ctx != null) {
                     if (ctx.pendingEvents.decrementAndGet() == 0 && ctx.completed) {

@@ -7,6 +7,7 @@ import io.pixelsdb.pixels.core.TypeDescription;
 import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
+import io.pixelsdb.pixels.sink.proto.SinkProto;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
             JsonNode schemaNode = rootNode.path("schema");
             JsonNode payloadNode = rootNode.path("payload");
 
-            OperationType opType = parseOperationType(payloadNode);
+            SinkProto.OperationType opType = parseOperationType(payloadNode);
             TypeDescription schema = getSchema(schemaNode, opType);
 
             return buildRowRecord(payloadNode, schema, opType);
@@ -40,17 +41,13 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
         }
     }
 
-    private OperationType parseOperationType(JsonNode payloadNode) {
+    private SinkProto.OperationType parseOperationType(JsonNode payloadNode) {
         String opCode = payloadNode.path("op").asText("");
-        OperationType opType = OperationType.fromString(opCode);
-        if (opType == OperationType.UNKNOWN) {
-            throw new IllegalArgumentException("Unknown operation code: " + opCode);
-        }
-        return opType;
+        return OperationType.fromString(opCode);
     }
 
     // TODO: cache schema
-    private TypeDescription getSchema(JsonNode schemaNode, OperationType opType) {
+    private TypeDescription getSchema(JsonNode schemaNode, SinkProto.OperationType opType) {
         switch (opType) {
             case DELETE:
                 return SchemaDeserializer.parseFromBeforeOrAfter(schemaNode, "before");
@@ -66,7 +63,7 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
 
     private RowChangeEvent buildRowRecord(JsonNode payloadNode,
                                           TypeDescription schema,
-                                          OperationType opType) {
+                                          SinkProto.OperationType opType) {
 
         RowRecordMessage.RowRecord.Builder builder = RowRecordMessage.RowRecord.newBuilder();
 
@@ -89,7 +86,7 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
 
     private Map<String, Object> parseDataFields(JsonNode payloadNode,
                                                 TypeDescription schema,
-                                                OperationType opType,
+                                                SinkProto.OperationType opType,
                                                 String dataField) {
         RowDataParser parser = new RowDataParser(schema);
 
@@ -100,8 +97,8 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
         return null;
     }
 
-    private JsonNode resolveDataNode(JsonNode payloadNode, OperationType opType) {
-        return opType == OperationType.DELETE ?
+    private JsonNode resolveDataNode(JsonNode payloadNode, SinkProto.OperationType opType) {
+        return opType == SinkProto.OperationType.DELETE ?
                 payloadNode.get("before") :
                 payloadNode.get("after");
     }
@@ -164,12 +161,12 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
         };
     }
 
-    private boolean hasAfterData(OperationType op) {
-        return op != OperationType.DELETE;
+    private boolean hasAfterData(SinkProto.OperationType op) {
+        return op != SinkProto.OperationType.DELETE;
     }
 
-    private boolean hasBeforeData(OperationType op) {
-        return op == OperationType.DELETE || op == OperationType.UPDATE;
+    private boolean hasBeforeData(SinkProto.OperationType op) {
+        return op == SinkProto.OperationType.DELETE || op == SinkProto.OperationType.UPDATE;
     }
 }
 

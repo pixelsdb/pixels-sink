@@ -5,10 +5,10 @@ import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import java.io.IOException;
 
 public class PixelsSinkWriterFactory {
-    static PixelsSinkWriter getWriterByConfig(PixelsSinkConfig pixelsSinkConfig, String tableName) throws IOException {
+    static public PixelsSinkWriter getWriterByConfig(PixelsSinkConfig pixelsSinkConfig) throws IOException {
         switch (pixelsSinkConfig.getPixelsSinkMode()) {
             case CSV:
-                return new CsvWriter(pixelsSinkConfig, tableName);
+                return new CsvWriter(pixelsSinkConfig);
             case BUFFER:
                 return new RemoteBufferWriter(pixelsSinkConfig);
         }

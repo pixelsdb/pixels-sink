@@ -24,21 +24,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+@Getter
 public class PixelsSinkConfig {
     private final Properties properties;
+
     private final Long transactionTimeout;
     private final PixelsSinkMode pixelsSinkMode;
-
-    @Getter
     private final short remotePort;
-    @Getter
     private final int batchSize;
-    @Getter
     private final int timeoutMs;
-    @Getter
     private final int flushIntervalMs;
-    @Getter
     private final int maxRetries;
+    private final boolean sinkCsvEnableHeader;
 
     public PixelsSinkConfig(String configFilePath) throws IOException {
         properties = new Properties();
@@ -56,7 +53,6 @@ public class PixelsSinkConfig {
                     throw new FileNotFoundException("Resource file not found: " + configFilePath);
                 }
                 properties.load(input);
-
             }
         }
         this.transactionTimeout = Long.valueOf(properties.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
@@ -68,6 +64,7 @@ public class PixelsSinkConfig {
         this.timeoutMs = parseInt(properties.getProperty("sink.timeout.ms"), PixelsSinkDefaultConfig.SINK_TIMEOUT_MS);
         this.flushIntervalMs = parseInt(properties.getProperty("sink.flush.interval.ms"), PixelsSinkDefaultConfig.SINK_FLUSH_INTERVAL_MS);
         this.maxRetries = parseInt(properties.getProperty("sink.max.retries"), PixelsSinkDefaultConfig.SINK_MAX_RETRIES);
+        this.sinkCsvEnableHeader = parseBoolean(properties.getProperty("sink.csv.enable_header"), PixelsSinkDefaultConfig.SINK_CSV_ENABLE_HEADER);
     }
 
     public String getTopicPrefix() {
@@ -99,7 +96,7 @@ public class PixelsSinkConfig {
     }
 
     public String getCsvSinkPath() {
-        return properties.getProperty("csv.sink_path", PixelsSinkDefaultConfig.CSV_SINK_PATH);
+        return properties.getProperty("sink.csv.path", PixelsSinkDefaultConfig.CSV_SINK_PATH);
     }
 
     public String getTransactionTopicSuffix() {
@@ -114,20 +111,15 @@ public class PixelsSinkConfig {
         return properties.getProperty("transaction.topic.group_id", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_GROUP_ID);
     }
 
-    public Long getTransactionTimeout() {
-        return transactionTimeout;
-    }
-
-    public PixelsSinkMode getPixelsSinkMode() {
-        return pixelsSinkMode;
-    }
-
     public String getSinkRemoteHost() {
         return properties.getProperty("sink.remote.host", PixelsSinkDefaultConfig.SINK_REMOTE_HOST);
     }
 
-
     private int parseInt(String valueStr, int defaultValue) {
         return (valueStr != null) ? Integer.parseInt(valueStr) : defaultValue;
+    }
+
+    private boolean parseBoolean(String valueStr, boolean defaultValue) {
+        return (valueStr != null) ? Boolean.parseBoolean(valueStr) : defaultValue;
     }
 }
