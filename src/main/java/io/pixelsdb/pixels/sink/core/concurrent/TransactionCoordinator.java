@@ -1,5 +1,8 @@
 package io.pixelsdb.pixels.sink.core.concurrent;
 
+import io.pixelsdb.pixels.common.exception.TransException;
+import io.pixelsdb.pixels.common.transaction.TransContext;
+import io.pixelsdb.pixels.common.transaction.TransService;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
@@ -32,6 +35,7 @@ public class TransactionCoordinator {
     private long TX_TIMEOUT_MS = PixelsSinkConfigFactory.getInstance().getTransactionTimeout();
     private final ScheduledExecutorService timeoutScheduler =
             Executors.newSingleThreadScheduledExecutor();
+    private final TransService transService;
 
     public TransactionCoordinator() {
         PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
@@ -40,6 +44,8 @@ public class TransactionCoordinator {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        transService = TransService.Instance();
         startDispatchWorker();
         startTimeoutChecker();
     }
@@ -86,14 +92,19 @@ public class TransactionCoordinator {
     }
 
     private void handleTxBegin(TransactionMetadataValue.TransactionMetadata txBegin) {
-        String txId = txBegin.getId();
-        TransactionContext ctx = new TransactionContext(txId);
-        activeTxContexts.put(txId, ctx);
-        List<BufferedEvent> buffered = getBufferedEvents(txId);
-        if (buffered != null) {
-            buffered.stream()
-                    .sorted(Comparator.comparingLong(BufferedEvent::getTotalOrder))
-                    .forEach(be -> processBufferedEvent(ctx, be));
+        try {
+            TransContext pixelsTransContext = transService.beginTrans(false);
+            String sourceTxId = txBegin.getId();
+            TransactionContext ctx = new TransactionContext(sourceTxId, pixelsTransContext);
+            activeTxContexts.put(sourceTxId, ctx);
+            List<BufferedEvent> buffered = getBufferedEvents(sourceTxId);
+            if (buffered != null) {
+                buffered.stream()
+                        .sorted(Comparator.comparingLong(BufferedEvent::getTotalOrder))
+                        .forEach(be -> processBufferedEvent(ctx, be));
+            }
+        } catch (TransException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -102,7 +113,6 @@ public class TransactionCoordinator {
         TransactionContext ctx = activeTxContexts.get(txId);
         if (ctx != null) {
             ctx.markCompleted();
-
             try {
                 if (ctx.pendingEvents.get() > 0) {
                     LOGGER.info("Waiting for {} pending events in TX {}",
@@ -112,7 +122,9 @@ public class TransactionCoordinator {
                 flushRemainingEvents(ctx);
                 activeTxContexts.remove(txId);
                 LOGGER.info("Committed transaction: {}", txId);
-            } catch (InterruptedException | ExecutionException e) {
+                transService.commitTrans(ctx.pixelsTransCtx.getTransId(), ctx.pixelsTransCtx.getTimestamp());
+            } catch (InterruptedException | ExecutionException | TransException e) {
+                // TODO(AntiO2) abort?
                 LOGGER.error("Failed to commit transaction {}", txId, e);
             }
         }
@@ -147,7 +159,7 @@ public class TransactionCoordinator {
     }
 
     private void bufferOrderedEvent(TransactionContext ctx, OrderedEvent event) {
-        String bufferKey = ctx.txId + "|" + event.getTable();
+        String bufferKey = ctx.sourceTxId + "|" + event.getTable();
         LOGGER.info("Buffered out-of-order event: {} {}/{}. Pending Events: {}",
                 bufferKey, event.collectionOrder, event.totalOrder, ctx.pendingEvents.incrementAndGet());
         orderedBuffers.computeIfAbsent(bufferKey, k ->
@@ -156,7 +168,7 @@ public class TransactionCoordinator {
     }
 
     private void checkPendingEvents(TransactionContext ctx, String table) {
-        String bufferKey = ctx.txId + "|" + table;
+        String bufferKey = ctx.sourceTxId + "|" + table;
         PriorityBlockingQueue<OrderedEvent> buffer = orderedBuffers.get(bufferKey);
         if (buffer == null) return;
 
@@ -236,19 +248,19 @@ public class TransactionCoordinator {
     }
 
     private void flushRemainingEvents(TransactionContext ctx) {
-        LOGGER.debug("Try Flush remaining events of {}", ctx.txId);
+        LOGGER.debug("Try Flush remaining events of {}", ctx.sourceTxId);
         ctx.getTrackedTables().forEach(table -> {
-            String bufferKey = ctx.txId + "|" + table;
+            String bufferKey = ctx.sourceTxId + "|" + table;
             PriorityBlockingQueue<OrderedEvent> buffer = orderedBuffers.remove(bufferKey);
             if (buffer != null) {
                 LOGGER.warn("Flushing {} events for {}.{}",
-                        buffer.size(), ctx.txId, table);
+                        buffer.size(), ctx.sourceTxId, table);
                 buffer.forEach(event -> {
                     LOGGER.debug("Processing event for {}:{}/{}",
-                            ctx.txId, event.collectionOrder, event.totalOrder);
+                            ctx.sourceTxId, event.collectionOrder, event.totalOrder);
                     dispatchImmediately(event.event, ctx);
                     LOGGER.debug("End Event for {}:{}/{}",
-                            ctx.txId, event.collectionOrder, event.totalOrder);
+                            ctx.sourceTxId, event.collectionOrder, event.totalOrder);
                 });
             }
         });
@@ -306,15 +318,17 @@ public class TransactionCoordinator {
     }
 
     protected class TransactionContext {
-        final String txId;
+        final String sourceTxId;
         final Map<String, AtomicLong> tableCursors = new ConcurrentHashMap<>();
-        final long createTime = System.currentTimeMillis();
+        final TransContext pixelsTransCtx;
         volatile boolean completed = false;
 
         final AtomicInteger pendingEvents = new AtomicInteger(0);
         final CompletableFuture<Void> completionFuture = new CompletableFuture<>();
-        TransactionContext(String txId) {
-            this.txId = txId;
+
+        TransactionContext(String sourceTxId, TransContext pixelsTransCtx) {
+            this.sourceTxId = sourceTxId;
+            this.pixelsTransCtx = pixelsTransCtx;
         }
 
         boolean isReadyForDispatch(String table, long collectionOrder) {
@@ -339,7 +353,9 @@ public class TransactionCoordinator {
         }
 
         boolean isExpired() {
-            return System.currentTimeMillis() - createTime > TX_TIMEOUT_MS;
+            // TODO: expire
+            return false;
+            // return System.currentTimeMillis() - pixelsTransCtx.getTimestamp() > TX_TIMEOUT_MS;
         }
 
         void awaitCompletion() throws InterruptedException, ExecutionException {
