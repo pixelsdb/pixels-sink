@@ -1,6 +1,6 @@
-package io.pixelsdb.pixels.sink.core.concurrent;
+package io.pixelsdb.pixels.sink.concurrent;
 
-import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 
 import java.util.HashMap;

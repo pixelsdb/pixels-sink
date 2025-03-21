@@ -1,7 +1,7 @@
 package io.pixelsdb.pixels.sink.monitor;
 
-import io.pixelsdb.pixels.sink.TableConsumerTask;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
+import io.pixelsdb.pixels.sink.consumer.TableConsumerTask;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.ListTopicsResult;
@@ -161,7 +161,7 @@ public class TopicMonitor extends Thread implements StoppableMonitor {
 
     private void launchConsumerTask(String topic) {
         try {
-            TableConsumerTask task = new TableConsumerTask(pixelsSinkConfig, kafkaProperties, topic);
+            TableConsumerTask task = new TableConsumerTask(kafkaProperties, topic);
             executorService.submit(task);
         } catch (Exception e) {
             log.error("Failed to start consumer for topic {}: {}", topic, e.getMessage());
@@ -197,7 +197,7 @@ public class TopicMonitor extends Thread implements StoppableMonitor {
                     .filter(this::shouldProcessTable)
                     .forEach(topic -> {
                         try {
-                            TableConsumerTask task = new TableConsumerTask(pixelsSinkConfig, kafkaProperties, topic);
+                            TableConsumerTask task = new TableConsumerTask(kafkaProperties, topic);
                             executorService.submit(task);
                             activeTasks.put(topic, task);
                             subscribedTopics.add(topic);

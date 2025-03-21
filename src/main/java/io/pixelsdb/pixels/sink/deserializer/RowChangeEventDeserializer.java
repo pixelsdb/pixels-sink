@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
 import io.pixelsdb.pixels.core.TypeDescription;
-import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
 import io.pixelsdb.pixels.sink.proto.SinkProto;
@@ -81,7 +81,10 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
         if (payloadNode.hasNonNull("transaction")) {
             builder.setTransaction(parseTransactionInfo(payloadNode.get("transaction")));
         }
-        return new RowChangeEvent(builder.build(), opType, beforeData, afterData);
+
+        RowChangeEvent event = new RowChangeEvent(builder.build(), schema, opType, beforeData, afterData);
+        event.initIndexKey();
+        return event;
     }
 
     private Map<String, Object> parseDataFields(JsonNode payloadNode,

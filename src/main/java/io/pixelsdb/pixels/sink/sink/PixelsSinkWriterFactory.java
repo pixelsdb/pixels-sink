@@ -9,8 +9,8 @@ public class PixelsSinkWriterFactory {
         switch (pixelsSinkConfig.getPixelsSinkMode()) {
             case CSV:
                 return new CsvWriter(pixelsSinkConfig);
-            case BUFFER:
-                return new RemoteBufferWriter(pixelsSinkConfig);
+            case RETINA:
+                return new RetinaWriter(pixelsSinkConfig);
         }
         return null;
     }

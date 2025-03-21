@@ -15,6 +15,7 @@
  */
 package io.pixelsdb.pixels.sink.config;
 
+import io.pixelsdb.pixels.common.utils.ConfigFactory;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkMode;
 import lombok.Getter;
 
@@ -22,21 +23,30 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.Properties;
 
 @Getter
 public class PixelsSinkConfig {
-    private final Properties properties;
+    private Properties properties;
+    private ConfigFactory config;
 
-    private final Long transactionTimeout;
-    private final PixelsSinkMode pixelsSinkMode;
-    private final short remotePort;
-    private final int batchSize;
-    private final int timeoutMs;
-    private final int flushIntervalMs;
-    private final int maxRetries;
-    private final boolean sinkCsvEnableHeader;
+    private Long transactionTimeout;
+    private PixelsSinkMode pixelsSinkMode;
+    private short remotePort;
+    private int batchSize;
+    private int timeoutMs;
+    private int flushIntervalMs;
+    private int maxRetries;
+    private boolean sinkCsvEnableHeader;
 
+    @Deprecated
+    public PixelsSinkConfig(Properties properties) {
+        this.properties = properties;
+        parseProps(properties);
+    }
+
+    @Deprecated
     public PixelsSinkConfig(String configFilePath) throws IOException {
         properties = new Properties();
         if (configFilePath != null && !configFilePath.isEmpty()) {
@@ -55,64 +65,83 @@ public class PixelsSinkConfig {
                 properties.load(input);
             }
         }
-        this.transactionTimeout = Long.valueOf(properties.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
-        this.pixelsSinkMode = PixelsSinkMode.fromValue(properties.getProperty("sink.mode", PixelsSinkDefaultConfig.SINK_MODE));
-
-        String remotePortStr = properties.getProperty("sink.remote.port");
-        this.remotePort = (remotePortStr != null) ? Short.parseShort(remotePortStr) : PixelsSinkDefaultConfig.SINK_REMOTE_PORT;
-        this.batchSize = parseInt(properties.getProperty("sink.batch.size"), PixelsSinkDefaultConfig.SINK_BATCH_SIZE);
-        this.timeoutMs = parseInt(properties.getProperty("sink.timeout.ms"), PixelsSinkDefaultConfig.SINK_TIMEOUT_MS);
-        this.flushIntervalMs = parseInt(properties.getProperty("sink.flush.interval.ms"), PixelsSinkDefaultConfig.SINK_FLUSH_INTERVAL_MS);
-        this.maxRetries = parseInt(properties.getProperty("sink.max.retries"), PixelsSinkDefaultConfig.SINK_MAX_RETRIES);
-        this.sinkCsvEnableHeader = parseBoolean(properties.getProperty("sink.csv.enable_header"), PixelsSinkDefaultConfig.SINK_CSV_ENABLE_HEADER);
+        parseProps(properties);
     }
 
+    public PixelsSinkConfig(ConfigFactory config) {
+        this.config = config;
+        this.transactionTimeout = Long.valueOf(getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
+        this.pixelsSinkMode = PixelsSinkMode.fromValue(getProperty("sink.mode", PixelsSinkDefaultConfig.SINK_MODE));
+
+        String remotePortStr = getProperty("sink.remote.port");
+        this.remotePort = (remotePortStr != null) ? Short.parseShort(remotePortStr) : PixelsSinkDefaultConfig.SINK_REMOTE_PORT;
+        this.batchSize = parseInt(getProperty("sink.batch.size"), PixelsSinkDefaultConfig.SINK_BATCH_SIZE);
+        this.timeoutMs = parseInt(getProperty("sink.timeout.ms"), PixelsSinkDefaultConfig.SINK_TIMEOUT_MS);
+        this.flushIntervalMs = parseInt(getProperty("sink.flush.interval.ms"), PixelsSinkDefaultConfig.SINK_FLUSH_INTERVAL_MS);
+        this.maxRetries = parseInt(getProperty("sink.max.retries"), PixelsSinkDefaultConfig.SINK_MAX_RETRIES);
+        this.sinkCsvEnableHeader = parseBoolean(getProperty("sink.csv.enable_header"), PixelsSinkDefaultConfig.SINK_CSV_ENABLE_HEADER);
+    }
+
+
+    private void parseProps(Properties props) {
+        this.transactionTimeout = Long.valueOf(props.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
+        this.pixelsSinkMode = PixelsSinkMode.fromValue(props.getProperty("sink.mode", PixelsSinkDefaultConfig.SINK_MODE));
+        String remotePortStr = props.getProperty("sink.remote.port");
+        this.remotePort = (remotePortStr != null) ? Short.parseShort(remotePortStr) : PixelsSinkDefaultConfig.SINK_REMOTE_PORT;
+        this.batchSize = parseInt(props.getProperty("sink.batch.size"), PixelsSinkDefaultConfig.SINK_BATCH_SIZE);
+        this.timeoutMs = parseInt(props.getProperty("sink.timeout.ms"), PixelsSinkDefaultConfig.SINK_TIMEOUT_MS);
+        this.flushIntervalMs = parseInt(props.getProperty("sink.flush.interval.ms"), PixelsSinkDefaultConfig.SINK_FLUSH_INTERVAL_MS);
+        this.maxRetries = parseInt(props.getProperty("sink.max.retries"), PixelsSinkDefaultConfig.SINK_MAX_RETRIES);
+        this.sinkCsvEnableHeader = parseBoolean(props.getProperty("sink.csv.enable_header"), PixelsSinkDefaultConfig.SINK_CSV_ENABLE_HEADER);
+    }
+
+
     public String getTopicPrefix() {
-        return properties.getProperty("topic.prefix");
+        return getProperty("topic.prefix");
     }
 
     public String getCaptureDatabase() {
-        return properties.getProperty("consumer.capture_database");
+        return getProperty("consumer.capture_database");
     }
 
     public String[] getIncludeTables() {
-        String includeTables = properties.getProperty("consumer.include_tables", "");
+        String includeTables = getProperty("consumer.include_tables", "");
         return includeTables.isEmpty() ? new String[0] : includeTables.split(",");
     }
 
     public String getBootstrapServers() {
-        return properties.getProperty("bootstrap.servers");
+        return getProperty("bootstrap.servers");
     }
 
     public String getGroupId() {
-        return properties.getProperty("group.id");
+        return getProperty("group.id");
     }
 
     public String getKeyDeserializer() {
-        return properties.getProperty("key.deserializer", PixelsSinkDefaultConfig.KEY_DESERIALIZER);
+        return getProperty("key.deserializer", PixelsSinkDefaultConfig.KEY_DESERIALIZER);
     }
     public String getValueDeserializer() {
-        return properties.getProperty("value.deserializer", PixelsSinkDefaultConfig.VALUE_DESERIALIZER);
+        return getProperty("value.deserializer", PixelsSinkDefaultConfig.VALUE_DESERIALIZER);
     }
 
     public String getCsvSinkPath() {
-        return properties.getProperty("sink.csv.path", PixelsSinkDefaultConfig.CSV_SINK_PATH);
+        return getProperty("sink.csv.path", PixelsSinkDefaultConfig.CSV_SINK_PATH);
     }
 
     public String getTransactionTopicSuffix() {
-        return properties.getProperty("transaction.topic.suffix", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_SUFFIX);
+        return getProperty("transaction.topic.suffix", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_SUFFIX);
     }
 
     public String getTransactionTopicValueDeserializer() {
-        return properties.getProperty("transaction.topic.key.deserializer", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_KEY_DESERIALIZER);
+        return getProperty("transaction.topic.key.deserializer", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_KEY_DESERIALIZER);
     }
 
     public String getTransactionTopicGroupId() {
-        return properties.getProperty("transaction.topic.group_id", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_GROUP_ID);
+        return getProperty("transaction.topic.group_id", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_GROUP_ID);
     }
 
     public String getSinkRemoteHost() {
-        return properties.getProperty("sink.remote.host", PixelsSinkDefaultConfig.SINK_REMOTE_HOST);
+        return getProperty("sink.remote.host", PixelsSinkDefaultConfig.SINK_REMOTE_HOST);
     }
 
     private int parseInt(String valueStr, int defaultValue) {
@@ -121,5 +150,17 @@ public class PixelsSinkConfig {
 
     private boolean parseBoolean(String valueStr, boolean defaultValue) {
         return (valueStr != null) ? Boolean.parseBoolean(valueStr) : defaultValue;
+    }
+
+    public String getProperty(String key) {
+        return config.getProperty(key);
+    }
+
+    public String getProperty(String key, String defaultValue) {
+        String value = config.getProperty(key);
+        if (Objects.isNull(value)) {
+            return defaultValue;
+        }
+        return value;
     }
 }

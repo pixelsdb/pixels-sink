@@ -1,4 +1,4 @@
-package io.pixelsdb.pixels.sink.core.concurrent;
+package io.pixelsdb.pixels.sink.concurrent;
 
 public class TransactionCoordinatorFactory {
     private static TransactionCoordinator instance;

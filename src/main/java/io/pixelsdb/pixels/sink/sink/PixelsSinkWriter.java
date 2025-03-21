@@ -1,6 +1,6 @@
 package io.pixelsdb.pixels.sink.sink;
 
-import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 
 import java.io.Closeable;
 import java.io.IOException;

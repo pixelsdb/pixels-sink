@@ -1,6 +1,6 @@
 package io.pixelsdb.pixels.sink.deserializer;
 
-import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.junit.jupiter.api.Test;

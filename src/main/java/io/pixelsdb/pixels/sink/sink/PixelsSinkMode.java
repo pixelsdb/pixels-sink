@@ -3,7 +3,7 @@ package io.pixelsdb.pixels.sink.sink;
 
 public enum PixelsSinkMode {
     CSV,
-    BUFFER;
+    RETINA;
 
     public static PixelsSinkMode fromValue(String value) {
         for (PixelsSinkMode mode : values()) {

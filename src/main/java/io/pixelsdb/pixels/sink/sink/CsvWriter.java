@@ -18,7 +18,7 @@ package io.pixelsdb.pixels.sink.sink;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
-import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.proto.SinkProto;
 import lombok.Getter;
 import org.slf4j.Logger;

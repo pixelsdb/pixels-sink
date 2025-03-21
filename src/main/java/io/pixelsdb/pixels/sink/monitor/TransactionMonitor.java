@@ -1,8 +1,8 @@
 package io.pixelsdb.pixels.sink.monitor;
 
+import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinator;
+import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
-import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinator;
-import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;

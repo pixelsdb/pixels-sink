@@ -1,10 +1,11 @@
-package io.pixelsdb.pixels.sink;
+package io.pixelsdb.pixels.sink.consumer;
 
 import io.pixelsdb.pixels.core.TypeDescription;
+import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinator;
+import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
-import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinator;
-import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinatorFactory;
-import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
+import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkWriter;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -23,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TableConsumerTask implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(TableConsumerTask.class);
     private static final TransactionCoordinator transactionCoordinator = TransactionCoordinatorFactory.getCoordinator();
-    private final PixelsSinkConfig pixelsSinkConfig;
     private final Properties kafkaProperties;
     private final String topic;
     private final AtomicBoolean running = new AtomicBoolean(true);
@@ -32,11 +32,11 @@ public class TableConsumerTask implements Runnable {
     private KafkaConsumer<String, RowChangeEvent> consumer;
     private PixelsSinkWriter sinkWriter;
 
-    public TableConsumerTask(PixelsSinkConfig pixelsSinkConfig, Properties kafkaProperties, String topic) throws IOException {
-        this.pixelsSinkConfig = pixelsSinkConfig;
+    public TableConsumerTask(Properties kafkaProperties, String topic) throws IOException {
+        PixelsSinkConfig config = PixelsSinkConfigFactory.getInstance();
         this.kafkaProperties = kafkaProperties;
         this.topic = topic;
-        this.kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, pixelsSinkConfig.getGroupId() + "-" + topic);
+        this.kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, config.getGroupId() + "-" + topic);
         this.kafkaProperties.put(ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG, "false");
         this.kafkaProperties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
         this.tableName = extractTableName(topic);
@@ -57,7 +57,8 @@ public class TableConsumerTask implements Runnable {
                 if (!records.isEmpty()) {
                     log.info("{} Consumer poll returned {} records", tableName, records.count());
                     records.forEach(record -> {
-                        transactionCoordinator.processRowEvent(record.value());
+                        RowChangeEvent event = record.value();
+                        transactionCoordinator.processRowEvent(event);
                     });
                 }
             }

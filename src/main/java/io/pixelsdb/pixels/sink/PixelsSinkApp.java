@@ -15,55 +15,34 @@
  */
 package io.pixelsdb.pixels.sink;
 
+import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.config.CommandLineConfig;
-import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
-import io.pixelsdb.pixels.sink.config.PixelsSinkConstants;
-import io.pixelsdb.pixels.sink.config.factory.KafkaPropFactorySelector;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
-import io.pixelsdb.pixels.sink.core.concurrent.TransactionCoordinatorFactory;
-import io.pixelsdb.pixels.sink.monitor.MonitorThreadManager;
-import io.pixelsdb.pixels.sink.monitor.TopicMonitor;
-import io.pixelsdb.pixels.sink.monitor.TransactionMonitor;
+import io.pixelsdb.pixels.sink.monitor.SinkMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Properties;
 
+/**
+ * Run PixelsSink as
+ */
+@Deprecated
 public class PixelsSinkApp {
     private static final Logger LOGGER = LoggerFactory.getLogger(PixelsSinkApp.class);
-    private static MonitorThreadManager manager;
-    private static volatile boolean running = true;
+    private static SinkMonitor sinkMonitor = new SinkMonitor();
+    ;
 
     public static void main(String[] args) throws IOException {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            running = false;
-            if (manager != null) {
-                manager.shutdown();
-            }
+            sinkMonitor.stopMonitor();
             TransactionCoordinatorFactory.reset();
             LOGGER.info("Pixels Sink Server shutdown complete");
         }));
 
         init(args);
-
-        PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
-        KafkaPropFactorySelector kafkaPropFactorySelector = new KafkaPropFactorySelector();
-
-        Properties transactionKafkaProperties = kafkaPropFactorySelector
-                .getFactory(PixelsSinkConstants.TRANSACTION_KAFKA_PROP_FACTORY)
-                .createKafkaProperties(pixelsSinkConfig);
-        TransactionMonitor transactionMonitor = new TransactionMonitor(pixelsSinkConfig, transactionKafkaProperties);
-
-        Properties topicKafkaProperties = kafkaPropFactorySelector
-                .getFactory(PixelsSinkConstants.ROW_RECORD_KAFKA_PROP_FACTORY)
-                .createKafkaProperties(pixelsSinkConfig);
-        TopicMonitor topicMonitor = new TopicMonitor(pixelsSinkConfig, topicKafkaProperties);
-
-        manager = new MonitorThreadManager();
-        manager.startMonitor(transactionMonitor);
-        manager.startMonitor(topicMonitor);
-
+        sinkMonitor.startSinkMonitor();
+        ;
     }
 
     private static void init(String[] args) throws IOException {

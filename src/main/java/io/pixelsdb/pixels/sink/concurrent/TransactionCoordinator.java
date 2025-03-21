@@ -1,4 +1,4 @@
-package io.pixelsdb.pixels.sink.core.concurrent;
+package io.pixelsdb.pixels.sink.concurrent;
 
 import io.pixelsdb.pixels.common.exception.TransException;
 import io.pixelsdb.pixels.common.transaction.TransContext;
@@ -6,7 +6,7 @@ import io.pixelsdb.pixels.common.transaction.TransService;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
-import io.pixelsdb.pixels.sink.core.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkWriter;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkWriterFactory;
@@ -37,7 +37,7 @@ public class TransactionCoordinator {
             Executors.newSingleThreadScheduledExecutor();
     private final TransService transService;
 
-    public TransactionCoordinator() {
+    TransactionCoordinator() {
         PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
         try {
             this.writer = PixelsSinkWriterFactory.getWriterByConfig(pixelsSinkConfig);
@@ -63,10 +63,8 @@ public class TransactionCoordinator {
             return;
         }
 
-
         String txId = event.getTransaction().getId();
         String table = event.getTable();
-
 
         long collectionOrder = event.getTransaction().getDataCollectionOrder();
         long totalOrder = event.getTransaction().getTotalOrder();
@@ -353,7 +351,7 @@ public class TransactionCoordinator {
         }
 
         boolean isExpired() {
-            // TODO: expire
+            // TODO: expire timeout transaction
             return false;
             // return System.currentTimeMillis() - pixelsTransCtx.getTimestamp() > TX_TIMEOUT_MS;
         }
