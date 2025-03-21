@@ -42,7 +42,6 @@ public class PixelsSinkApp {
 
         init(args);
         sinkMonitor.startSinkMonitor();
-        ;
     }
 
     private static void init(String[] args) throws IOException {
