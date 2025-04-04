@@ -1,4 +1,13 @@
 services:
+
+  apicurio:
+    image: apicurio/apicurio-registry-mem:2.6.2.Final
+    container_name: apicurio
+    ports:
+      - "8080:8080"
+    networks:
+      - pixels_network
+
   mysql:
     image: mysql:8.0
     container_name: pixels_mysql_source_db
@@ -39,32 +48,6 @@ services:
       - postgres-password
     networks:
       - pixels_network
-  apicurio-postgres:
-    container_name: apicurio-postgres
-    image: postgres:17
-    environment:
-      POSTGRES_DB: apicurio-registry
-      POSTGRES_USER: apicurio-registry
-      POSTGRES_PASSWORD: password
-    networks:
-      - pixels_network
-
-
-  apicurio-registry:
-    image: apicurio/apicurio-registry:3.0.6
-    container_name: apicurio
-    ports:
-      - "38080:8080"
-    environment:
-      APICURIO_STORAGE_KIND: 'sql'
-      APICURIO_STORAGE_SQL_KIND: 'postgresql'
-      APICURIO_DATASOURCE_URL: 'jdbc:postgresql://apicurio-postgres/apicurio-registry'
-      APICURIO_DATASOURCE_USERNAME: apicurio-registry
-      APICURIO_DATASOURCE_PASSWORD: password
-    networks:
-      - pixels_network
-    depends_on:
-      - apicurio-postgres
 
   kafka:
     image: apache/kafka:3.9.0
@@ -103,6 +86,7 @@ services:
 #        - mysql_debezium
 #      networks:
 #        - pixels_network
+
   kafka_ui:
     image: obsidiandynamics/kafdrop:latest
     container_name: kafka_ui
@@ -121,46 +105,52 @@ services:
     depends_on:
      - kafka
      - postgres
-     - apicurio-registry
+     - apicurio
     environment:
+      ENABLE_APICURIO_CONVERTERS: "true"
+      CONNECT_KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio:8080/apis/registry/v2
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+      CONNECT_VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio:8080/apis/registry/v2
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+      CONNECT_SCHEMA_NAME_ADJUSTMENT_MODE: "avro"
       CONNECT_BOOTSTRAP_SERVERS: pixels_kafka:9092
-      BOOTSTRAP_CONTROLLERS: pixels_kafka:9092
-      BOOTSTRAP_SERVERS: pixels_kafka:9092
-      GROUP_ID: 1
-      CONFIG_STORAGE_TOPIC: postgres_connect_configs
-      OFFSET_STORAGE_TOPIC: postgres_connect_offsets
-      STATUS_STORAGE_TOPIC: postgres_connect_statuses
+      GROUP_ID: "1"
+      CONFIG_STORAGE_TOPIC: pg_connect_configs
+      OFFSET_STORAGE_TOPIC: pg_connect_offsets
+      STATUS_STORAGE_TOPIC: pg_connect_statuses
     networks:
       - pixels_network
 
   mysql_debezium:
-    image: pixels-debezium:${PIXELS_SINK_VERSION}
+    image: debezium/connect:2.3
     ports:
-     - 8083:8083
+      - 8083:8083
     depends_on:
-     - kafka
-     - mysql
-     - apicurio-registry
+      - kafka
+      - mysql
+      - apicurio
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: pixels_kafka:9092
+      ENABLE_APICURIO_CONVERTERS: "true"
+      CONNECT_KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio:8080/apis/registry/v2
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+      CONNECT_VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio:8080/apis/registry/v2
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+      CONNECT_SCHEMA_NAME_ADJUSTMENT_MODE: "avro"
+      #      CONNECT_BOOTSTRAP_SERVERS: pixels_kafka:9092
       BOOTSTRAP_CONTROLLERS: pixels_kafka:9092
       BOOTSTRAP_SERVERS: pixels_kafka:9092
-      GROUP_ID: 1
+      GROUP_ID: "1"
       CONFIG_STORAGE_TOPIC: mysql_connect_configs
       OFFSET_STORAGE_TOPIC: mysql_connect_offsets
       STATUS_STORAGE_TOPIC: mysql_connect_statuses
-    #      ENABLE_APICURIO_CONVERTERS: true
-    #      KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
-    #      VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
-    #      CONNECT_KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
-    #      CONNECT_KEY_CONVERTER_APICURIO.REGISTRY_URL: http://apicurio:8080/apis/registry/v2
-    #      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: true
-    #      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: true
-    #      CONNECT_VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
-    #      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio:8080/apis/registry/v2
-    #      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: true
-    #      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: true
-    #      CONNECT_SCHEMA_NAME_ADJUSTMENT_MODE: avro
     networks:
       - pixels_network
 

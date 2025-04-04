@@ -31,6 +31,8 @@ public class TableMetadataRegistry {
     private static final MetadataService metadataService = MetadataService.Instance();
     private static volatile TableMetadataRegistry instance;
     private final ConcurrentMap<TableMetadataKey, TableMetadata> registry = new ConcurrentHashMap<>();
+    private final SchemaCache schemaCache = SchemaCache.getInstance();
+
 
     private TableMetadataRegistry() {
     }
@@ -67,5 +69,9 @@ public class TableMetadataRegistry {
             throw new RuntimeException(e);
         }
     }
+
+//    public TypeDescription getTypeDescription(String schema, String table) {
+//        return schemaCache.get();
+//    }
 
 }
