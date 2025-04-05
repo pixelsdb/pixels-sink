@@ -19,8 +19,11 @@ package io.pixelsdb.pixels.sink.deserializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.pixelsdb.pixels.core.TypeDescription;
+import org.apache.avro.Schema;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class SchemaDeserializer {
     public static TypeDescription parseFromBeforeOrAfter(JsonNode schemaNode, String fieldName) {
@@ -84,19 +87,22 @@ public class SchemaDeserializer {
         }
     }
 
-    /**
-     * 将 Avro Schema 转换为 Pixels 类型描述
-     *
-     * @param avroSchema Avro Schema 对象
-     * @return Pixels 类型描述树
-     */
+    public static TypeDescription parseFromBeforeOrAfter(Schema schemaNode, String fieldName) {
+        Schema.Field filed = schemaNode.getField(fieldName);
+        if (filed == null) {
+            throw new IllegalArgumentException("Can't find field in avro schema: " + fieldName);
+        }
+
+        Schema valueSchema = filed.schema();
+        return parseFromAvroSchema(valueSchema);
+    }
+
+
     public static TypeDescription parseFromAvroSchema(Schema avroSchema) {
         return parseAvroType(avroSchema, new HashMap<>());
     }
 
-    // 递归解析方法（带缓存）
     private static TypeDescription parseAvroType(Schema schema, Map<String, TypeDescription> cache) {
-        // 处理缓存命中
         String schemaKey = schema.getFullName() + ":" + schema.hashCode();
         if (cache.containsKey(schemaKey)) {
             return cache.get(schemaKey);
@@ -134,7 +140,6 @@ public class SchemaDeserializer {
     }
 
     private static TypeDescription parseAvroUnion(Schema schema, Map<String, TypeDescription> cache) {
-        // 找到第一个非 null 类型
         for (Schema type : schema.getTypes()) {
             if (type.getType() != Schema.Type.NULL) {
                 return parseAvroType(type, cache);
@@ -144,17 +149,14 @@ public class SchemaDeserializer {
     }
 
     private static TypeDescription parseAvroArray(Schema schema, Map<String, TypeDescription> cache) {
-        TypeDescription elementType = parseAvroType(schema.getElementType(), cache);
-        return TypeDescription.createArray(elementType);
+        throw new RuntimeException("Doesn't support Array");
     }
 
     private static TypeDescription parseAvroMap(Schema schema, Map<String, TypeDescription> cache) {
-        TypeDescription valueType = parseAvroType(schema.getValueType(), cache);
-        return TypeDescription.createMap(TypeDescription.createString(), valueType);
+        throw new RuntimeException("Doesn't support Map");
     }
 
     private static TypeDescription parseAvroPrimitive(Schema schema) {
-        // 处理逻辑类型
         String logicalType = schema.getLogicalType() != null ?
                 schema.getLogicalType().getName() : null;
 
@@ -162,19 +164,18 @@ public class SchemaDeserializer {
             switch (logicalType) {
                 case "decimal":
                     return TypeDescription.createDecimal(
-                            schema.getObjectProp("precision").intValue(),
-                            schema.getObjectProp("scale").intValue()
+                            Integer.parseInt(schema.getProp("precision")),
+                            Integer.parseInt(schema.getProp("scale"))
                     );
                 case "date":
                     return TypeDescription.createDate();
                 case "timestamp-millis":
-                    return TypeDescription.createTimestamp();
+                    return TypeDescription.createTimestamp(Integer.parseInt(schema.getProp("precision")));
                 case "uuid":
-                    return TypeDescription.createString(); // Pixels 无 UUID 类型
+                    return TypeDescription.createString();
             }
         }
 
-        // 基本类型映射
         switch (schema.getType()) {
             case LONG:
                 return TypeDescription.createLong();
@@ -189,10 +190,9 @@ public class SchemaDeserializer {
             case DOUBLE:
                 return TypeDescription.createDouble();
             case BYTES:
-                return TypeDescription.createBinary();
+                // return TypeDescription.createBinary();
             default:
                 throw new IllegalArgumentException("Unsupported Avro type: " + schema);
         }
     }
-}
 }

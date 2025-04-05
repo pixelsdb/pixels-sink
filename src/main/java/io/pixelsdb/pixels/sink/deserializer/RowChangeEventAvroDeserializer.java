@@ -19,12 +19,14 @@ package io.pixelsdb.pixels.sink.deserializer;
 
 import io.apicurio.registry.serde.SerdeConfig;
 import io.apicurio.registry.serde.avro.AvroKafkaDeserializer;
+import io.pixelsdb.pixels.core.TypeDescription;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.metadata.TableMetadataRegistry;
+import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
-import io.pixelsdb.pixels.sink.proto.SinkProto;
+import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.errors.SerializationException;
@@ -47,6 +49,7 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
     public void configure(Map<String, ?> configs, boolean isKey) {
         Map<String, Object> enrichedConfig = new HashMap<>(configs);
         enrichedConfig.put(SerdeConfig.REGISTRY_URL, config.getRegistryUrl());
+        enrichedConfig.put(SerdeConfig.CHECK_PERIOD_MS, SerdeConfig.CHECK_PERIOD_MS_DEFAULT);
         avroDeserializer.configure(enrichedConfig, isKey);
     }
 
@@ -55,35 +58,24 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
         try {
             GenericRecord avroRecord = avroDeserializer.deserialize(topic, data);
             Schema avroSchema = avroRecord.getSchema();
-            registerSchema(topic, avroSchema);
-            return convertToRowChangeEvent(avroRecord, avroSchema);
+            RowChangeEvent rowChangeEvent = convertToRowChangeEvent(avroRecord, avroSchema);
+            TypeDescription typeDescription = SchemaDeserializer.parseFromBeforeOrAfter(avroSchema, "before");
+            return rowChangeEvent;
         } catch (Exception e) {
             throw new SerializationException("Avro deserialization failed", e);
         }
     }
 
     private void registerSchema(String topic, Schema avroSchema) {
-//        TypeDescription schemaDesc = schemaCache.computeIfAbsent(topic, () ->
-//                SchemaDeserializer.parseFromAvroSchema(avroSchema)
-//        );
-//
-//        TableMetadata metadata = new TableMetadata(
-//                avroSchema.getFullName(),
-//                schemaDesc,
-//                System.currentTimeMillis()
-//        );
-//
-//        metadataRegistry.register(topic, metadata);
+
     }
 
     private RowChangeEvent convertToRowChangeEvent(GenericRecord avroRecord, Schema schema) {
-        SinkProto.OperationType op = parseOperationType(avroRecord);
-        long tsNs = (Long) avroRecord.get("ts_ns");
+        OperationType op = parseOperationType(avroRecord);
+        long tsMs = (Long) avroRecord.get("ts_ms");
         RowRecordMessage.RowRecord.Builder recordBuilder = RowRecordMessage.RowRecord.newBuilder()
                 .setOp(avroRecord.get("op").toString())
-                .setTsMs((Long) avroRecord.get("ts_ms"))
-                .setTsUs((Long) avroRecord.get("ts_us"))
-                .setTsNs(tsNs);
+                .setTsMs((Long) avroRecord.get("ts_ms"));
 
         parseRowData(avroRecord.get("before"), recordBuilder.getBeforeBuilder());
         parseRowData(avroRecord.get("after"), recordBuilder.getAfterBuilder());
@@ -106,26 +98,19 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
         );
     }
 
-    // 辅助方法实现
-    private SinkProto.OperationType parseOperationType(GenericRecord record) {
+    private OperationType parseOperationType(GenericRecord record) {
         String op = record.get("op").toString().toUpperCase();
         try {
-            return SinkProto.OperationType.valueOf(op);
+            return OperationType.fromString(op);
         } catch (IllegalArgumentException e) {
-            return SinkProto.OperationType.UNRECOGNIZED;
+            return OperationType.UNRECOGNIZED;
         }
     }
 
     private void parseRowData(Object data, RowRecordMessage.RowData.Builder builder) {
         if (data instanceof GenericRecord) {
             GenericRecord rowData = (GenericRecord) data;
-            builder.setId((Long) rowData.get("id"))
-                    .setName(rowData.get("name").toString());
-
-            // 处理attributes map
-            Map<CharSequence, CharSequence> avroMap =
-                    (Map<CharSequence, CharSequence>) rowData.get("attributes");
-            avroMap.forEach((k, v) -> builder.putAttributes(k.toString(), v.toString()));
+            // TODO storage row data
         }
     }
 
@@ -181,15 +166,22 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
         return value;
     }
 
-    // 安全取值方法
     private String getStringSafely(GenericRecord record, String field) {
-        Object value = record.get(field);
-        return value != null ? value.toString() : "";
+        try {
+            Object value = record.get(field);
+            return value != null ? value.toString() : "";
+        } catch (AvroRuntimeException e) {
+            return "";
+        }
     }
 
     private long getLongSafely(GenericRecord record, String field) {
-        Object value = record.get(field);
-        return value instanceof Number ? ((Number) value).longValue() : 0L;
+        try {
+            Object value = record.get(field);
+            return value instanceof Number ? ((Number) value).longValue() : 0L;
+        } catch (AvroRuntimeException e) {
+            return 0L;
+        }
     }
 
 
@@ -199,7 +191,6 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
             builder.setId((Long) data.get("id"))
                     .setName(data.get("name").toString());
 
-            // 解析attributes
             Map<CharSequence, CharSequence> avroMap = (Map<CharSequence, CharSequence>) data.get("attributes");
             avroMap.forEach((k, v) -> builder.putAttributes(k.toString(), v.toString()));
         }

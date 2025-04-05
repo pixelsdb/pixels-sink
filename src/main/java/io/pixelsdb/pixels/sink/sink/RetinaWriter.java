@@ -27,7 +27,6 @@ import io.pixelsdb.pixels.retina.RetinaProto;
 import io.pixelsdb.pixels.retina.RetinaWorkerServiceGrpc;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
-import io.pixelsdb.pixels.sink.proto.SinkProto;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,16 +204,6 @@ public class RetinaWriter implements PixelsSinkWriter {
                 .setPrimaryKey(event.getBeforePk())
                 .setPkId(event.getPkId())
                 .build();
-    }
-
-    private boolean validateResponse(SinkProto.WriteResponse response, RowChangeEvent event) {
-        if (!response.getSuccess()) {
-            LOGGER.warn("Write failed for event {}, reason: {}",
-                    event.getTransaction().getId(),
-                    response.getMessage());
-            return false;
-        }
-        return true;
     }
 
 }

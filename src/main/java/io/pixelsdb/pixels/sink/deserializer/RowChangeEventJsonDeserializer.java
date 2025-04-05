@@ -23,7 +23,6 @@ import io.pixelsdb.pixels.core.TypeDescription;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
-import io.pixelsdb.pixels.sink.proto.SinkProto;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,7 @@ public class RowChangeEventJsonDeserializer implements Deserializer<RowChangeEve
             JsonNode schemaNode = rootNode.path("schema");
             JsonNode payloadNode = rootNode.path("payload");
 
-            SinkProto.OperationType opType = parseOperationType(payloadNode);
+            OperationType opType = parseOperationType(payloadNode);
             TypeDescription schema = getSchema(schemaNode, opType);
 
             return buildRowRecord(payloadNode, schema, opType);
@@ -56,13 +55,13 @@ public class RowChangeEventJsonDeserializer implements Deserializer<RowChangeEve
         }
     }
 
-    private SinkProto.OperationType parseOperationType(JsonNode payloadNode) {
+    private OperationType parseOperationType(JsonNode payloadNode) {
         String opCode = payloadNode.path("op").asText("");
         return OperationType.fromString(opCode);
     }
 
     // TODO: cache schema
-    private TypeDescription getSchema(JsonNode schemaNode, SinkProto.OperationType opType) {
+    private TypeDescription getSchema(JsonNode schemaNode, OperationType opType) {
         switch (opType) {
             case DELETE:
                 return SchemaDeserializer.parseFromBeforeOrAfter(schemaNode, "before");
@@ -78,7 +77,7 @@ public class RowChangeEventJsonDeserializer implements Deserializer<RowChangeEve
 
     private RowChangeEvent buildRowRecord(JsonNode payloadNode,
                                           TypeDescription schema,
-                                          SinkProto.OperationType opType) {
+                                          OperationType opType) {
 
         RowRecordMessage.RowRecord.Builder builder = RowRecordMessage.RowRecord.newBuilder();
 
@@ -104,7 +103,7 @@ public class RowChangeEventJsonDeserializer implements Deserializer<RowChangeEve
 
     private Map<String, Object> parseDataFields(JsonNode payloadNode,
                                                 TypeDescription schema,
-                                                SinkProto.OperationType opType,
+                                                OperationType opType,
                                                 String dataField) {
         RowDataParser parser = new RowDataParser(schema);
 
@@ -115,8 +114,8 @@ public class RowChangeEventJsonDeserializer implements Deserializer<RowChangeEve
         return null;
     }
 
-    private JsonNode resolveDataNode(JsonNode payloadNode, SinkProto.OperationType opType) {
-        return opType == SinkProto.OperationType.DELETE ?
+    private JsonNode resolveDataNode(JsonNode payloadNode, OperationType opType) {
+        return opType == OperationType.DELETE ?
                 payloadNode.get("before") :
                 payloadNode.get("after");
     }
@@ -150,13 +149,12 @@ public class RowChangeEventJsonDeserializer implements Deserializer<RowChangeEve
     }
 
 
-
-    private boolean hasAfterData(SinkProto.OperationType op) {
-        return op != SinkProto.OperationType.DELETE;
+    private boolean hasAfterData(OperationType op) {
+        return op != OperationType.DELETE;
     }
 
-    private boolean hasBeforeData(SinkProto.OperationType op) {
-        return op == SinkProto.OperationType.DELETE || op == SinkProto.OperationType.UPDATE;
+    private boolean hasBeforeData(OperationType op) {
+        return op == OperationType.DELETE || op == OperationType.UPDATE;
     }
 }
 
