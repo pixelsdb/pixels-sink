@@ -99,7 +99,7 @@ services:
       - pixels_network
 
   pg_debezium:
-    image: pixels-debezium:${PIXELS_SINK_VERSION}
+    image: debezium/connect:2.7.3.Final
     ports:
      - 8084:8083
     depends_on:
@@ -117,8 +117,10 @@ services:
       CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
       CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
       CONNECT_SCHEMA_NAME_ADJUSTMENT_MODE: "avro"
-      CONNECT_BOOTSTRAP_SERVERS: pixels_kafka:9092
-      GROUP_ID: "1"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      BOOTSTRAP_CONTROLLERS: pixels_kafka:9092
+      BOOTSTRAP_SERVERS: pixels_kafka:9092
+      GROUP_ID: "pg_debezium"
       CONFIG_STORAGE_TOPIC: pg_connect_configs
       OFFSET_STORAGE_TOPIC: pg_connect_offsets
       STATUS_STORAGE_TOPIC: pg_connect_statuses
@@ -126,7 +128,7 @@ services:
       - pixels_network
 
   mysql_debezium:
-    image: debezium/connect:2.3
+    image: debezium/connect:2.7.3.Final
     ports:
       - 8083:8083
     depends_on:
@@ -144,10 +146,11 @@ services:
       CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
       CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
       CONNECT_SCHEMA_NAME_ADJUSTMENT_MODE: "avro"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       #      CONNECT_BOOTSTRAP_SERVERS: pixels_kafka:9092
       BOOTSTRAP_CONTROLLERS: pixels_kafka:9092
       BOOTSTRAP_SERVERS: pixels_kafka:9092
-      GROUP_ID: "1"
+      GROUP_ID: "mysql_debezium"
       CONFIG_STORAGE_TOPIC: mysql_connect_configs
       OFFSET_STORAGE_TOPIC: mysql_connect_offsets
       STATUS_STORAGE_TOPIC: mysql_connect_statuses

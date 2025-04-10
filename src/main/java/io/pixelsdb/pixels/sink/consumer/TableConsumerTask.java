@@ -17,7 +17,6 @@
 
 package io.pixelsdb.pixels.sink.consumer;
 
-import io.pixelsdb.pixels.core.TypeDescription;
 import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinator;
 import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
@@ -44,7 +43,6 @@ public class TableConsumerTask implements Runnable {
     private final String topic;
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final String tableName;
-    private TypeDescription schema; // assume schema will not change here
     private KafkaConsumer<String, RowChangeEvent> consumer;
 
     public TableConsumerTask(Properties kafkaProperties, String topic) throws IOException {
