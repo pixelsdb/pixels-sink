@@ -17,7 +17,7 @@
 
 package io.pixelsdb.pixels.sink.config;
 
-import io.pixelsdb.pixels.sink.deserializer.RowChangeEventDeserializer;
+import io.pixelsdb.pixels.sink.deserializer.RowChangeEventJsonDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 public class PixelsSinkDefaultConfig {
@@ -25,7 +25,7 @@ public class PixelsSinkDefaultConfig {
     public static final String CSV_SINK_PATH = "./data";
 
     public static final String KEY_DESERIALIZER = StringDeserializer.class.getName(); // org.apache.kafka.common.serialization.StringDeserializer
-    public static final String VALUE_DESERIALIZER = RowChangeEventDeserializer.class.getName();
+    public static final String VALUE_DESERIALIZER = RowChangeEventJsonDeserializer.class.getName();
 
     public static final String SINK_MODE = "csv";
 

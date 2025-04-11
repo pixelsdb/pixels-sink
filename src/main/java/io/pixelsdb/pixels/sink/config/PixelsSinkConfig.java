@@ -43,12 +43,14 @@ public class PixelsSinkConfig {
 
     @Deprecated
     public PixelsSinkConfig(Properties properties) {
+        this.config = ConfigFactory.Instance();
         this.properties = properties;
         parseProps(properties);
     }
 
     @Deprecated
     public PixelsSinkConfig(String configFilePath) throws IOException {
+        this.config = ConfigFactory.Instance();
         properties = new Properties();
         if (configFilePath != null && !configFilePath.isEmpty()) {
             try (InputStream input = new FileInputStream(configFilePath)) {
@@ -67,6 +69,7 @@ public class PixelsSinkConfig {
             }
         }
         parseProps(properties);
+        this.config.loadProperties(configFilePath);
     }
 
     public PixelsSinkConfig(ConfigFactory config) {
@@ -134,7 +137,7 @@ public class PixelsSinkConfig {
     }
 
     public String getTransactionTopicValueDeserializer() {
-        return getProperty("transaction.topic.key.deserializer", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_KEY_DESERIALIZER);
+        return getProperty("transaction.topic.value.deserializer", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_VALUE_DESERIALIZER);
     }
 
     public String getTransactionTopicGroupId() {
@@ -163,5 +166,9 @@ public class PixelsSinkConfig {
             return defaultValue;
         }
         return value;
+    }
+
+    public String getRegistryUrl() {
+        return getProperty("sink.registry.url", "");
     }
 }

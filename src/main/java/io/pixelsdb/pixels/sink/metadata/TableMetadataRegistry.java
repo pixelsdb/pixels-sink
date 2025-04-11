@@ -22,6 +22,7 @@ import io.pixelsdb.pixels.common.metadata.MetadataService;
 import io.pixelsdb.pixels.common.metadata.domain.Column;
 import io.pixelsdb.pixels.common.metadata.domain.SecondaryIndex;
 import io.pixelsdb.pixels.common.metadata.domain.Table;
+import io.pixelsdb.pixels.core.TypeDescription;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +32,8 @@ public class TableMetadataRegistry {
     private static final MetadataService metadataService = MetadataService.Instance();
     private static volatile TableMetadataRegistry instance;
     private final ConcurrentMap<TableMetadataKey, TableMetadata> registry = new ConcurrentHashMap<>();
+    private final ConcurrentMap<TableMetadataKey, TypeDescription> typeDescriptionConcurrentMap = new ConcurrentHashMap<>();
+    private final SchemaCache schemaCache = SchemaCache.getInstance();
 
     private TableMetadataRegistry() {
     }
@@ -68,4 +71,7 @@ public class TableMetadataRegistry {
         }
     }
 
+    public TypeDescription getTypeDescription(String schema, String table) {
+        return typeDescriptionConcurrentMap.get(new TableMetadataKey(schema, table));
+    }
 }

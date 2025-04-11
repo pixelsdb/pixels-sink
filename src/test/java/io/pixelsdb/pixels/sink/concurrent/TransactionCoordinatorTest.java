@@ -20,8 +20,8 @@ package io.pixelsdb.pixels.sink.concurrent;
 import io.pixelsdb.pixels.sink.TestUtils;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
-import io.pixelsdb.pixels.sink.proto.SinkProto;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -133,8 +133,8 @@ class TransactionCoordinatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SinkProto.OperationType.class, names = {"INSERT", "UPDATE", "DELETE", "SNAPSHOT"})
-    void shouldProcessNonTransactionalEvents(SinkProto.OperationType opType) throws InterruptedException {
+    @EnumSource(value = OperationType.class, names = {"INSERT", "UPDATE", "DELETE", "SNAPSHOT"})
+    void shouldProcessNonTransactionalEvents(OperationType opType) throws InterruptedException {
         RowChangeEvent event = new RowChangeEvent(
                 RowRecordMessage.RowRecord.newBuilder().build(),
                 opType,

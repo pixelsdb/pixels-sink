@@ -27,14 +27,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <mainClass>io.pixelsdb.pixels.sink.PixelsSinkApp</mainClass>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
 
         <dep.argparse4j.version>0.9.0</dep.argparse4j.version>
-        <dep.kafka.version>3.9.0</dep.kafka.version>
+        <dep.kafka.version>3.8.0</dep.kafka.version>
         <dep.opencsv.version>5.8</dep.opencsv.version>
         <dep.lombok.version>1.18.36</dep.lombok.version>
         <dep.debezium.version>3.0.7.Final</dep.debezium.version>
@@ -176,6 +176,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>io.apicurio</groupId>
+            <artifactId>apicurio-registry-serdes-avro-serde</artifactId>
+            <version>2.6.2.Final</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -266,6 +272,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>16</source>
+                    <target>16</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>

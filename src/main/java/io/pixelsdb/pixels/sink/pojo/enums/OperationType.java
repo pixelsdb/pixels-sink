@@ -17,25 +17,30 @@
 
 package io.pixelsdb.pixels.sink.pojo.enums;
 
-import io.pixelsdb.pixels.sink.proto.SinkProto;
-
 import java.util.Objects;
 
-public class OperationType {
+public enum OperationType {
+    INSERT,
+    UPDATE,
+    DELETE,
+    SNAPSHOT,
+    UNKNOWN,
+    UNRECOGNIZED;
 
-    public static SinkProto.OperationType fromString(String op) {
+    public static OperationType fromString(String op) {
+        op = op.toLowerCase();
         if (Objects.equals(op, "c")) {
-            return SinkProto.OperationType.INSERT;
+            return OperationType.INSERT;
         }
         if (Objects.equals(op, "u")) {
-            return SinkProto.OperationType.UPDATE;
+            return OperationType.UPDATE;
         }
         if (Objects.equals(op, "d")) {
-            return SinkProto.OperationType.DELETE;
+            return OperationType.DELETE;
         }
 
         if (Objects.equals(op, "r")) {
-            return SinkProto.OperationType.SNAPSHOT;
+            return OperationType.SNAPSHOT;
         }
         throw new RuntimeException(String.format("Can't convert %s to operation type", op));
     }

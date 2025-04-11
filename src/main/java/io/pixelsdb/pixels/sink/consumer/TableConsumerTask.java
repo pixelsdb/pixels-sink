@@ -17,13 +17,11 @@
 
 package io.pixelsdb.pixels.sink.consumer;
 
-import io.pixelsdb.pixels.core.TypeDescription;
 import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinator;
 import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
-import io.pixelsdb.pixels.sink.sink.PixelsSinkWriter;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -45,9 +43,7 @@ public class TableConsumerTask implements Runnable {
     private final String topic;
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final String tableName;
-    private TypeDescription schema; // assume schema will not change here
     private KafkaConsumer<String, RowChangeEvent> consumer;
-    private PixelsSinkWriter sinkWriter;
 
     public TableConsumerTask(Properties kafkaProperties, String topic) throws IOException {
         PixelsSinkConfig config = PixelsSinkConfigFactory.getInstance();
@@ -95,11 +91,6 @@ public class TableConsumerTask implements Runnable {
         log.info("Shutting down consumer for table: {}", tableName);
         if (consumer != null) {
             consumer.wakeup();
-        }
-        try {
-            sinkWriter.close();
-        } catch (IOException e) {
-            log.error("Error closing writer for {}: {}", tableName, e.getMessage());
         }
     }
 
