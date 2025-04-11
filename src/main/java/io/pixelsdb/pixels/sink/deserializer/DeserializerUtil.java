@@ -20,6 +20,8 @@ package io.pixelsdb.pixels.sink.deserializer;
 import com.google.protobuf.ByteString;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
+import org.apache.avro.AvroRuntimeException;
+import org.apache.avro.generic.GenericRecord;
 
 import java.util.Arrays;
 
@@ -52,5 +54,23 @@ public class DeserializerUtil {
                 return topic;
             }
         };
+    }
+
+    static public String getStringSafely(GenericRecord record, String field) {
+        try {
+            Object value = record.get(field);
+            return value != null ? value.toString() : "";
+        } catch (AvroRuntimeException e) {
+            return "";
+        }
+    }
+
+    static public Long getLongSafely(GenericRecord record, String field) {
+        try {
+            Object value = record.get(field);
+            return value instanceof Number ? ((Number) value).longValue() : 0L;
+        } catch (AvroRuntimeException e) {
+            return 0L;
+        }
     }
 }

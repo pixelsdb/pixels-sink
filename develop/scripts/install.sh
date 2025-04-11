@@ -26,13 +26,15 @@ for arg do
   val=`echo "$arg" | sed -e 's;^--[^=]*=;;'`
 
   case "$arg" in
-    --develop_debug=*)          develop_debug="$val";;
-    --debug)                    develop_debug=on ;;
-    --need_init=*)              need_init="$val";;
+    --develop_debug=*)          develop_debug="$val"  ;;
+    --debug)                    develop_debug=on      ;;
+    --need_init=*)              need_init="$val"      ;;
     --enable_postgres=*)        enable_postgres="$val";;
-    --enable_mysql=*)           enable_mysql="$val";;
-    --need_build=*)             need_build="$val" ;;
-    --generate_data=*)          generate_data="$val" ;;
+    --enable_mysql=*)           enable_mysql="$val"   ;;
+    --need_build=*)             need_build="$val"     ;;
+    --generate_data=*)          generate_data="$val"  ;;
+    --load_postgres=*)          load_postgres="$val"  ;;
+    --load_mysql=*)             load_mysql="$val"     ;;
     -h|--help)                  usage ;;
     *)                          echo "wrong options : $arg";
                                 exit 1
@@ -96,6 +98,7 @@ check_fatal_exit "Register PostgreSQL Source Connector Fail"
   if [[ x${load_postgres} == x"on" ]]; then
     docker exec pixels_postgres_source_db sh -c " psql -Upixels -d pixels_realtime_crud < /load.sql"
   fi
+  docker exec pixels_postgres_source_db sh -c " psql -Upixels -d pixels_realtime_crud < /example/sql/sample.sql"
 fi
 
 log_info "Visit http://localhost:9000 to check kafka status"

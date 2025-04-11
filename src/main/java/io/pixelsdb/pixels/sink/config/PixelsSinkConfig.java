@@ -137,7 +137,7 @@ public class PixelsSinkConfig {
     }
 
     public String getTransactionTopicValueDeserializer() {
-        return getProperty("transaction.topic.key.deserializer", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_KEY_DESERIALIZER);
+        return getProperty("transaction.topic.value.deserializer", TransactionConfig.DEFAULT_TRANSACTION_TOPIC_VALUE_DESERIALIZER);
     }
 
     public String getTransactionTopicGroupId() {

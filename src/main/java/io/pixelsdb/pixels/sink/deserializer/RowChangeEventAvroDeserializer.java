@@ -115,25 +115,25 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
     }
 
     private void parseSourceInfo(GenericRecord source, RowRecordMessage.SourceInfo.Builder builder) {
-        builder.setVersion(getStringSafely(source, "version"))
-                .setConnector(getStringSafely(source, "connector"))
-                .setName(getStringSafely(source, "name"))
-                .setTsMs(getLongSafely(source, "ts_ms"))
-                .setSnapshot(getStringSafely(source, "snapshot"))
-                .setDb(getStringSafely(source, "db"))
-                .setSequence(getStringSafely(source, "sequence"))
-                .setSchema(getStringSafely(source, "schema"))
-                .setTable(getStringSafely(source, "table"))
-                .setTxId(getLongSafely(source, "tx_id"))
-                .setLsn(getLongSafely(source, "lsn"))
-                .setXmin(getLongSafely(source, "xmin"));
+        builder.setVersion(DeserializerUtil.getStringSafely(source, "version"))
+                .setConnector(DeserializerUtil.getStringSafely(source, "connector"))
+                .setName(DeserializerUtil.getStringSafely(source, "name"))
+                .setTsMs(DeserializerUtil.getLongSafely(source, "ts_ms"))
+                .setSnapshot(DeserializerUtil.getStringSafely(source, "snapshot"))
+                .setDb(DeserializerUtil.getStringSafely(source, "db"))
+                .setSequence(DeserializerUtil.getStringSafely(source, "sequence"))
+                .setSchema(DeserializerUtil.getStringSafely(source, "schema"))
+                .setTable(DeserializerUtil.getStringSafely(source, "table"))
+                .setTxId(DeserializerUtil.getLongSafely(source, "tx_id"))
+                .setLsn(DeserializerUtil.getLongSafely(source, "lsn"))
+                .setXmin(DeserializerUtil.getLongSafely(source, "xmin"));
     }
 
     private void parseTransactionInfo(GenericRecord transaction,
                                       RowRecordMessage.TransactionInfo.Builder builder) {
-        builder.setId(getStringSafely(transaction, "id"))
-                .setTotalOrder(getLongSafely(transaction, "total_order"))
-                .setDataCollectionOrder(getLongSafely(transaction, "data_collection_order"));
+        builder.setId(DeserializerUtil.getStringSafely(transaction, "id"))
+                .setTotalOrder(DeserializerUtil.getLongSafely(transaction, "total_order"))
+                .setDataCollectionOrder(DeserializerUtil.getLongSafely(transaction, "data_collection_order"));
     }
 
     private Map<String, Object> convertToDataMap(Object data) {
@@ -164,24 +164,6 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
             return converted;
         }
         return value;
-    }
-
-    private String getStringSafely(GenericRecord record, String field) {
-        try {
-            Object value = record.get(field);
-            return value != null ? value.toString() : "";
-        } catch (AvroRuntimeException e) {
-            return "";
-        }
-    }
-
-    private long getLongSafely(GenericRecord record, String field) {
-        try {
-            Object value = record.get(field);
-            return value instanceof Number ? ((Number) value).longValue() : 0L;
-        } catch (AvroRuntimeException e) {
-            return 0L;
-        }
     }
 
 

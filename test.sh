@@ -15,4 +15,4 @@
 #
 #
 
-./develop/install --need_build=off --enable_postgres=off --generate_data=off
+./develop/install --need_build=off --generate_data=off --enable_mysql=off --load_postgres=off

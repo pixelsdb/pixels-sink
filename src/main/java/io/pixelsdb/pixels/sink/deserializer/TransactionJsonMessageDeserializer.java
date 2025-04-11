@@ -52,7 +52,6 @@ public class TransactionJsonMessageDeserializer implements Deserializer<Transact
     private TransactionMetadataValue.TransactionMetadata parseTransactionMetadata(Map<String, Object> rawMessage) throws IOException {
         TransactionMetadataValue.TransactionMetadata.Builder builder = TransactionMetadataValue.TransactionMetadata.newBuilder();
         String json = OBJECT_MAPPER.writeValueAsString(rawMessage.get("payload"));
-        //TODO optimize
         PROTO_PARSER.merge(json, builder);
 
         return builder.build();
