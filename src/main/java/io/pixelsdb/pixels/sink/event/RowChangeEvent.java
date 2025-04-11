@@ -26,7 +26,6 @@ import io.pixelsdb.pixels.sink.metadata.TableMetadata;
 import io.pixelsdb.pixels.sink.metadata.TableMetadataRegistry;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
-import io.pixelsdb.pixels.sink.proto.SinkProto;
 import io.pixelsdb.pixels.sink.sink.RetinaWriter;
 import lombok.Getter;
 
@@ -44,7 +43,7 @@ public class RowChangeEvent {
     @Getter
     private long timeStamp;
     @Getter
-    private final SinkProto.OperationType op;
+    private final OperationType op;
     private final RowRecordMessage.RowRecord rowRecord;
 
     @Getter
@@ -63,7 +62,7 @@ public class RowChangeEvent {
     }
 
     @Deprecated
-    public RowChangeEvent(RowRecordMessage.RowRecord rowRecord, SinkProto.OperationType op, Map<String, Object> before, Map<String, Object> after) {
+    public RowChangeEvent(RowRecordMessage.RowRecord rowRecord, OperationType op, Map<String, Object> before, Map<String, Object> after) {
         this.rowRecord = rowRecord;
         this.op = op;
         this.before = before;
@@ -71,7 +70,7 @@ public class RowChangeEvent {
         this.schema = null;
     }
 
-    public RowChangeEvent(RowRecordMessage.RowRecord rowRecord, TypeDescription schema, SinkProto.OperationType op, Map<String, Object> before, Map<String, Object> after) {
+    public RowChangeEvent(RowRecordMessage.RowRecord rowRecord, TypeDescription schema, OperationType op, Map<String, Object> before, Map<String, Object> after) {
         this.rowRecord = rowRecord;
         this.op = op;
         this.before = before;
@@ -89,7 +88,7 @@ public class RowChangeEvent {
 
 
     public void initIndexKey() {
-        if (op == SinkProto.OperationType.INSERT || op == SinkProto.OperationType.SNAPSHOT) {
+        if (op == OperationType.INSERT || op == OperationType.SNAPSHOT) {
             // We do not need to generate an index key for insert request
             return;
         }
@@ -162,15 +161,15 @@ public class RowChangeEvent {
     }
 
     public boolean isDelete() {
-        return op == SinkProto.OperationType.DELETE;
+        return op == OperationType.DELETE;
     }
 
     public boolean isInsert() {
-        return op == SinkProto.OperationType.INSERT;
+        return op == OperationType.INSERT;
     }
 
     public boolean isUpdate() {
-        return op == SinkProto.OperationType.UPDATE;
+        return op == OperationType.UPDATE;
     }
 
     public Long getTimeStampUs() {

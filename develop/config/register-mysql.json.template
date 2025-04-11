@@ -1,20 +1,25 @@
 {
-    "name": "pixels-mysql-connector",  
-    "config": {
-      "provide.transaction.metadata": true,
-      "connector.class": "io.debezium.connector.mysql.MySqlConnector",
-      "tasks.max": "1",  
-      "database.hostname": "pixels_mysql_source_db",  
-      "database.port": "3306",
-      "database.user": "pixels",
-      "database.password": "<$ mysql_password>",
-      "database.server.id": "1",  
-      "topic.prefix": "oltp_server",  
-      "database.include.list": "pixels_realtime_crud",  
-      "schema.history.internal.kafka.bootstrap.servers": "pixels_kafka:9092",  
-      "schema.history.internal.kafka.topic": "schema-changes.mysql",
+  "name": "mysql-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "database.hostname": "pixels_mysql_source_db",
+    "database.user": "pixels",
+    "database.password": "<$ mysql_password>",
+    "database.server.id": "1",
+    "topic.prefix": "oltp_server",
+    "database.include.list": "pixels_realtime_crud",
+    "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+    "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+    "key.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+    "key.converter.apicurio.registry.auto-register": "true",
+    "key.converter.apicurio.registry.find-latest": "true",
 
-      "key.converter.schemas.enable": "false",
-      "value.converter.schemas.enable": "false"
-    }
+    "value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+    "value.converter.apicurio.registry.auto-register": "true",
+    "value.converter.apicurio.registry.find-latest": "true",
+
+    "schema.name.adjustment.mode": "avro",
+    "schema.history.internal.kafka.bootstrap.servers": "pixels_kafka:9092",
+    "schema.history.internal.kafka.topic": "schema-changes.mysql"
+  }
 }

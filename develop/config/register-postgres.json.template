@@ -18,7 +18,14 @@
     "transforms.topicRouting.regex": "oltp_server\\.public\\.(.*)",
     "transforms.topicRouting.replacement": "oltp_server.pixels_realtime_crud.$1",
 
-    "key.converter.schemas.enable": "false",
-    "value.converter.schemas.enable": "false"
+    "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+    "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+    "key.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+    "key.converter.apicurio.registry.auto-register": "true",
+    "key.converter.apicurio.registry.find-latest": "true",
+    "value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+    "value.converter.apicurio.registry.auto-register": "true",
+    "value.converter.apicurio.registry.find-latest": "true",
+    "schema.name.adjustment.mode": "avro"
   }
 }

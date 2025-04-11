@@ -19,21 +19,18 @@ package io.pixelsdb.pixels.sink.deserializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.ByteString;
 import io.pixelsdb.pixels.core.TypeDescription;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
-import io.pixelsdb.pixels.sink.proto.SinkProto;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Map;
 
-public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> {
-    private static final Logger logger = LoggerFactory.getLogger(RowChangeEventDeserializer.class);
+public class RowChangeEventJsonDeserializer implements Deserializer<RowChangeEvent> {
+    private static final Logger logger = LoggerFactory.getLogger(RowChangeEventJsonDeserializer.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -48,23 +45,23 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
             JsonNode schemaNode = rootNode.path("schema");
             JsonNode payloadNode = rootNode.path("payload");
 
-            SinkProto.OperationType opType = parseOperationType(payloadNode);
+            OperationType opType = parseOperationType(payloadNode);
             TypeDescription schema = getSchema(schemaNode, opType);
 
             return buildRowRecord(payloadNode, schema, opType);
         } catch (Exception e) {
             logger.error("Failed to deserialize message from topic {}: {}", topic, e.getMessage());
-            return buildErrorEvent(topic, data, e);
+            return DeserializerUtil.buildErrorEvent(topic, data, e);
         }
     }
 
-    private SinkProto.OperationType parseOperationType(JsonNode payloadNode) {
+    private OperationType parseOperationType(JsonNode payloadNode) {
         String opCode = payloadNode.path("op").asText("");
         return OperationType.fromString(opCode);
     }
 
     // TODO: cache schema
-    private TypeDescription getSchema(JsonNode schemaNode, SinkProto.OperationType opType) {
+    private TypeDescription getSchema(JsonNode schemaNode, OperationType opType) {
         switch (opType) {
             case DELETE:
                 return SchemaDeserializer.parseFromBeforeOrAfter(schemaNode, "before");
@@ -80,7 +77,7 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
 
     private RowChangeEvent buildRowRecord(JsonNode payloadNode,
                                           TypeDescription schema,
-                                          SinkProto.OperationType opType) {
+                                          OperationType opType) {
 
         RowRecordMessage.RowRecord.Builder builder = RowRecordMessage.RowRecord.newBuilder();
 
@@ -106,7 +103,7 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
 
     private Map<String, Object> parseDataFields(JsonNode payloadNode,
                                                 TypeDescription schema,
-                                                SinkProto.OperationType opType,
+                                                OperationType opType,
                                                 String dataField) {
         RowDataParser parser = new RowDataParser(schema);
 
@@ -117,8 +114,8 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
         return null;
     }
 
-    private JsonNode resolveDataNode(JsonNode payloadNode, SinkProto.OperationType opType) {
-        return opType == SinkProto.OperationType.DELETE ?
+    private JsonNode resolveDataNode(JsonNode payloadNode, OperationType opType) {
+        return opType == OperationType.DELETE ?
                 payloadNode.get("before") :
                 payloadNode.get("after");
     }
@@ -151,42 +148,13 @@ public class RowChangeEventDeserializer implements Deserializer<RowChangeEvent> 
                 .build();
     }
 
-    private RowChangeEvent buildErrorEvent(String topic, byte[] rawData, Exception error) {
-        RowRecordMessage.ErrorInfo errorInfo = RowRecordMessage.ErrorInfo.newBuilder()
-                .setMessage(error.getMessage())
-                .setStackTrace(Arrays.toString(error.getStackTrace()))
-                .setOriginalData(ByteString.copyFrom(rawData))
-                .build();
 
-        RowRecordMessage.RowRecord record = RowRecordMessage.RowRecord.newBuilder()
-                .setOp("ERROR")
-                .setTsMs(System.currentTimeMillis())
-                .build();
-
-        return new RowChangeEvent(record) {
-            @Override
-            public boolean hasError() {
-                return true;
-            }
-
-            @Override
-            public RowRecordMessage.ErrorInfo getErrorInfo() {
-                return errorInfo;
-            }
-
-            @Override
-            public String getTopic() {
-                return topic;
-            }
-        };
+    private boolean hasAfterData(OperationType op) {
+        return op != OperationType.DELETE;
     }
 
-    private boolean hasAfterData(SinkProto.OperationType op) {
-        return op != SinkProto.OperationType.DELETE;
-    }
-
-    private boolean hasBeforeData(SinkProto.OperationType op) {
-        return op == SinkProto.OperationType.DELETE || op == SinkProto.OperationType.UPDATE;
+    private boolean hasBeforeData(OperationType op) {
+        return op == OperationType.DELETE || op == OperationType.UPDATE;
     }
 }
 

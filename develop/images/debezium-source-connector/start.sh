@@ -4,9 +4,7 @@
 set -e
 
 if [[ -z "$SENSITIVE_PROPERTIES" ]]; then
-    SENSITIVE_PROPERTIES="CONNECT_SASL_JAAS_CONFIG,CONNECT_CONSUMER_SASL_JAAS_CONFIG,CONNECT_PRODUCER_SASL_JAAS_CONFIG,CONNECT_SSL_KEYSTORE_PASSWORD,
-CONNECT_PRODUCER_SSL_KEYSTORE_PASSWORD,CONNECT_SSL_TRUSTSTORE_PASSWORD,CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD,CONNECT_SSL_KEY_PASSWORD,CONNECT_PROD
-UCER_SSL_KEY_PASSWORD,CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD,CONNECT_CONSUMER_SSL_KEYSTORE_PASSWORD,CONNECT_CONSUMER_SSL_KEY_PASSWORD"
+    SENSITIVE_PROPERTIES="CONNECT_SASL_JAAS_CONFIG,CONNECT_CONSUMER_SASL_JAAS_CONFIG,CONNECT_PRODUCER_SASL_JAAS_CONFIG,CONNECT_SSL_KEYSTORE_PASSWORD,CONNECT_PRODUCER_SSL_KEYSTORE_PASSWORD,CONNECT_SSL_TRUSTSTORE_PASSWORD,CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD,CONNECT_SSL_KEY_PASSWORD,CONNECT_PRODUCER_SSL_KEY_PASSWORD,CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD,CONNECT_CONSUMER_SSL_KEYSTORE_PASSWORD,CONNECT_CONSUMER_SSL_KEY_PASSWORD"
 fi
 
 if [[ -z "$BOOTSTRAP_SERVERS" ]]; then
@@ -26,8 +24,7 @@ echo "Using BOOTSTRAP_SERVERS=$BOOTSTRAP_SERVERS"
 if [[ -z "$HOST_NAME" ]]; then
     HOST_NAME=$(ip addr | grep 'BROADCAST' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
 fi
-: ${KAFKA_HOME:=/opt/kafka}
-: ${KAFKA_DATA:=/opt/kafka/data}
+
 : ${REST_PORT:=8083}
 : ${REST_HOST_NAME:=$HOST_NAME}
 : ${ADVERTISED_PORT:=8083}
@@ -43,7 +40,6 @@ fi
 : ${ENABLE_DEBEZIUM_SCRIPTING:=false}
 : ${ENABLE_JOLOKIA:=false}
 : ${ENABLE_OTEL:=false}
-: ${KAFKA_CONNECT_PLUGINS_DIR:="/kafka/connect"}
 export CONNECT_REST_ADVERTISED_PORT=$ADVERTISED_PORT
 export CONNECT_REST_ADVERTISED_HOST_NAME=$ADVERTISED_HOST_NAME
 export CONNECT_REST_PORT=$REST_PORT
@@ -78,6 +74,59 @@ unset HEAP_OPTS
 unset MD5HASH
 unset SCALA_VERSION
 
+#
+# Parameter 1: Should the extension be enabled ("true") or disabled ("false")
+#
+# When enabled, the .jar for the extension is symlinked to from the Kafka Connect plugins directory.
+function set_debezium_kc_rest_extension_availability() {
+    ENABLED=$1;
+
+    if [[ "${ENABLED}" == "true" && ! -z "$EXTERNAL_LIBS_DIR" && -d "$EXTERNAL_LIBS_DIR/debezium-connect-rest-extension" ]] ; then
+        mkdir -p "$KAFKA_CONNECT_PLUGINS_DIR/debezium-connect-rest-extension"
+        ln -snf $EXTERNAL_LIBS_DIR/debezium-connect-rest-extension/* "$KAFKA_CONNECT_PLUGINS_DIR/debezium-connect-rest-extension"
+        if [ -z "${CONNECT_REST_EXTENSION_CLASSES-}" ]; then
+            export CONNECT_REST_EXTENSION_CLASSES=io.debezium.kcrestextension.DebeziumConnectRestExtension
+        else
+            export CONNECT_REST_EXTENSION_CLASSES=$CONNECT_REST_EXTENSION_CLASSES,io.debezium.kcrestextension.DebeziumConnectRestExtension
+        fi
+        echo Debezium Kafka Connect REST API Extension enabled!
+    else
+        if [[ -d "$KAFKA_CONNECT_PLUGINS_DIR/debezium-connect-rest-extension" ]] ; then
+            find "$KAFKA_CONNECT_PLUGINS_DIR/debezium-connect-rest-extension" -lname "$EXTERNAL_LIBS_DIR/debezium-connect-rest-extension/*" -exec rm -f {} \;
+        fi
+    fi
+}
+
+#
+# Parameter 1: Should the resource be enabled ("true") or disabled ("false")
+# Parameter 2: Folder path under $EXTERNAL_LIBS_DIR where the resorce is deployed
+# Parameter 3: A wildcard pattern matching files from the resource folder
+# Parameter 4: Name of the resource to print in log messages
+#
+# When enabled, files for the given resource are symlinked to each connector's folder.
+# The best practice is to have a class appear in no more than one JAR from all JARs
+# on the classpath to prevent errors at runtime.
+function set_connector_additonal_resource_availability() {
+    ENABLED=$1;
+    RESOURCE_FOLDER=$2;
+    FILE_WILD_CARD=$3;
+    RESOURCE_PRETTY_NAME=$4;
+
+    if [[ "${ENABLED}" == "true" && ! -z "$EXTERNAL_LIBS_DIR" && -d "$EXTERNAL_LIBS_DIR/$RESOURCE_FOLDER" ]] ; then
+        plugin_dirs=(${CONNECT_PLUGIN_PATH//,/ })
+        for plugin_dir in $plugin_dirs ; do
+            for plugin in $plugin_dir/*/ ; do
+                ln -snf $EXTERNAL_LIBS_DIR/$RESOURCE_FOLDER/$FILE_WILD_CARD "$plugin"
+            done
+        done
+        echo "$RESOURCE_PRETTY_NAME enabled!"
+    else
+        plugin_dirs=(${CONNECT_PLUGIN_PATH//,/ })
+        for plugin_dir in $plugin_dirs ; do
+            find $plugin_dir/ -lname "$EXTERNAL_LIBS_DIR/$RESOURCE_FOLDER/$FILE_WILD_CARD" -exec rm -f {} \;
+        done
+    fi
+}
 
 #
 # Set up the classpath with all the plugins ...
@@ -88,23 +137,81 @@ fi
 echo "Plugins are loaded from $CONNECT_PLUGIN_PATH"
 
 #
+# Set up additional resources for Kafka Connect Debezium Connectors
+#
+set_connector_additonal_resource_availability $ENABLE_APICURIO_CONVERTERS "apicurio" "*" "Apicurio connectors"
+set_connector_additonal_resource_availability $ENABLE_DEBEZIUM_SCRIPTING "debezium-scripting" "*.jar" "Debezium Scripting"
+set_connector_additonal_resource_availability $ENABLE_OTEL "otel" "*.jar" "OpenTelemetry"
+
+#
+# Set up Kafka Connect plugins
+#
+set_debezium_kc_rest_extension_availability $ENABLE_DEBEZIUM_KC_REST_EXTENSION
+
+#
 # Set up the JMX options
 #
 : ${JMXAUTH:="false"}
 : ${JMXSSL:="false"}
 if [[ -n "$JMXPORT" && -n "$JMXHOST" ]]; then
     echo "Enabling JMX on ${JMXHOST}:${JMXPORT}"
-    export KAFKA_JMX_OPTS="-Djava.rmi.server.hostname=${JMXHOST} -Dcom.sun.management.jmxremote.rmi.port=${JMXPORT} -Dcom.sun.management.jmxremote.po
-rt=${JMXPORT} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=${JMXAUTH} -Dcom.sun.management.jmxremote.ssl=${JMXSSL} "
+    export KAFKA_JMX_OPTS="-Djava.rmi.server.hostname=${JMXHOST} -Dcom.sun.management.jmxremote.rmi.port=${JMXPORT} -Dcom.sun.management.jmxremote.port=${JMXPORT} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=${JMXAUTH} -Dcom.sun.management.jmxremote.ssl=${JMXSSL} "
 fi
 
+#
+# Setup Flight Recorder
+#
+if [[ "$ENABLE_JFR" == "true" ]]; then
+    JFR_OPTS="-XX:StartFlightRecording"
+    opt_delimiter="="
+    for VAR in $(env); do
+      if [[ "$VAR" == JFR_RECORDING_* ]]; then
+        opt_name=`echo "$VAR" | sed -r "s/^JFR_RECORDING_([^=]*)=.*/\1/g" | tr '[:upper:]' '[:lower:]' | tr _ -`
+        opt_value=`echo "$VAR" | sed -r "s/^JFR_RECORDING_[^=]*=(.*)/\1/g"`
+        JFR_OPTS="${JFR_OPTS}${opt_delimiter}${opt_name}=${opt_value}"
+        opt_delimiter=","
+      fi
+    done
+    opt_delimiter=" -XX:FlightRecorderOptions="
+    for VAR in $(env); do
+      if [[ "$VAR" == JFR_OPT_* ]]; then
+        opt_name=`echo "$VAR" | sed -r "s/^JFR_OPT_([^=]*)=.*/\1/g" | tr '[:upper:]' '[:lower:]' | tr _ -`
+        opt_value=`echo "$VAR" | sed -r "s/^JFR_OPT_[^=]*=(.*)/\1/g"`
+        JFR_OPTS="${JFR_OPTS}${opt_delimiter}${opt_name}=${opt_value}"
+        opt_delimiter=","
+      fi
+    done
+    echo "Java Flight Recorder enabled and configured with options $JFR_OPTS"
+    if [[ -n "$KAFKA_OPTS" ]]; then
+        export KAFKA_OPTS="$KAFKA_OPTS $JFR_OPTS"
+    else
+        export KAFKA_OPTS="$JFR_OPTS"
+    fi
+    unset JFR_OPTS
+fi
+
+#
+# Setup Debezium Jolokia
+#
+if [ "$ENABLE_JOLOKIA" = "true" ]; then
+  KAFKA_OPTS="${KAFKA_OPTS} -javaagent:$(ls "$KAFKA_HOME"/libs/jolokia-jvm-*.jar)=port=8778,host=*"
+  export KAFKA_OPTS
+fi
+
+#
+# Setup Kafka Prometheus Metrics
+#
+if [ "$ENABLE_JMX_EXPORTER" = "true" ]; then
+  KAFKA_OPTS="${KAFKA_OPTS} -javaagent:$(ls "$KAFKA_HOME"/libs/jmx_prometheus_javaagent*.jar)=9404:$KAFKA_HOME/config/metrics.yaml"
+  export KAFKA_OPTS
+fi
 
 #
 # Make sure the directory for logs exists ...
 #
 mkdir -p ${KAFKA_DATA}/$KAFKA_BROKER_ID
 
-
+# Process the argument to this container ...
 if [[ "x$CONNECT_BOOTSTRAP_SERVERS" = "x" ]]; then
     echo "The BOOTSTRAP_SERVERS variable must be set, or the container must be linked to one that runs Kafka."
     exit 1
@@ -152,6 +259,16 @@ echo "      OFFSET_FLUSH_INTERVAL_MS=$CONNECT_OFFSET_FLUSH_INTERVAL_MS"
 echo "      OFFSET_FLUSH_TIMEOUT_MS=$CONNECT_OFFSET_FLUSH_TIMEOUT_MS"
 echo "      SHUTDOWN_TIMEOUT=$CONNECT_TASK_SHUTDOWN_GRACEFUL_TIMEOUT_MS"
 
+# Choose the right `cp` argument, `--update=none` is not available on RHEL
+release=`cat /etc/redhat-release | cut -d ' ' -f1`
+if [ $release = "Fedora" ]; then
+    cp_arg="-r --update=none"
+else
+    cp_arg="-rn"
+fi
+# Copy config files if not provided in volume
+cp $cp_arg  $KAFKA_HOME/config.orig/* $KAFKA_HOME/config
+
 #
 # Configure the log files ...
 #
@@ -161,21 +278,21 @@ if [[ -n "$CONNECT_LOG4J_LOGGERS" ]]; then
 fi
 env | grep '^CONNECT_LOG4J' | while read -r VAR;
 do
-    env_var=`echo "$VAR" | sed -r "s/([^=]*)=.*/\1/g"`
-    prop_name=`echo "$VAR" | sed -r "s/^CONNECT_([^=]*)=.*/\1/g" | tr '[:upper:]' '[:lower:]' | tr _ .`
-    prop_value=`echo "$VAR" | sed -r "s/^CONNECT_[^=]*=(.*)/\1/g"`
-    if grep -Eq "(^|^#)$prop_name=" $KAFKA_HOME/config/log4j.properties; then
-        #note that no config names or values may contain an '@' char
-        sed -r -i "s@(^|^#)($prop_name)=(.*)@\2=${prop_value}@g" $KAFKA_HOME/config/log4j.properties
-    else
-        echo "$prop_name=${prop_value}" >> $KAFKA_HOME/config/log4j.properties
-    fi
-    if [[ "$SENSITIVE_PROPERTIES" = *"$env_var"* ]]; then
-        echo "--- Setting logging property from $env_var: $prop_name=[hidden]"
-    else
-        echo "--- Setting logging property from $env_var: $prop_name=${prop_value}"
-    fi
-    unset $env_var
+  env_var=`echo "$VAR" | sed -r "s/([^=]*)=.*/\1/g"`
+  prop_name=`echo "$VAR" | sed -r "s/^CONNECT_([^=]*)=.*/\1/g" | tr '[:upper:]' '[:lower:]' | tr _ .`
+  prop_value=`echo "$VAR" | sed -r "s/^CONNECT_[^=]*=(.*)/\1/g"`
+  if grep -Eq "(^|^#)$prop_name=" $KAFKA_HOME/config/log4j.properties; then
+      #note that no config names or values may contain an '@' char
+      sed -r -i "s@(^|^#)($prop_name)=(.*)@\2=${prop_value}@g" $KAFKA_HOME/config/log4j.properties
+  else
+      echo "$prop_name=${prop_value}" >> $KAFKA_HOME/config/log4j.properties
+  fi
+  if [[ "$SENSITIVE_PROPERTIES" = *"$env_var"* ]]; then
+      echo "--- Setting logging property from $env_var: $prop_name=[hidden]"
+  else
+     echo "--- Setting logging property from $env_var: $prop_name=${prop_value}"
+  fi
+  unset $env_var
 done
 if [[ -n "$LOG_LEVEL" ]]; then
     sed -i -r -e "s|=INFO, stdout|=$LOG_LEVEL, stdout|g" $KAFKA_HOME/config/log4j.properties
@@ -188,8 +305,8 @@ export KAFKA_LOG4J_OPTS="-Dlog4j.configuration=file:$KAFKA_HOME/config/log4j.pro
 #
 env | while read -r VAR;
 do
-    env_var=`echo "$VAR" | sed -r "s/([^=]*)=.*/\1/g"`
-    if [[ $env_var =~ ^CONNECT_ ]]; then
+  env_var=`echo "$VAR" | sed -r "s/([^=]*)=.*/\1/g"`
+  if [[ $env_var =~ ^CONNECT_ ]]; then
     prop_name=`echo "$VAR" | sed -r "s/^CONNECT_([^=]*)=.*/\1/g" | tr '[:upper:]' '[:lower:]' | tr _ .`
     prop_value=`echo "$VAR" | sed -r "s/^CONNECT_[^=]*=(.*)/\1/g"`
     if grep -Eq "(^|^#)$prop_name=" $KAFKA_HOME/config/connect-standalone.properties; then
@@ -204,11 +321,10 @@ do
     else
         echo "--- Setting property from $env_var: $prop_name=${prop_value}"
     fi
-    fi
+  fi
 done
 
 #
 # Execute the Kafka Connect distributed service, replacing this shell process with the specified program ...
 #
 exec $KAFKA_HOME/bin/connect-standalone.sh $KAFKA_HOME/config/connect-standalone.properties
-# sleep 10h
