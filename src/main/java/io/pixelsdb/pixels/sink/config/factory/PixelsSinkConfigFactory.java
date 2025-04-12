@@ -21,7 +21,6 @@ import io.pixelsdb.pixels.common.utils.ConfigFactory;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 
 import java.io.IOException;
-import java.util.Properties;
 
 public class PixelsSinkConfigFactory {
     private static volatile PixelsSinkConfig instance;
@@ -42,10 +41,6 @@ public class PixelsSinkConfigFactory {
     public static synchronized void initialize(ConfigFactory config) {
         PixelsSinkConfigFactory.config = config;
         instance = new PixelsSinkConfig(config);
-    }
-
-    public static synchronized void initialize(Properties props) {
-        instance = new PixelsSinkConfig(props);
     }
 
     public static PixelsSinkConfig getInstance() {

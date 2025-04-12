@@ -40,15 +40,9 @@ public class PixelsSinkConfig {
     private int flushIntervalMs;
     private int maxRetries;
     private boolean sinkCsvEnableHeader;
+    private boolean monitorEnabled;
+    private short monitorPort;
 
-    @Deprecated
-    public PixelsSinkConfig(Properties properties) {
-        this.config = ConfigFactory.Instance();
-        this.properties = properties;
-        parseProps(properties);
-    }
-
-    @Deprecated
     public PixelsSinkConfig(String configFilePath) throws IOException {
         this.config = ConfigFactory.Instance();
         properties = new Properties();
@@ -68,37 +62,27 @@ public class PixelsSinkConfig {
                 properties.load(input);
             }
         }
-        parseProps(properties);
         this.config.loadProperties(configFilePath);
+        parseProps();
     }
 
     public PixelsSinkConfig(ConfigFactory config) {
         this.config = config;
+        parseProps();
+    }
+
+    private void parseProps() {
         this.transactionTimeout = Long.valueOf(getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
         this.pixelsSinkMode = PixelsSinkMode.fromValue(getProperty("sink.mode", PixelsSinkDefaultConfig.SINK_MODE));
-
-        String remotePortStr = getProperty("sink.remote.port");
-        this.remotePort = (remotePortStr != null) ? Short.parseShort(remotePortStr) : PixelsSinkDefaultConfig.SINK_REMOTE_PORT;
+        this.remotePort = parseShort(getProperty("sink.remote.port"), PixelsSinkDefaultConfig.SINK_REMOTE_PORT);
         this.batchSize = parseInt(getProperty("sink.batch.size"), PixelsSinkDefaultConfig.SINK_BATCH_SIZE);
         this.timeoutMs = parseInt(getProperty("sink.timeout.ms"), PixelsSinkDefaultConfig.SINK_TIMEOUT_MS);
         this.flushIntervalMs = parseInt(getProperty("sink.flush.interval.ms"), PixelsSinkDefaultConfig.SINK_FLUSH_INTERVAL_MS);
         this.maxRetries = parseInt(getProperty("sink.max.retries"), PixelsSinkDefaultConfig.SINK_MAX_RETRIES);
         this.sinkCsvEnableHeader = parseBoolean(getProperty("sink.csv.enable_header"), PixelsSinkDefaultConfig.SINK_CSV_ENABLE_HEADER);
+        this.monitorEnabled = parseBoolean(getProperty("sink.monitor.enabled"), PixelsSinkDefaultConfig.SINK_MONITOR_ENABLED);
+        this.monitorPort = parseShort(getProperty("sink.monitor.port"), PixelsSinkDefaultConfig.SINK_MONITOR_PORT);
     }
-
-
-    private void parseProps(Properties props) {
-        this.transactionTimeout = Long.valueOf(props.getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
-        this.pixelsSinkMode = PixelsSinkMode.fromValue(props.getProperty("sink.mode", PixelsSinkDefaultConfig.SINK_MODE));
-        String remotePortStr = props.getProperty("sink.remote.port");
-        this.remotePort = (remotePortStr != null) ? Short.parseShort(remotePortStr) : PixelsSinkDefaultConfig.SINK_REMOTE_PORT;
-        this.batchSize = parseInt(props.getProperty("sink.batch.size"), PixelsSinkDefaultConfig.SINK_BATCH_SIZE);
-        this.timeoutMs = parseInt(props.getProperty("sink.timeout.ms"), PixelsSinkDefaultConfig.SINK_TIMEOUT_MS);
-        this.flushIntervalMs = parseInt(props.getProperty("sink.flush.interval.ms"), PixelsSinkDefaultConfig.SINK_FLUSH_INTERVAL_MS);
-        this.maxRetries = parseInt(props.getProperty("sink.max.retries"), PixelsSinkDefaultConfig.SINK_MAX_RETRIES);
-        this.sinkCsvEnableHeader = parseBoolean(props.getProperty("sink.csv.enable_header"), PixelsSinkDefaultConfig.SINK_CSV_ENABLE_HEADER);
-    }
-
 
     public String getTopicPrefix() {
         return getProperty("topic.prefix");
@@ -148,6 +132,10 @@ public class PixelsSinkConfig {
         return getProperty("sink.remote.host", PixelsSinkDefaultConfig.SINK_REMOTE_HOST);
     }
 
+    private short parseShort(String valueStr, short defaultValue) {
+        return (valueStr != null) ? Short.parseShort(valueStr) : defaultValue;
+    }
+
     private int parseInt(String valueStr, int defaultValue) {
         return (valueStr != null) ? Integer.parseInt(valueStr) : defaultValue;
     }
@@ -171,4 +159,5 @@ public class PixelsSinkConfig {
     public String getRegistryUrl() {
         return getProperty("sink.registry.url", "");
     }
+
 }

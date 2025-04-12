@@ -164,13 +164,13 @@ public class SchemaDeserializer {
             switch (logicalType) {
                 case "decimal":
                     return TypeDescription.createDecimal(
-                            Integer.parseInt(schema.getProp("precision")),
-                            Integer.parseInt(schema.getProp("scale"))
+                            (Integer) (schema.getObjectProp("precision")),
+                            (Integer) (schema.getObjectProp("scale"))
                     );
                 case "date":
                     return TypeDescription.createDate();
                 case "timestamp-millis":
-                    return TypeDescription.createTimestamp(Integer.parseInt(schema.getProp("precision")));
+                    return TypeDescription.createTimestamp((Integer) (schema.getObjectProp("precision")));
                 case "uuid":
                     return TypeDescription.createString();
             }

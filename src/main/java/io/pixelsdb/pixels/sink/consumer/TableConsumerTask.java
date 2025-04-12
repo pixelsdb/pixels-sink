@@ -25,7 +25,6 @@ import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +60,9 @@ public class TableConsumerTask implements Runnable {
             consumer = new KafkaConsumer<>(kafkaProperties);
             consumer.subscribe(Collections.singleton(topic));
 
-            TopicPartition partition = new TopicPartition(topic, 0);
-            consumer.poll(Duration.ofSeconds(1));
-            consumer.seek(partition, 0);
+//            TopicPartition partition = new TopicPartition(topic, 0);
+//            consumer.poll(Duration.ofSeconds(1));
+//            consumer.seek(partition, 0);
 
             while (running.get()) {
                 ConsumerRecords<String, RowChangeEvent> records = consumer.poll(Duration.ofSeconds(5));
@@ -78,6 +77,9 @@ public class TableConsumerTask implements Runnable {
         } catch (WakeupException e) {
             // shutdown normally
             log.info("Consumer wakeup triggered for {}", tableName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("Exception: {}", e.getMessage());
         } finally {
             if (consumer != null) {
                 consumer.close(Duration.ofSeconds(5));

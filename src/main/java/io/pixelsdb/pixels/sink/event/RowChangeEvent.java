@@ -24,9 +24,11 @@ import io.pixelsdb.pixels.index.IndexProto;
 import io.pixelsdb.pixels.retina.RetinaProto;
 import io.pixelsdb.pixels.sink.metadata.TableMetadata;
 import io.pixelsdb.pixels.sink.metadata.TableMetadataRegistry;
+import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
 import io.pixelsdb.pixels.sink.sink.RetinaWriter;
+import io.prometheus.client.Summary;
 import lombok.Getter;
 
 import java.nio.ByteBuffer;
@@ -55,6 +57,11 @@ public class RowChangeEvent {
 
     @Getter
     private TableMetadata tableMetadata = null;
+
+    private final MetricsFacade metricsFacade = MetricsFacade.getInstance();
+    private Summary.Timer latencyTimer;
+
+
     public RowChangeEvent(RowRecordMessage.RowRecord rowRecord) {
         this.rowRecord = rowRecord;
         this.op = OperationType.fromString(rowRecord.getOp());
@@ -178,5 +185,16 @@ public class RowChangeEvent {
 
     public int getPkId() {
         return tableMetadata.getPkId();
+    }
+
+    public void startLatencyTimer() {
+        this.latencyTimer = metricsFacade.startLatencyTimer();
+    }
+
+    public void endLatencyTimer() {
+        if (latencyTimer != null) {
+            this.latencyTimer.close();
+        }
+
     }
 }

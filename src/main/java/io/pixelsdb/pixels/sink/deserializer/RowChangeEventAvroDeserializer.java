@@ -26,7 +26,6 @@ import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.metadata.TableMetadataRegistry;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
-import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.errors.SerializationException;
@@ -110,7 +109,7 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
     private void parseRowData(Object data, RowRecordMessage.RowData.Builder builder) {
         if (data instanceof GenericRecord) {
             GenericRecord rowData = (GenericRecord) data;
-            // TODO storage row data
+            // TODO (AntiO2): storage row data
         }
     }
 
