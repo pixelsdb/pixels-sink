@@ -160,36 +160,38 @@ services:
       - pixels_network
 
   # monitor
-#  prometheus:
-#    image: prom/prometheus:v3.2.1
-#    container_name: pixels-prometheus
-#    ports:
-#      - "9090:9090"
-#    volumes:
-#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-#    networks:
-#      - pixels_network
-#    depends_on:
-#      - pixels-sink
-#
-#  grafana:
-#    image: grafana/grafana:10.1.5
-#    container_name: pixels-grafana
-#    ports:
-#      - "3000:3000"
-#    volumes:
-#      - grafana-data:/var/lib/grafana
-#      - ./images/grafana-provisioning:/etc/grafana/provisioning
-#    environment:
-#      - GF_SECURITY_ADMIN_USER=admin
-#      - GF_SECURITY_ADMIN_PASSWORD=admin
-#    networks:
-#      - pixels_network
-#    depends_on:
-#      - prometheus
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    container_name: pixels-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./images/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - pixels_network
+    depends_on:
+      - pixels-sink
+
+  grafana:
+    image: grafana/grafana:10.1.5
+    container_name: pixels-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./images/grafana-provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_DEFAULT_INSTANCE_THEME=light
+    networks:
+      - pixels_network
+    depends_on:
+      - prometheus
 volumes:
   mysql_data:
   postgres_data:
+  grafana-data:
 
 secrets:
   mysql-root-password:

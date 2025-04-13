@@ -21,9 +21,7 @@ import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.prometheus.client.Counter;
-import io.prometheus.client.Gauge;
 import io.prometheus.client.Summary;
-import io.prometheus.client.Summary.Timer;
 
 public class MetricsFacade {
     private static MetricsFacade instance;
@@ -32,8 +30,7 @@ public class MetricsFacade {
     private final Counter rowChangeCounter;
     private final Counter transactionCounter;
     private final Summary processingLatency;
-    private final Gauge throughputGauge;
-
+    private final Counter rawDataThroughputCounter;
     private MetricsFacade(boolean enabled) {
         this.enabled = enabled;
         if (enabled) {
@@ -58,19 +55,21 @@ public class MetricsFacade {
                     .name("sink_processing_latency_seconds")
                     .help("End-to-end processing latency")
                     .quantile(0.5, 0.05)
+                    .quantile(0.75, 0.01)
                     .quantile(0.95, 0.01)
+                    .quantile(0.99, 0.01)
                     .register();
 
-            this.throughputGauge = Gauge.build()
-                    .name("sink_throughput_ops_second")
-                    .help("Current throughput in operations/second")
+            this.rawDataThroughputCounter = Counter.build()
+                    .name("sink_data_throughput_counter")
+                    .help("Data throughput")
                     .register();
         } else {
             this.rowChangeCounter = null;
             this.transactionCounter = null;
             this.processingLatency = null;
-            this.throughputGauge = null;
             this.tableChangeCounter = null;
+            this.rawDataThroughputCounter = null;
         }
     }
 
@@ -102,13 +101,11 @@ public class MetricsFacade {
         }
     }
 
-    public Timer startLatencyTimer() {
+    public Summary.Timer startLatencyTimer() {
         return enabled ? processingLatency.startTimer() : null;
     }
 
-    public void updateThroughput(double ops) {
-        if (enabled && throughputGauge != null) {
-            throughputGauge.set(ops);
-        }
+    public void addRawData(double data) {
+        rawDataThroughputCounter.inc(data);
     }
 }

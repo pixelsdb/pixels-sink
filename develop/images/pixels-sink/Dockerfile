@@ -1,5 +1,5 @@
 # This docker file should be built in project source dir
-FROM openjdk:8u92-jdk-alpine
+FROM openjdk:17-jdk-oracle
 
 WORKDIR /app
 

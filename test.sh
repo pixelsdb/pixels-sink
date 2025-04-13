@@ -17,3 +17,4 @@
 
 ./develop/install --need_build=off --generate_data=off --enable_mysql=off --load_postgres=off
 ./develop/install --need_build=off --generate_data=off --enable_mysql=off
+./develop/install --need_build=on --generate_data=off --enable_mysql=off

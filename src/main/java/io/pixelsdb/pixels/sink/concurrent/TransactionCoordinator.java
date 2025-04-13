@@ -213,6 +213,7 @@ public class TransactionCoordinator {
                     RowChangeEvent event = nonTxQueue.poll(10, TimeUnit.MILLISECONDS);
                     if (event != null) {
                         dispatchImmediately(event, null);
+                        metricsFacade.recordTransaction();
                         continue;
                     }
 
