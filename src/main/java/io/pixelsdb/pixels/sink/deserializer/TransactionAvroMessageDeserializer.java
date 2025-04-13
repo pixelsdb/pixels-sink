@@ -21,6 +21,7 @@ import io.apicurio.registry.serde.SerdeConfig;
 import io.apicurio.registry.serde.avro.AvroKafkaDeserializer;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
+import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.errors.SerializationException;
@@ -50,6 +51,7 @@ public class TransactionAvroMessageDeserializer implements Deserializer<Transact
             return null;
         }
         try {
+            MetricsFacade.getInstance().addRawData(bytes.length);
             GenericRecord avroRecord = avroDeserializer.deserialize(topic, bytes);
             return convertToTransactionMetadata(avroRecord);
         } catch (Exception e) {

@@ -21,13 +21,15 @@ import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConstants;
 import io.pixelsdb.pixels.sink.config.factory.KafkaPropFactorySelector;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
+import io.prometheus.client.exporter.HTTPServer;
 
+import java.io.IOException;
 import java.util.Properties;
 
 public class SinkMonitor implements StoppableMonitor {
     private MonitorThreadManager manager;
     private volatile boolean running = true;
-
+    private HTTPServer prometheusHttpServer;
     public void startSinkMonitor() {
         PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
         KafkaPropFactorySelector kafkaPropFactorySelector = new KafkaPropFactorySelector();
@@ -45,12 +47,24 @@ public class SinkMonitor implements StoppableMonitor {
         manager = new MonitorThreadManager();
         manager.startMonitor(transactionMonitor);
         manager.startMonitor(topicMonitor);
+
+        try {
+            if (pixelsSinkConfig.isMonitorEnabled()) {
+                this.prometheusHttpServer = new HTTPServer(PixelsSinkConfigFactory.getInstance().getMonitorPort());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
     @Override
     public void stopMonitor() {
         manager.shutdown();
+        if (prometheusHttpServer != null) {
+            prometheusHttpServer.close();
+        }
+
         running = false;
     }
 

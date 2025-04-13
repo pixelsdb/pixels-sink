@@ -102,4 +102,5 @@ check_fatal_exit "Register PostgreSQL Source Connector Fail"
 fi
 
 log_info "Visit http://localhost:9000 to check kafka status"
+log_info "Visit http://localhost:3000 to check Grafana Dashboard"
 

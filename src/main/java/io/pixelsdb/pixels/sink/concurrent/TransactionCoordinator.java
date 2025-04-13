@@ -24,6 +24,7 @@ import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkWriter;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkWriterFactory;
@@ -54,6 +55,8 @@ public class TransactionCoordinator {
             Executors.newSingleThreadScheduledExecutor();
     private final TransService transService;
 
+    private final MetricsFacade metricsFacade = MetricsFacade.getInstance();
+
     TransactionCoordinator() {
         PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
         try {
@@ -71,10 +74,13 @@ public class TransactionCoordinator {
             handleTxBegin(txMeta);
         } else if ("END".equals(txMeta.getStatus())) {
             handleTxEnd(txMeta);
+            metricsFacade.recordTransaction();
         }
     }
 
     public void processRowEvent(RowChangeEvent event) {
+        metricsFacade.recordRowChange(event.getTable(), event.getOp());
+        event.startLatencyTimer();
         if (event.getTransaction() == null || event.getTransaction().getId().isEmpty()) {
             handleNonTxEvent(event);
             return;
@@ -207,6 +213,7 @@ public class TransactionCoordinator {
                     RowChangeEvent event = nonTxQueue.poll(10, TimeUnit.MILLISECONDS);
                     if (event != null) {
                         dispatchImmediately(event, null);
+                        metricsFacade.recordTransaction();
                         continue;
                     }
 
@@ -235,6 +242,8 @@ public class TransactionCoordinator {
                                 event.getTransaction().getTotalOrder() : "N/A");
                 boolean success = writer.write(event);
                 if (success) {
+                    event.endLatencyTimer();
+
                 } else {
                     // TODO retry?
                 }

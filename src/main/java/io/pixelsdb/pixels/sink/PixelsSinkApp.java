@@ -19,6 +19,7 @@ package io.pixelsdb.pixels.sink;
 import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.config.CommandLineConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
+import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
 import io.pixelsdb.pixels.sink.monitor.SinkMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,5 +49,7 @@ public class PixelsSinkApp {
     private static void init(String[] args) throws IOException {
         CommandLineConfig cmdLineConfig = new CommandLineConfig(args);
         PixelsSinkConfigFactory.initialize(cmdLineConfig.getConfigPath());
+        MetricsFacade.initialize();
+
     }
 }

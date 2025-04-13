@@ -24,6 +24,7 @@ import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.metadata.TableMetadataRegistry;
+import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
 import org.apache.avro.Schema;
@@ -55,12 +56,14 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
     @Override
     public RowChangeEvent deserialize(String topic, byte[] data) {
         try {
+            MetricsFacade.getInstance().addRawData(data.length);
             GenericRecord avroRecord = avroDeserializer.deserialize(topic, data);
             Schema avroSchema = avroRecord.getSchema();
             RowChangeEvent rowChangeEvent = convertToRowChangeEvent(avroRecord, avroSchema);
             TypeDescription typeDescription = SchemaDeserializer.parseFromBeforeOrAfter(avroSchema, "before");
             return rowChangeEvent;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new SerializationException("Avro deserialization failed", e);
         }
     }
@@ -109,7 +112,7 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
     private void parseRowData(Object data, RowRecordMessage.RowData.Builder builder) {
         if (data instanceof GenericRecord) {
             GenericRecord rowData = (GenericRecord) data;
-            // TODO storage row data
+            // TODO (AntiO2): storage row data
         }
     }
 
