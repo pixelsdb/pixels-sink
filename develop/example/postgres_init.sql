@@ -5,5 +5,4 @@ GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO pixels;
 
 \c pixels_realtime_crud;
 
-\i /example/sql/dss.ddl;
-
+-- \i /example/sql/dss.ddl;

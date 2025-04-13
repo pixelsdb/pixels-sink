@@ -11,6 +11,4 @@ FLUSH PRIVILEGES;
 -- create & load tpch tables
 USE pixels_realtime_crud;
 
-SOURCE /var/lib/mysql-files/sql/dss.ddl;
-
-
+-- SOURCE /var/lib/mysql-files/sql/dss.ddl;
