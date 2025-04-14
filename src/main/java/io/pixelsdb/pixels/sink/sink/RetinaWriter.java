@@ -26,7 +26,12 @@ import io.pixelsdb.pixels.index.IndexProto;
 import io.pixelsdb.pixels.retina.RetinaProto;
 import io.pixelsdb.pixels.retina.RetinaWorkerServiceGrpc;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
+import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
+import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
+import io.pixelsdb.pixels.sink.util.LatencySimulator;
+import io.prometheus.client.Summary;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,23 +49,29 @@ public class RetinaWriter implements PixelsSinkWriter {
     private static final IndexService indexService = new IndexService();
 
 
-
+    private static final PixelsSinkConfig config = PixelsSinkConfigFactory.getInstance();
     private final ReentrantLock writeLock = new ReentrantLock();
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     // TODO(LiZinuo): 使用RetinaService替换
     final ManagedChannel channel;
     final RetinaWorkerServiceGrpc.RetinaWorkerServiceBlockingStub blockingStub;
 
-    RetinaWriter(PixelsSinkConfig config) {
+    private final MetricsFacade metricsFacade = MetricsFacade.getInstance();
 
-        // TODO(LiZinuo): 使用RetinaService替换
-        this.channel = ManagedChannelBuilder.forAddress(
-                        config.getSinkRemoteHost(),
-                        config.getRemotePort()
-                )
-                .usePlaintext()
-                .build();
-        this.blockingStub = RetinaWorkerServiceGrpc.newBlockingStub(channel);
+    RetinaWriter() {
+        if (config.isRpcEnable()) {
+            // TODO(LiZinuo): 使用RetinaService替换
+            this.channel = ManagedChannelBuilder.forAddress(
+                            config.getSinkRemoteHost(),
+                            config.getRemotePort()
+                    )
+                    .usePlaintext()
+                    .build();
+            this.blockingStub = RetinaWorkerServiceGrpc.newBlockingStub(channel);
+        } else {
+            channel = null;
+            blockingStub = null;
+        }
     }
 
     @Override
@@ -107,18 +118,30 @@ public class RetinaWriter implements PixelsSinkWriter {
 
         writeLock.lock();
         try {
-            switch (event.getOp()) {
-                case INSERT:
-                case SNAPSHOT:
-                    return sendInsertRequest(event);
-                case UPDATE:
-                    return sendUpdateRequest(event);
-                case DELETE:
-                    return sendDeleteRequest(event);
-                case UNKNOWN:
-                case UNRECOGNIZED:
-                    break;
+            if (config.isRpcEnable()) {
+                switch (event.getOp()) {
+                    case INSERT:
+                    case SNAPSHOT:
+                        return sendInsertRequest(event);
+                    case UPDATE:
+                        return sendUpdateRequest(event);
+                    case DELETE:
+                        return sendDeleteRequest(event);
+                    case UNKNOWN:
+                    case UNRECOGNIZED:
+                        break;
+                }
+            } else {
+                if (event.getOp() != OperationType.INSERT) {
+                    Summary.Timer indexLatencyTimer = metricsFacade.startIndexLatencyTimer();
+                    LatencySimulator.smartDelay(); // Look Up Index
+                    indexLatencyTimer.close();
+                }
+                Summary.Timer latencyTimer = metricsFacade.startRetinaLatencyTimer();
+                LatencySimulator.smartDelay(); // Call Retina
+                latencyTimer.close();
             }
+
         } catch (StatusRuntimeException e) {
             LOGGER.error("gRPC write failed for event {}: {}", event.getTransaction().getId(), e.getStatus());
             return false;

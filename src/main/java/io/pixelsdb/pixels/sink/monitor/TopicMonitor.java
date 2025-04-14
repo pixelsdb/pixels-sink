@@ -28,10 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -196,17 +193,22 @@ public class TopicMonitor extends Thread implements StoppableMonitor {
             try {
                 processTopicChanges();
             } catch (Exception e) {
+                e.printStackTrace();
                 log.error("Error processing topic changes: {}", e.getMessage());
             }
         }
 
-        private void processTopicChanges() throws Exception {
-            ListTopicsResult listTopicsResult = adminClient.listTopics();
-            Set<String> currentTopics = listTopicsResult.names().get(5, TimeUnit.SECONDS);
-            Set<String> filteredTopics = filterTopics(currentTopics, baseTopic + ".");
+        private void processTopicChanges() {
+            try {
+                ListTopicsResult listTopicsResult = adminClient.listTopics();
+                Set<String> currentTopics = listTopicsResult.names().get(5, TimeUnit.SECONDS);
+                Set<String> filteredTopics = filterTopics(currentTopics, baseTopic + ".");
 
-            Set<String> newTopics = detectNewTopics(filteredTopics);
-            handleNewTopics(newTopics);
+                Set<String> newTopics = detectNewTopics(filteredTopics);
+                handleNewTopics(newTopics);
+            } catch (TimeoutException | ExecutionException | InterruptedException ignored) {
+
+            }
         }
 
         private void handleNewTopics(Set<String> newTopics) {

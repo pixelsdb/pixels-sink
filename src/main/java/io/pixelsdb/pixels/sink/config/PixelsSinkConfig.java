@@ -42,7 +42,8 @@ public class PixelsSinkConfig {
     private boolean sinkCsvEnableHeader;
     private boolean monitorEnabled;
     private short monitorPort;
-
+    private boolean rpcEnable;
+    private int mockRpcDelay;
     public PixelsSinkConfig(String configFilePath) throws IOException {
         this.config = ConfigFactory.Instance();
         properties = new Properties();
@@ -72,8 +73,8 @@ public class PixelsSinkConfig {
     }
 
     private void parseProps() {
-        this.transactionTimeout = Long.valueOf(getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
         this.pixelsSinkMode = PixelsSinkMode.fromValue(getProperty("sink.mode", PixelsSinkDefaultConfig.SINK_MODE));
+        this.transactionTimeout = Long.valueOf(getProperty("transaction.timeout", TransactionConfig.DEFAULT_TRANSACTION_TIME_OUT));
         this.remotePort = parseShort(getProperty("sink.remote.port"), PixelsSinkDefaultConfig.SINK_REMOTE_PORT);
         this.batchSize = parseInt(getProperty("sink.batch.size"), PixelsSinkDefaultConfig.SINK_BATCH_SIZE);
         this.timeoutMs = parseInt(getProperty("sink.timeout.ms"), PixelsSinkDefaultConfig.SINK_TIMEOUT_MS);
@@ -82,6 +83,8 @@ public class PixelsSinkConfig {
         this.sinkCsvEnableHeader = parseBoolean(getProperty("sink.csv.enable_header"), PixelsSinkDefaultConfig.SINK_CSV_ENABLE_HEADER);
         this.monitorEnabled = parseBoolean(getProperty("sink.monitor.enabled"), PixelsSinkDefaultConfig.SINK_MONITOR_ENABLED);
         this.monitorPort = parseShort(getProperty("sink.monitor.port"), PixelsSinkDefaultConfig.SINK_MONITOR_PORT);
+        this.rpcEnable = parseBoolean(getProperty("sink.rpc.enable"), PixelsSinkDefaultConfig.SINK_RPC_ENABLED);
+        this.mockRpcDelay = parseInt(getProperty("sink.rpc.mock.delay"), PixelsSinkDefaultConfig.MOCK_RPC_DELAY);
     }
 
     public String getTopicPrefix() {

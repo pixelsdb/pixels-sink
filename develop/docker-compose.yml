@@ -103,7 +103,7 @@ services:
   pg_debezium:
     image: debezium/connect:2.7.3.Final
     ports:
-     - 8084:8083
+      - "8084:8083"
     depends_on:
      - kafka
      - postgres
@@ -132,7 +132,7 @@ services:
   mysql_debezium:
     image: debezium/connect:2.7.3.Final
     ports:
-      - 8083:8083
+      - "8083:8083"
     depends_on:
       - kafka
       - mysql
@@ -169,8 +169,8 @@ services:
       - ./images/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - pixels_network
-    depends_on:
-      - pixels-sink
+  #    depends_on:
+  #      - pixels-sink
 
   grafana:
     image: grafana/grafana:10.1.5

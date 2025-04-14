@@ -1,3 +1,6 @@
 [submodule "develop/example/tpch_data/tpch-dbgen"]
 	path = develop/example/tpch-dbgen
 	url = https://github.com/AntiO2/tpch-dbgen.git
+[submodule "develop/example/benchmarksql"]
+	path = develop/example/benchmarksql
+	url = https://github.com/AntiO2/benchmarksql.git

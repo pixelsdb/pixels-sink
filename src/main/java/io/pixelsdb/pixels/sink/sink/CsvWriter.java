@@ -19,6 +19,7 @@ package io.pixelsdb.pixels.sink.sink;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
+import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import lombok.Getter;
@@ -57,10 +58,10 @@ public class CsvWriter implements PixelsSinkWriter {
     private final ReentrantLock writeLock = new ReentrantLock(true);
     private final AtomicInteger writeCounter = new AtomicInteger(0);
 
-
+    private static final PixelsSinkConfig config = PixelsSinkConfigFactory.getInstance();
     private final String CSV_DELIMITER = "|";
 
-    public CsvWriter(PixelsSinkConfig config) throws IOException {
+    public CsvWriter() throws IOException {
         this.databaseName = config.getCaptureDatabase();
         this.baseOutputPath = Paths.get(config.getCsvSinkPath(), databaseName);
         this.enableHeader = config.isSinkCsvEnableHeader();

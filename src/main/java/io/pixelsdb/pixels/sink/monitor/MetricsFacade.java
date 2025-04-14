@@ -31,6 +31,11 @@ public class MetricsFacade {
     private final Counter transactionCounter;
     private final Summary processingLatency;
     private final Counter rawDataThroughputCounter;
+
+    private final Summary transServiceLatency;
+    private final Summary indexServiceLatency;
+    private final Summary retinaServiceLatency;
+
     private MetricsFacade(boolean enabled) {
         this.enabled = enabled;
         if (enabled) {
@@ -56,13 +61,40 @@ public class MetricsFacade {
                     .help("End-to-end processing latency")
                     .quantile(0.5, 0.05)
                     .quantile(0.75, 0.01)
-                    .quantile(0.95, 0.01)
-                    .quantile(0.99, 0.01)
+                    .quantile(0.95, 0.005)
+                    .quantile(0.99, 0.001)
                     .register();
 
             this.rawDataThroughputCounter = Counter.build()
                     .name("sink_data_throughput_counter")
                     .help("Data throughput")
+                    .register();
+
+            this.transServiceLatency = Summary.build()
+                    .name("trans_service_latency_seconds")
+                    .help("End-to-end processing latency")
+                    .quantile(0.5, 0.05)
+                    .quantile(0.75, 0.01)
+                    .quantile(0.95, 0.005)
+                    .quantile(0.99, 0.001)
+                    .register();
+
+            this.indexServiceLatency = Summary.build()
+                    .name("index_service_latency_seconds")
+                    .help("End-to-end processing latency")
+                    .quantile(0.5, 0.05)
+                    .quantile(0.75, 0.01)
+                    .quantile(0.95, 0.005)
+                    .quantile(0.99, 0.001)
+                    .register();
+
+            this.retinaServiceLatency = Summary.build()
+                    .name("retina_service_latency_seconds")
+                    .help("End-to-end processing latency")
+                    .quantile(0.5, 0.05)
+                    .quantile(0.75, 0.01)
+                    .quantile(0.95, 0.005)
+                    .quantile(0.99, 0.001)
                     .register();
         } else {
             this.rowChangeCounter = null;
@@ -70,6 +102,10 @@ public class MetricsFacade {
             this.processingLatency = null;
             this.tableChangeCounter = null;
             this.rawDataThroughputCounter = null;
+            this.transServiceLatency = null;
+            this.indexServiceLatency = null;
+            this.retinaServiceLatency = null;
+
         }
     }
 
@@ -101,8 +137,20 @@ public class MetricsFacade {
         }
     }
 
-    public Summary.Timer startLatencyTimer() {
+    public Summary.Timer startProcessLatencyTimer() {
         return enabled ? processingLatency.startTimer() : null;
+    }
+
+    public Summary.Timer startIndexLatencyTimer() {
+        return enabled ? indexServiceLatency.startTimer() : null;
+    }
+
+    public Summary.Timer startTransLatencyTimer() {
+        return enabled ? transServiceLatency.startTimer() : null;
+    }
+
+    public Summary.Timer startRetinaLatencyTimer() {
+        return enabled ? retinaServiceLatency.startTimer() : null;
     }
 
     public void addRawData(double data) {

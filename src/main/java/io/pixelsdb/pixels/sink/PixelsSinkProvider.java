@@ -20,6 +20,7 @@ package io.pixelsdb.pixels.sink;
 import io.pixelsdb.pixels.common.sink.SinkProvider;
 import io.pixelsdb.pixels.common.utils.ConfigFactory;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
+import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
 import io.pixelsdb.pixels.sink.monitor.SinkMonitor;
 
 public class PixelsSinkProvider implements SinkProvider {
@@ -27,6 +28,7 @@ public class PixelsSinkProvider implements SinkProvider {
 
     public void start(ConfigFactory config) {
         PixelsSinkConfigFactory.initialize(config);
+        MetricsFacade.initialize();
         sinkMonitor = new SinkMonitor();
         sinkMonitor.startSinkMonitor();
     }

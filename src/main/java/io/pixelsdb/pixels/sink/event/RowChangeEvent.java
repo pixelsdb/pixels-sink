@@ -149,6 +149,9 @@ public class RowChangeEvent {
         return rowRecord.getSource().getTable();
     }
 
+    public String getFullTableName() {
+        return getSchemaName() + "." + getTable();
+    }
     // TODO(AntiO2): How to Map Schema Names Between Source DB and Pixels
     public String getSchemaName() {
         return rowRecord.getSource().getDb();
@@ -188,7 +191,7 @@ public class RowChangeEvent {
     }
 
     public void startLatencyTimer() {
-        this.latencyTimer = metricsFacade.startLatencyTimer();
+        this.latencyTimer = metricsFacade.startProcessLatencyTimer();
     }
 
     public void endLatencyTimer() {

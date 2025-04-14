@@ -28,6 +28,8 @@ import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkWriter;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkWriterFactory;
+import io.pixelsdb.pixels.sink.util.LatencySimulator;
+import io.prometheus.client.Summary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,9 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 public class TransactionCoordinator {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionCoordinator.class);
@@ -47,6 +52,7 @@ public class TransactionCoordinator {
 
     final ConcurrentMap<String, TransactionContext> activeTxContexts = new ConcurrentHashMap<>();
     final ExecutorService dispatchExecutor = Executors.newFixedThreadPool(PixelsSinkDefaultConfig.SINK_THREAD);
+    private final ExecutorService transactionExecutor = Executors.newFixedThreadPool(PixelsSinkDefaultConfig.SINK_THREAD);
     private final ConcurrentMap<String, List<BufferedEvent>> orphanedEvents = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, PriorityBlockingQueue<OrderedEvent>> orderedBuffers = new ConcurrentHashMap<>();
     private final BlockingQueue<RowChangeEvent> nonTxQueue = new LinkedBlockingQueue<>();
@@ -56,11 +62,12 @@ public class TransactionCoordinator {
     private final TransService transService;
 
     private final MetricsFacade metricsFacade = MetricsFacade.getInstance();
+    private final PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
+
 
     TransactionCoordinator() {
-        PixelsSinkConfig pixelsSinkConfig = PixelsSinkConfigFactory.getInstance();
         try {
-            this.writer = PixelsSinkWriterFactory.getWriterByConfig(pixelsSinkConfig);
+            this.writer = PixelsSinkWriterFactory.getWriter();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -79,6 +86,10 @@ public class TransactionCoordinator {
     }
 
     public void processRowEvent(RowChangeEvent event) {
+        if (event == null) {
+            return;
+        }
+
         metricsFacade.recordRowChange(event.getTable(), event.getOp());
         event.startLatencyTimer();
         if (event.getTransaction() == null || event.getTransaction().getId().isEmpty()) {
@@ -87,17 +98,24 @@ public class TransactionCoordinator {
         }
 
         String txId = event.getTransaction().getId();
-        String table = event.getTable();
+        String table = event.getFullTableName();
 
         long collectionOrder = event.getTransaction().getDataCollectionOrder();
         long totalOrder = event.getTransaction().getTotalOrder();
 
-        LOGGER.debug("Receive event  {} {}/{}", txId, collectionOrder, totalOrder);
-
+        LOGGER.debug("Receive event  {}/{} {}:{}", txId, totalOrder, table, collectionOrder);
         TransactionContext ctx = activeTxContexts.get(txId);
         if (ctx == null) {
             bufferOrphanedEvent(txId, new BufferedEvent(event, collectionOrder, totalOrder));
             return;
+        }
+        LOGGER.debug("Lock {}", ctx.sourceTxId);
+        ctx.lock.lock();
+        try {
+            ctx.cond.signalAll();
+        } finally {
+            LOGGER.debug("Unlock {}", ctx.sourceTxId);
+            ctx.lock.unlock();
         }
 
         OrderedEvent orderedEvent = new OrderedEvent(event, collectionOrder, totalOrder);
@@ -113,48 +131,95 @@ public class TransactionCoordinator {
     }
 
     private void handleTxBegin(TransactionMetadataValue.TransactionMetadata txBegin) {
-        try {
-            TransContext pixelsTransContext = transService.beginTrans(false);
-            String sourceTxId = txBegin.getId();
-            TransactionContext ctx = new TransactionContext(sourceTxId, pixelsTransContext);
-            activeTxContexts.put(sourceTxId, ctx);
-            List<BufferedEvent> buffered = getBufferedEvents(sourceTxId);
-            if (buffered != null) {
-                buffered.stream()
-                        .sorted(Comparator.comparingLong(BufferedEvent::getTotalOrder))
-                        .forEach(be -> processBufferedEvent(ctx, be));
+        LOGGER.debug("Begin Tx: {}", txBegin.getId());
+        String sourceTxId = txBegin.getId();
+        TransactionContext ctx = new TransactionContext(sourceTxId);
+        activeTxContexts.put(sourceTxId, ctx);
+        transactionExecutor.submit(() -> {
+            try {
+                LOGGER.debug("Tx Begin Lock {}, {}", sourceTxId, ctx.lock);
+                ctx.lock.lock();
+                TransContext pixelsTransContext;
+                Summary.Timer transLatencyTimer = metricsFacade.startTransLatencyTimer();
+                if (pixelsSinkConfig.isRpcEnable()) {
+                    pixelsTransContext = transService.beginTrans(false);
+                } else {
+                    LatencySimulator.smartDelay();
+                    pixelsTransContext = new TransContext(txBegin.getId().hashCode(), txBegin.getTsMs(), false);
+                }
+                transLatencyTimer.close();
+                activeTxContexts.get(sourceTxId).pixelsTransCtx = pixelsTransContext;
+                ctx.lock.unlock();
+                LOGGER.debug("Tx Begin Unlock {}, {}", sourceTxId, ctx.lock);
+                List<BufferedEvent> buffered = getBufferedEvents(sourceTxId);
+                if (buffered != null) {
+                    buffered.stream()
+                            .sorted(Comparator.comparingLong(BufferedEvent::getTotalOrder))
+                            .forEach(be -> processBufferedEvent(ctx, be));
+                }
+            } catch (TransException e) {
+                throw new RuntimeException(e);
             }
-        } catch (TransException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     private void handleTxEnd(TransactionMetadataValue.TransactionMetadata txEnd) {
         String txId = txEnd.getId();
         TransactionContext ctx = activeTxContexts.get(txId);
-        if (ctx != null) {
-            ctx.markCompleted();
-            try {
-                if (ctx.pendingEvents.get() > 0) {
-                    LOGGER.info("Waiting for {} pending events in TX {}",
-                            ctx.pendingEvents.get(), txId);
-                    ctx.awaitCompletion();
+        transactionExecutor.submit(() -> {
+                    LOGGER.debug("Begin to Commit transaction: {}", txId);
+                    if (ctx != null) {
+                        try {
+                            LOGGER.debug("TX End Lock {}, {}", txId, ctx.lock);
+                            ctx.lock.lock();
+                            ctx.markCompleted();
+                            try {
+                                while (!ctx.isCompleted(txEnd)) {
+                                    ctx.lock.lock();
+                                    LOGGER.debug("TX End Get Lock {}", txId);
+                                    LOGGER.debug("Waiting for events in TX {}: {}", txId,
+                                            txEnd.getDataCollectionsList().stream()
+                                                    .map(dc -> dc.getDataCollection() + "=" +
+                                                            ctx.tableCursors.getOrDefault(dc.getDataCollection(), new AtomicLong()).get() +
+                                                            "/" + dc.getEventCount())
+                                                    .collect(Collectors.joining(", ")));
+
+                                    ctx.cond.await(100, TimeUnit.MILLISECONDS);
+                                }
+                            } finally {
+                                LOGGER.debug("TX End Unlock {}", txId);
+                                ctx.lock.unlock();
+                            }
+
+                            if (ctx.pendingEvents.get() > 0) {
+                                LOGGER.info("Waiting for {} pending events in TX {}",
+                                        ctx.pendingEvents.get(), txId);
+                                ctx.awaitCompletion();
+                            }
+
+                            flushRemainingEvents(ctx);
+                            activeTxContexts.remove(txId);
+                            LOGGER.info("Committed transaction: {}", txId);
+                            Summary.Timer transLatencyTimer = metricsFacade.startTransLatencyTimer();
+                            if (pixelsSinkConfig.isRpcEnable()) {
+                                transService.commitTrans(ctx.pixelsTransCtx.getTransId(), ctx.pixelsTransCtx.getTimestamp());
+                            } else {
+                                LatencySimulator.smartDelay();
+                            }
+                            transLatencyTimer.close();
+                        } catch (InterruptedException | ExecutionException | TransException e) {
+                            // TODO(AntiO2) abort?
+                            LOGGER.error("Failed to commit transaction {}", txId, e);
+                        }
+                    }
                 }
-                flushRemainingEvents(ctx);
-                activeTxContexts.remove(txId);
-                LOGGER.info("Committed transaction: {}", txId);
-                transService.commitTrans(ctx.pixelsTransCtx.getTransId(), ctx.pixelsTransCtx.getTimestamp());
-            } catch (InterruptedException | ExecutionException | TransException e) {
-                // TODO(AntiO2) abort?
-                LOGGER.error("Failed to commit transaction {}", txId, e);
-            }
-        }
+        );
     }
 
 
     private void bufferOrphanedEvent(String txId, BufferedEvent event) {
         orphanedEvents.computeIfAbsent(txId, k -> new CopyOnWriteArrayList<>()).add(event);
-        LOGGER.debug("Buffered orphan event for TX {}: {}", txId, event);
+        LOGGER.debug("Buffered orphan event for TX {}: {}/{}", txId, event.collectionOrder, event.totalOrder);
     }
 
     private List<BufferedEvent> getBufferedEvents(String txId) {
@@ -243,7 +308,6 @@ public class TransactionCoordinator {
                 boolean success = writer.write(event);
                 if (success) {
                     event.endLatencyTimer();
-
                 } else {
                     // TODO retry?
                 }
@@ -342,13 +406,22 @@ public class TransactionCoordinator {
     }
 
     protected class TransactionContext {
+        final ReentrantLock lock = new ReentrantLock();
+        final Condition cond = lock.newCondition();
+
         final String sourceTxId;
         final Map<String, AtomicLong> tableCursors = new ConcurrentHashMap<>();
-        final TransContext pixelsTransCtx;
+        TransContext pixelsTransCtx;
         volatile boolean completed = false;
 
         final AtomicInteger pendingEvents = new AtomicInteger(0);
         final CompletableFuture<Void> completionFuture = new CompletableFuture<>();
+
+
+        TransactionContext(String sourceTxId) {
+            this.sourceTxId = sourceTxId;
+            this.pixelsTransCtx = null;
+        }
 
         TransactionContext(String sourceTxId, TransContext pixelsTransCtx) {
             this.sourceTxId = sourceTxId;
@@ -372,14 +445,26 @@ public class TransactionCoordinator {
             return tableCursors.keySet();
         }
 
-        void markCompleted() {
-            this.completed = true;
+        boolean isCompleted(TransactionMetadataValue.TransactionMetadata tx) {
+            for (TransactionMetadataValue.TransactionMetadata.DataCollection dataCollection : tx.getDataCollectionsList()) {
+                AtomicLong targetEventCount = tableCursors.get(dataCollection.getDataCollection());
+                long target = targetEventCount == null ? 0 : targetEventCount.get();
+                LOGGER.debug("TX {}, Table {}, event count {}, tableCursors {}", tx.getId(), dataCollection.getDataCollection(), dataCollection.getEventCount(), target);
+                if (dataCollection.getEventCount() >= target) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         boolean isExpired() {
             // TODO: expire timeout transaction
             return false;
             // return System.currentTimeMillis() - pixelsTransCtx.getTimestamp() > TX_TIMEOUT_MS;
+        }
+
+        void markCompleted() {
+            this.completed = true;
         }
 
         void awaitCompletion() throws InterruptedException, ExecutionException {

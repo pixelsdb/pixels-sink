@@ -18,16 +18,19 @@
 package io.pixelsdb.pixels.sink.sink;
 
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
+import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 
 import java.io.IOException;
 
 public class PixelsSinkWriterFactory {
-    static public PixelsSinkWriter getWriterByConfig(PixelsSinkConfig pixelsSinkConfig) throws IOException {
-        switch (pixelsSinkConfig.getPixelsSinkMode()) {
+    private static final PixelsSinkConfig config = PixelsSinkConfigFactory.getInstance();
+
+    static public PixelsSinkWriter getWriter() throws IOException {
+        switch (config.getPixelsSinkMode()) {
             case CSV:
-                return new CsvWriter(pixelsSinkConfig);
+                return new CsvWriter();
             case RETINA:
-                return new RetinaWriter(pixelsSinkConfig);
+                return new RetinaWriter();
         }
         return null;
     }

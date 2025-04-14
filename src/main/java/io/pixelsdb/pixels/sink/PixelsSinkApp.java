@@ -27,13 +27,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * Run PixelsSink as
+ * Run PixelsSink as a server
  */
-@Deprecated
 public class PixelsSinkApp {
     private static final Logger LOGGER = LoggerFactory.getLogger(PixelsSinkApp.class);
     private static SinkMonitor sinkMonitor = new SinkMonitor();
-    ;
 
     public static void main(String[] args) throws IOException {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -50,6 +48,5 @@ public class PixelsSinkApp {
         CommandLineConfig cmdLineConfig = new CommandLineConfig(args);
         PixelsSinkConfigFactory.initialize(cmdLineConfig.getConfigPath());
         MetricsFacade.initialize();
-
     }
 }

@@ -50,4 +50,8 @@ public class PixelsSinkDefaultConfig {
     // Monitor Config
     public static final boolean SINK_MONITOR_ENABLED = true;
     public static final short SINK_MONITOR_PORT = 9464;
+
+    // Mock RPC
+    public static final boolean SINK_RPC_ENABLED = true;
+    public static final int MOCK_RPC_DELAY = 100;
 }

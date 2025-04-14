@@ -56,7 +56,7 @@ public class TransactionMonitor implements Runnable, StoppableMonitor {
             while (running.get()) {
                 try {
                     ConsumerRecords<String, TransactionMetadataValue.TransactionMetadata> records =
-                            consumer.poll(Duration.ofMillis(500));
+                            consumer.poll(Duration.ofMillis(1000));
 
                     for (ConsumerRecord<String, TransactionMetadataValue.TransactionMetadata> record : records) {
                         TransactionMetadataValue.TransactionMetadata transaction = record.value();

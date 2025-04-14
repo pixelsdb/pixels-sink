@@ -60,6 +60,10 @@ source ${SCRIPT_DIR}/common_func.sh
 if [[ x${need_build} == x"on" ]]; then 
   build_image ${IMAGE_DIR}/debezium-source-connector pixels-debezium
   build_pixels_sink_image
+
+  if [[ x${enable_tpcc} == x"on" ]]; then
+    build_tpcc_tool
+  fi
 fi
 
 if [[ x${generate_data} == x"on" ]]; then
@@ -87,7 +91,7 @@ check_fatal_exit "MySQL Source Kafka Connector Server Fail"
 try_command curl -f -X POST -H "Content-Type: application/json" -d @${CONFIG_DIR}/register-mysql.json http://localhost:8083/connectors -w '\n' # We need to wait here for MySQL to load all the data
 check_fatal_exit "Register MySQL Source Connector Fail"
   if [[ x${enable_tpch} == x"on" &&  x${load_mysql} == x"on" ]]; then
-    docker exec pixels_mysql_source_db sh -c "mysql -upixels -p$(cat "${SECRETS_DIR}/mysql-pixels-password.txt") -D pixels_realtime_crud < /example/sql/dss.ddl"
+    docker exec pixels_mysql_source_db sh -c "mysql -upixels -p$(cat "${SECRETS_DIR}/mysql-pixels-password.txt") -D pixels_realtime_crud < /var/lib/mysql-files/sql/dss.ddl"
     docker exec pixels_mysql_source_db sh -c "mysql -upixels -p$(cat "${SECRETS_DIR}/mysql-pixels-password.txt") -D pixels_realtime_crud < /load.sql"
   fi
 fi
@@ -106,10 +110,25 @@ check_fatal_exit "Register PostgreSQL Source Connector Fail"
     docker exec pixels_postgres_source_db sh -c " psql -Upixels -d pixels_realtime_crud < /example/sql/dss.ddl"
     docker exec pixels_postgres_source_db sh -c " psql -Upixels -d pixels_realtime_crud < /load.sql"
   fi
-
-
 fi
 
 log_info "Visit http://localhost:9000 to check kafka status"
 log_info "Visit http://localhost:3000 to check Grafana Dashboard"
+
+
+if [[ x${enable_tpcc} == x"on" ]]; then
+  log_info "Start TPC-C Benchmark"
+
+  if [[ x${enable_mysql} == x"on" ]]; then
+    build_tpcc_db mysql
+    start_tpcc_test mysql
+  fi
+
+  if [[ x${enable_postgres} == x"on" ]]; then
+    build_tpcc_db pg
+    start_tpcc_test pg
+  fi
+
+  log_info "End TPC-C Benchmark"
+fi
 

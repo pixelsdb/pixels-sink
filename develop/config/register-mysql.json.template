@@ -1,6 +1,7 @@
 {
   "name": "mysql-connector",
   "config": {
+    "provide.transaction.metadata": true,
     "connector.class": "io.debezium.connector.mysql.MySqlConnector",
     "database.hostname": "pixels_mysql_source_db",
     "database.user": "pixels",
