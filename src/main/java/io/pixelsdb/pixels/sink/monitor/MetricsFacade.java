@@ -19,6 +19,7 @@ package io.pixelsdb.pixels.sink.monitor;
 
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
+import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Summary;
@@ -35,7 +36,8 @@ public class MetricsFacade {
     private final Summary transServiceLatency;
     private final Summary indexServiceLatency;
     private final Summary retinaServiceLatency;
-
+    private final Summary writerLatency;
+    private final Summary totalLatency;
     private MetricsFacade(boolean enabled) {
         this.enabled = enabled;
         if (enabled) {
@@ -96,6 +98,26 @@ public class MetricsFacade {
                     .quantile(0.95, 0.005)
                     .quantile(0.99, 0.001)
                     .register();
+
+            this.writerLatency = Summary.build()
+                    .name("write_latency_seconds")
+                    .help("Write latency")
+                    .quantile(0.5, 0.05)
+                    .quantile(0.75, 0.01)
+                    .quantile(0.95, 0.005)
+                    .quantile(0.99, 0.001)
+                    .register();
+
+            this.totalLatency = Summary.build()
+                    .name("total_latency_seconds")
+                    .help("total latency to ETL a row change event")
+                    .labelNames("table", "operation")
+                    .quantile(0.5, 0.05)
+                    .quantile(0.75, 0.01)
+                    .quantile(0.95, 0.005)
+                    .quantile(0.99, 0.001)
+                    .register();
+
         } else {
             this.rowChangeCounter = null;
             this.transactionCounter = null;
@@ -105,7 +127,8 @@ public class MetricsFacade {
             this.transServiceLatency = null;
             this.indexServiceLatency = null;
             this.retinaServiceLatency = null;
-
+            this.writerLatency = null;
+            this.totalLatency = null;
         }
     }
 
@@ -153,7 +176,18 @@ public class MetricsFacade {
         return enabled ? retinaServiceLatency.startTimer() : null;
     }
 
+    public Summary.Timer startWriteLatencyTimer() {
+        return enabled ? writerLatency.startTimer() : null;
+    }
+
     public void addRawData(double data) {
         rawDataThroughputCounter.inc(data);
+    }
+
+    public void recordTotalLatency(RowChangeEvent event) {
+        if(event.getTimeStamp() != 0) {
+            long recordLatency = System.currentTimeMillis()- event.getTimeStamp();
+            totalLatency.labels(event.getFullTableName(), event.getOp().toString()).observe(recordLatency);
+        }
     }
 }

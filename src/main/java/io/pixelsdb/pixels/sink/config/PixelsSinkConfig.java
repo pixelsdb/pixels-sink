@@ -46,23 +46,6 @@ public class PixelsSinkConfig {
     private int mockRpcDelay;
     public PixelsSinkConfig(String configFilePath) throws IOException {
         this.config = ConfigFactory.Instance();
-        properties = new Properties();
-        if (configFilePath != null && !configFilePath.isEmpty()) {
-            try (InputStream input = new FileInputStream(configFilePath)) {
-                properties.load(input);
-            } catch (FileNotFoundException e) {
-                throw new FileNotFoundException("Configuration file not found: " + configFilePath);
-            } catch (IOException e) {
-                throw new IOException("Error reading configuration file: " + configFilePath, e);
-            }
-        } else {
-            try (InputStream input = getClass().getClassLoader().getResourceAsStream(PixelsSinkDefaultConfig.PROPERTIES_PATH)) {
-                if (input == null) {
-                    throw new FileNotFoundException("Resource file not found: " + configFilePath);
-                }
-                properties.load(input);
-            }
-        }
         this.config.loadProperties(configFilePath);
         parseProps();
     }

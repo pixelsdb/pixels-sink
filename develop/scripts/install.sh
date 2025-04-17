@@ -14,7 +14,7 @@ need_init=on
 need_build=on
 
 generate_data=on
-example_data_scale=0.1
+data_scale=0.1
 
 enable_tpch=off
 enable_tpcc=off
@@ -37,6 +37,7 @@ for arg do
     --enable_mysql=*)           enable_mysql="$val"   ;;
     --need_build=*)             need_build="$val"     ;;
     --generate_data=*)          generate_data="$val"  ;;
+    --data_scale=*)             data_scale="$val"     ;;
     --load_postgres=*)          load_postgres="$val"  ;;
     --load_mysql=*)             load_mysql="$val"     ;;
     --enable_tpch=*)            enable_tpch="$val"    ;;
@@ -68,7 +69,7 @@ fi
 
 if [[ x${generate_data} == x"on" ]]; then
   build_generator
-  generate_tpch_data ${example_data_scale}
+  generate_tpch_data ${data_scale}
 fi
 
 if [[ x${need_init} == x"on" ]]; then
@@ -92,6 +93,7 @@ try_command curl -f -X POST -H "Content-Type: application/json" -d @${CONFIG_DIR
 check_fatal_exit "Register MySQL Source Connector Fail"
   if [[ x${enable_tpch} == x"on" &&  x${load_mysql} == x"on" ]]; then
     docker exec pixels_mysql_source_db sh -c "mysql -upixels -p$(cat "${SECRETS_DIR}/mysql-pixels-password.txt") -D pixels_realtime_crud < /var/lib/mysql-files/sql/dss.ddl"
+#    docker exec pixels_mysql_source_db sh -c "mysql -upixels -p$(cat "${SECRETS_DIR}/mysql-pixels-password.txt") -D pixels_realtime_crud < /var/lib/mysql-files/sql/sample.sql"
     docker exec pixels_mysql_source_db sh -c "mysql -upixels -p$(cat "${SECRETS_DIR}/mysql-pixels-password.txt") -D pixels_realtime_crud < /load.sql"
   fi
 fi

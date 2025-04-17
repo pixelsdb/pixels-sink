@@ -18,7 +18,8 @@
     "value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
     "value.converter.apicurio.registry.auto-register": "true",
     "value.converter.apicurio.registry.find-latest": "true",
-
+    "snapshot.mode": "initial",
+    "inconsistent.schema.handling.mode": "warn",
     "schema.name.adjustment.mode": "avro",
     "schema.history.internal.kafka.bootstrap.servers": "pixels_kafka:9092",
     "schema.history.internal.kafka.topic": "schema-changes.mysql"

@@ -31,7 +31,8 @@ public class PixelsSinkDefaultConfig {
 
     public static final int SINK_CSV_RECORD_FLUSH = 1000;
 
-    public static final int SINK_THREAD = 4;
+    public static final int SINK_THREAD = 32;
+    public static final int SINK_CONSUMER_THREAD = 8;
     //    sink.remote.host=localhost
 //    sink.remote.port=229422
 //    sink.batch.size=100

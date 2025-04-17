@@ -20,6 +20,7 @@ package io.pixelsdb.pixels.sink.consumer;
 import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinator;
 import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
+import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -35,6 +36,9 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TableConsumerTask implements Runnable {
@@ -45,7 +49,7 @@ public class TableConsumerTask implements Runnable {
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final String tableName;
     private KafkaConsumer<String, RowChangeEvent> consumer;
-
+    private final ExecutorService executor = Executors.newCachedThreadPool();
     public TableConsumerTask(Properties kafkaProperties, String topic) throws IOException {
         PixelsSinkConfig config = PixelsSinkConfigFactory.getInstance();
         this.kafkaProperties = kafkaProperties;
@@ -62,18 +66,20 @@ public class TableConsumerTask implements Runnable {
             consumer = new KafkaConsumer<>(kafkaProperties);
             consumer.subscribe(Collections.singleton(topic));
 
-            TopicPartition partition = new TopicPartition(topic, 0);
-            consumer.poll(Duration.ofSeconds(1));
-            consumer.seek(partition, 0);
+//            TopicPartition partition = new TopicPartition(topic, 0);
+//            consumer.poll(Duration.ofSeconds(1));
+//            consumer.seek(partition, 0);
 
             while (running.get()) {
                 try {
                     ConsumerRecords<String, RowChangeEvent> records = consumer.poll(Duration.ofSeconds(5));
                     if (!records.isEmpty()) {
-                        log.info("{} Consumer poll returned {} records", tableName, records.count());
+                        log.debug("{} Consumer poll returned {} records", tableName, records.count());
                         records.forEach(record -> {
-                            RowChangeEvent event = record.value();
-                            transactionCoordinator.processRowEvent(event);
+                            executor.execute(() -> {
+                                RowChangeEvent event = record.value();
+                                transactionCoordinator.processRowEvent(event);
+                            });
                         });
                     }
                 } catch (InterruptException ignored) {

@@ -4,10 +4,10 @@ conn=jdbc:mysql://localhost:3306/pixels_realtime_crud?useSSL=false&useServerPrep
 user=pixels
 password=pixels_realtime_crud
 
-warehouses=1
-loadWorkers=4
+warehouses=4
+loadWorkers=16
 
-terminals=1
+terminals=32
 //To run specified transactions per terminal- runMins must equal zero
 runTxnsPerTerminal=0
 //To run for specified minutes- runTxnsPerTerminal must equal zero

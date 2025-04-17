@@ -64,7 +64,9 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
             return rowChangeEvent;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new SerializationException("Avro deserialization failed", e);
+            return null;
+            // throw new SerializationException("Avro deserialization failed", e);
+            // TODO: 这里有些Row Change Event 不是完整的结构。
         }
     }
 
@@ -101,10 +103,10 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
     }
 
     private OperationType parseOperationType(GenericRecord record) {
-        String op = record.get("op").toString().toUpperCase();
+        String op = DeserializerUtil.getStringSafely(record, "op");
         try {
             return OperationType.fromString(op);
-        } catch (IllegalArgumentException e) {
+        } catch (RuntimeException e) {
             return OperationType.UNRECOGNIZED;
         }
     }

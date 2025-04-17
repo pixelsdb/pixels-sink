@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 #
+microdnf install -y vim
 
 ./develop/install --need_build=off --generate_data=off --enable_mysql=off --load_postgres=off
 ./develop/install --need_build=off --generate_data=off --enable_mysql=off
@@ -23,3 +24,9 @@
 ./develop/install --need_build=off --generate_data=off --enable_mysql=on --enable_postgres=off --enable_tpch=off --enable_tpcc=on
 
 ./develop/install --need_build=on --generate_data=off --enable_mysql=on --enable_postgres=off --enable_tpch=off --enable_tpcc=on
+
+./develop/install --need_build=on --generate_data=on --data_scale=10 --enable_mysql=on --enable_postgres=off --enable_tpch=on --enable_tpcc=off
+
+./develop/install --need_build=on --generate_data=on --data_scale=1 --enable_mysql=on --enable_postgres=off --enable_tpch=on --enable_tpcc=off
+
+./develop/install --need_build=off --generate_data=on --data_scale=1 --enable_mysql=on --enable_postgres=off --enable_tpch=on --enable_tpcc=off

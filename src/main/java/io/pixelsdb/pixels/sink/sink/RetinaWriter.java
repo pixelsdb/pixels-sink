@@ -103,7 +103,6 @@ public class RetinaWriter implements PixelsSinkWriter {
         if (isClosed.get()) {
             throw new IOException("Writer is already closed");
         }
-        writeLock.lock();
 //        SinkProto.WriteRequest request = SinkProto.WriteRequest.newBuilder().build();
 //        SinkProto.WriteResponse response = blockingStub.writeData(request);
         return false;
@@ -116,7 +115,6 @@ public class RetinaWriter implements PixelsSinkWriter {
             return false;
         }
 
-        writeLock.lock();
         try {
             if (config.isRpcEnable()) {
                 switch (event.getOp()) {
@@ -132,21 +130,22 @@ public class RetinaWriter implements PixelsSinkWriter {
                         break;
                 }
             } else {
-                if (event.getOp() != OperationType.INSERT) {
+                if (event.getOp() != OperationType.INSERT && event.getOp() != OperationType.SNAPSHOT) {
                     Summary.Timer indexLatencyTimer = metricsFacade.startIndexLatencyTimer();
-                    LatencySimulator.smartDelay(); // Look Up Index
+                    LatencySimulator.smartDelay(); // Mock Look Up Index
                     indexLatencyTimer.close();
                 }
-                Summary.Timer latencyTimer = metricsFacade.startRetinaLatencyTimer();
+                Summary.Timer retinaLatencyTimer = metricsFacade.startRetinaLatencyTimer();
                 LatencySimulator.smartDelay(); // Call Retina
-                latencyTimer.close();
+                retinaLatencyTimer.close();
+                return true;
             }
 
         } catch (StatusRuntimeException e) {
             LOGGER.error("gRPC write failed for event {}: {}", event.getTransaction().getId(), e.getStatus());
             return false;
         } finally {
-            writeLock.unlock();
+
         }
         // TODO: error handle
         return false;
@@ -161,12 +160,12 @@ public class RetinaWriter implements PixelsSinkWriter {
     private RetinaProto.InsertRecordRequest getInsertRecordRequest(RowChangeEvent event) {
         // Step1. Serialize Row Data
         RetinaProto.InsertRecordRequest.Builder builder = RetinaProto.InsertRecordRequest.newBuilder();
-        event.getAfterData().forEach((col, value) ->
-                builder.addColValues(value.toString()));
-
-        // Step2. Build Insert Request
+//        event.getAfterData().forEach((col, value) ->
+//                builder.addColValues(value.toString()));
+//
+//        // Step2. Build Insert Request
         return builder
-                .setTable(event.getTable())
+                //.setTable(event.getTable())
                 .setTimestamp(event.getTimeStamp()).build();
     }
 

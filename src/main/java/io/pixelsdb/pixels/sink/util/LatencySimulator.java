@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 public class LatencySimulator {
     private static final Random RANDOM = ThreadLocalRandom.current();
-    private static final double longTailProb = 0.01;
+    private static final double longTailProb = 0.05;
     private static final double longTailScale = 30;
     private static final double tailVariance = 0.1;
     private static final double normalVariance = 0.4;

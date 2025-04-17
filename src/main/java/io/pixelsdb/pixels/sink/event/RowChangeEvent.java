@@ -83,6 +83,7 @@ public class RowChangeEvent {
         this.before = before;
         this.after = after;
         this.schema = schema;
+        this.timeStamp = rowRecord.getTsMs();
     }
 
     public void setTimeStamp(long timeStamp) {
@@ -113,7 +114,7 @@ public class RowChangeEvent {
         this.indexKey = IndexProto.IndexKey.newBuilder()
                 .setTimestamp(timeStamp)
                 .setKey(ByteString.copyFrom(byteBuffer))
-                .setIndexId(indexInfo.getId())
+                //.setIndexId(indexInfo.getId())
                 .build();
     }
 
