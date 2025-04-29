@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pixelsdb.pixels.core.TypeDescription;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
+import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
 import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -39,7 +40,7 @@ public class RowChangeEventJsonDeserializer implements Deserializer<RowChangeEve
             logger.debug("Received empty message from topic: {}", topic);
             return null;
         }
-
+        MetricsFacade.getInstance().addRawData(data.length);
         try {
             JsonNode rootNode = objectMapper.readTree(data);
             JsonNode schemaNode = rootNode.path("schema");

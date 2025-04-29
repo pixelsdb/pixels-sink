@@ -19,6 +19,7 @@ package io.pixelsdb.pixels.sink.deserializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.util.JsonFormat;
+import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
 import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class TransactionJsonMessageDeserializer implements Deserializer<Transact
         if (data == null || data.length == 0) {
             return null;
         }
-
+        MetricsFacade.getInstance().addRawData(data.length);
         try {
             Map<String, Object> rawMessage = OBJECT_MAPPER.readValue(data, Map.class);
             return parseTransactionMetadata(rawMessage);

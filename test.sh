@@ -29,4 +29,4 @@ microdnf install -y vim
 
 ./develop/install --need_build=on --generate_data=on --data_scale=1 --enable_mysql=on --enable_postgres=off --enable_tpch=on --enable_tpcc=off
 
-./develop/install --need_build=off --generate_data=on --data_scale=1 --enable_mysql=on --enable_postgres=off --enable_tpch=on --enable_tpcc=off
+./develop/install --need_build=on --generate_data=on --data_scale=1 --enable_mysql=on --enable_postgres=off --enable_tpch=off --enable_tpcc=off
