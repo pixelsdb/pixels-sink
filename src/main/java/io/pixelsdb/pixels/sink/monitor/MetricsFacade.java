@@ -17,10 +17,10 @@
 
 package io.pixelsdb.pixels.sink.monitor;
 
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
-import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Summary;
 
@@ -140,14 +140,17 @@ public class MetricsFacade {
     }
 
     public static MetricsFacade getInstance() {
+        if (instance == null) {
+            initialize();
+        }
         return instance;
     }
 
-    public void recordRowChange(String table, OperationType operation) {
+    public void recordRowChange(String table, SinkProto.OperationType operation) {
         recordRowChange(table, operation, 1);
     }
 
-    public void recordRowChange(String table, OperationType operation, int rows) {
+    public void recordRowChange(String table, SinkProto.OperationType operation, int rows) {
         if (enabled && rowChangeCounter != null) {
             tableChangeCounter.labels(table).inc(rows);
             rowChangeCounter.labels(table, operation.toString()).inc(rows);

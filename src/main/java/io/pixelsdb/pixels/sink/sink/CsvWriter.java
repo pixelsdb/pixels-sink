@@ -17,11 +17,11 @@
 package io.pixelsdb.pixels.sink.sink;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
-import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,10 +101,11 @@ public class CsvWriter implements PixelsSinkWriter {
     @Override
     public boolean write(RowChangeEvent event) {
         final String tableName = event.getTable();
-        if (event.getOp() == OperationType.DELETE) {
+        if (event.getOp() == SinkProto.OperationType.DELETE) {
             return true;
         }
-        Map<String, Object> message = event.getAfterData();
+//        Map<String, Object> message = event.getAfterData();
+        Map<String, Object> message = null;
         writeLock.lock();
         try {
             FileChannel channel = getOrCreateChannel(event);

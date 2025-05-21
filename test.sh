@@ -30,3 +30,14 @@ microdnf install -y vim
 ./develop/install --need_build=on --generate_data=on --data_scale=1 --enable_mysql=on --enable_postgres=off --enable_tpch=on --enable_tpcc=off
 
 ./develop/install --need_build=on --generate_data=on --data_scale=1 --enable_mysql=on --enable_postgres=off --enable_tpch=off --enable_tpcc=off
+
+
+./develop/install --need_build=off --generate_data=off --enable_mysql=off --load_postgres=off
+
+./develop/install --need_build=off --generate_data=off --enable_mysql=on --enable_postgres=off
+
+
+
+####
+docker exec pixels_mysql_source_db sh -c "mysql -upixels -p$(cat "${SECRETS_DIR}/mysql-pixels-password.txt") -D pixels_realtime_crud < /var/lib/mysql-files/sql/dss.ddl"
+docker exec pixels_mysql_source_db sh -c "mysql -upixels -p$(cat "${SECRETS_DIR}/mysql-pixels-password.txt") -D pixels_realtime_crud < /var/lib/mysql-files/sql/sample.sql"

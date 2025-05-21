@@ -20,16 +20,11 @@ import io.pixelsdb.pixels.common.utils.ConfigFactory;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkMode;
 import lombok.Getter;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Objects;
-import java.util.Properties;
 
 @Getter
 public class PixelsSinkConfig {
-    private Properties properties;
     private ConfigFactory config;
 
     private Long transactionTimeout;

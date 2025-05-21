@@ -23,6 +23,10 @@ import io.pixelsdb.pixels.common.metadata.domain.Column;
 import io.pixelsdb.pixels.common.metadata.domain.SecondaryIndex;
 import io.pixelsdb.pixels.common.metadata.domain.Table;
 import io.pixelsdb.pixels.core.TypeDescription;
+import io.pixelsdb.pixels.sink.deserializer.SchemaDeserializer;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,5 +77,21 @@ public class TableMetadataRegistry {
 
     public TypeDescription getTypeDescription(String schema, String table) {
         return typeDescriptionConcurrentMap.get(new TableMetadataKey(schema, table));
+    }
+
+    /**
+     * parse typeDescription from avro record and cache it.
+     *
+     * @param record
+     * @return
+     */
+    public TypeDescription parseTypeDescription(GenericRecord record, String sourceSchema, String sourceTable) {
+        Schema schema = ((GenericData.Record) record.get("before")).getSchema();
+        TableMetadataKey tableMetadataKey = new TableMetadataKey(sourceSchema, sourceTable);
+        TypeDescription typeDescription = typeDescriptionConcurrentMap.computeIfAbsent(
+                tableMetadataKey,
+                key -> SchemaDeserializer.parseFromAvroSchema(schema)
+        );
+        return typeDescription;
     }
 }

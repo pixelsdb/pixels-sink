@@ -17,10 +17,10 @@
 
 package io.pixelsdb.pixels.sink.monitor;
 
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinator;
 import io.pixelsdb.pixels.sink.concurrent.TransactionCoordinatorFactory;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
-import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -37,7 +37,7 @@ public class TransactionMonitor implements Runnable, StoppableMonitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionMonitor.class);
 
     private final String transactionTopic;
-    private final KafkaConsumer<String, TransactionMetadataValue.TransactionMetadata> consumer;
+    private final KafkaConsumer<String, SinkProto.TransactionMetadata> consumer;
     private final TransactionCoordinator transactionCoordinator;
     private final AtomicBoolean running = new AtomicBoolean(true);
 
@@ -55,11 +55,11 @@ public class TransactionMonitor implements Runnable, StoppableMonitor {
 
             while (running.get()) {
                 try {
-                    ConsumerRecords<String, TransactionMetadataValue.TransactionMetadata> records =
+                    ConsumerRecords<String, SinkProto.TransactionMetadata> records =
                             consumer.poll(Duration.ofMillis(1000));
 
-                    for (ConsumerRecord<String, TransactionMetadataValue.TransactionMetadata> record : records) {
-                        TransactionMetadataValue.TransactionMetadata transaction = record.value();
+                    for (ConsumerRecord<String, SinkProto.TransactionMetadata> record : records) {
+                        SinkProto.TransactionMetadata transaction = record.value();
                         LOGGER.debug("Processing transaction event: {}", transaction.getId());
                         transactionCoordinator.processTransactionEvent(transaction);
                     }

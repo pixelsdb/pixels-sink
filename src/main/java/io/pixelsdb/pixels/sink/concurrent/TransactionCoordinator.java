@@ -20,12 +20,11 @@ package io.pixelsdb.pixels.sink.concurrent;
 import io.pixelsdb.pixels.common.exception.TransException;
 import io.pixelsdb.pixels.common.transaction.TransContext;
 import io.pixelsdb.pixels.common.transaction.TransService;
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
-import io.pixelsdb.pixels.sink.config.PixelsSinkDefaultConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
-import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkWriter;
 import io.pixelsdb.pixels.sink.sink.PixelsSinkWriterFactory;
 import io.pixelsdb.pixels.sink.util.LatencySimulator;
@@ -40,7 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -76,7 +74,8 @@ public class TransactionCoordinator {
         // startDispatchWorker();
         startTimeoutChecker();
     }
-    public void processTransactionEvent(TransactionMetadataValue.TransactionMetadata txMeta) {
+
+    public void processTransactionEvent(SinkProto.TransactionMetadata txMeta) {
         if ("BEGIN".equals(txMeta.getStatus())) {
             handleTxBegin(txMeta);
         } else if ("END".equals(txMeta.getStatus())) {
@@ -90,6 +89,7 @@ public class TransactionCoordinator {
             return;
         }
 
+        metricsFacade.recordRowChange(event.getTable(), event.getOp());
         event.startLatencyTimer();
         if (event.getTransaction() == null || event.getTransaction().getId().isEmpty()) {
             handleNonTxEvent(event);
@@ -132,7 +132,7 @@ public class TransactionCoordinator {
         }
     }
 
-    private void handleTxBegin(TransactionMetadataValue.TransactionMetadata txBegin) {
+    private void handleTxBegin(SinkProto.TransactionMetadata txBegin) {
         try {
             startTrans(txBegin.getId()).get();
         } catch (InterruptedException e) {
@@ -172,7 +172,7 @@ public class TransactionCoordinator {
         });
     }
 
-    private void handleTxEnd(TransactionMetadataValue.TransactionMetadata txEnd) {
+    private void handleTxEnd(SinkProto.TransactionMetadata txEnd) {
         String txId = txEnd.getId();
         TransactionContext ctx = activeTxContexts.get(txId);
         transactionExecutor.submit(() -> {
@@ -473,8 +473,8 @@ public class TransactionCoordinator {
             return tableCursors.keySet();
         }
 
-        boolean isCompleted(TransactionMetadataValue.TransactionMetadata tx) {
-            for (TransactionMetadataValue.TransactionMetadata.DataCollection dataCollection : tx.getDataCollectionsList()) {
+        boolean isCompleted(SinkProto.TransactionMetadata tx) {
+            for (SinkProto.DataCollection dataCollection : tx.getDataCollectionsList()) {
                 // Long targetEventCount = tableCursors.get(dataCollection.getDataCollection());
                 Long targetEventCount = tableCounters.get(dataCollection.getDataCollection());
                 long target = targetEventCount == null ? 0 : targetEventCount;

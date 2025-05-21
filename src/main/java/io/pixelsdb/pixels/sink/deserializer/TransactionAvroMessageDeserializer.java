@@ -19,10 +19,10 @@ package io.pixelsdb.pixels.sink.deserializer;
 
 import io.apicurio.registry.serde.SerdeConfig;
 import io.apicurio.registry.serde.avro.AvroKafkaDeserializer;
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
-import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TransactionAvroMessageDeserializer implements Deserializer<TransactionMetadataValue.TransactionMetadata> {
+public class TransactionAvroMessageDeserializer implements Deserializer<SinkProto.TransactionMetadata> {
     private static final Logger logger = LoggerFactory.getLogger(TransactionAvroMessageDeserializer.class);
     private final AvroKafkaDeserializer<GenericRecord> avroDeserializer = new AvroKafkaDeserializer<>();
     private final PixelsSinkConfig config = PixelsSinkConfigFactory.getInstance();
@@ -46,7 +46,7 @@ public class TransactionAvroMessageDeserializer implements Deserializer<Transact
     }
 
     @Override
-    public TransactionMetadataValue.TransactionMetadata deserialize(String topic, byte[] bytes) {
+    public SinkProto.TransactionMetadata deserialize(String topic, byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
@@ -60,20 +60,20 @@ public class TransactionAvroMessageDeserializer implements Deserializer<Transact
         }
     }
 
-    private TransactionMetadataValue.TransactionMetadata convertToTransactionMetadata(GenericRecord record) {
-        TransactionMetadataValue.TransactionMetadata.Builder builder =
-                TransactionMetadataValue.TransactionMetadata.newBuilder();
-        builder.setStatus(DeserializerUtil.getStringSafely(record, "status"))
+    private SinkProto.TransactionMetadata convertToTransactionMetadata(GenericRecord record) {
+        SinkProto.TransactionMetadata.Builder builder =
+                SinkProto.TransactionMetadata.newBuilder();
+        builder.setStatus(DeserializerUtil.getStatusSafely(record, "status"))
                 .setId(DeserializerUtil.getStringSafely(record, "id"))
                 .setEventCount(DeserializerUtil.getLongSafely(record, "event_count"))
-                .setTsMs(DeserializerUtil.getLongSafely(record, "ts_ms"));
+                .setTimestamp(DeserializerUtil.getLongSafely(record, "ts_ms"));
 
         if (record.get("data_collections") != null) {
             Iterable<?> collections = (Iterable<?>) record.get("data_collections");
             for (Object item : collections) {
                 if (item instanceof GenericRecord collectionRecord) {
-                    TransactionMetadataValue.TransactionMetadata.DataCollection.Builder collectionBuilder =
-                            TransactionMetadataValue.TransactionMetadata.DataCollection.newBuilder();
+                    SinkProto.DataCollection.Builder collectionBuilder =
+                            SinkProto.DataCollection.newBuilder();
                     collectionBuilder.setDataCollection(DeserializerUtil.getStringSafely(collectionRecord, "data_collection"));
                     collectionBuilder.setEventCount(DeserializerUtil.getLongSafely(collectionRecord, "event_count"));
                     builder.addDataCollections(collectionBuilder);

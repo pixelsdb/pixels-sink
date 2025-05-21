@@ -19,8 +19,8 @@ package io.pixelsdb.pixels.sink.deserializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.util.JsonFormat;
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
-import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +28,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-public class TransactionJsonMessageDeserializer implements Deserializer<TransactionMetadataValue.TransactionMetadata> {
+public class TransactionJsonMessageDeserializer implements Deserializer<SinkProto.TransactionMetadata> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionJsonMessageDeserializer.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final JsonFormat.Parser PROTO_PARSER = JsonFormat.parser().ignoringUnknownFields();
 
     @Override
-    public TransactionMetadataValue.TransactionMetadata deserialize(String topic, byte[] data) {
+    public SinkProto.TransactionMetadata deserialize(String topic, byte[] data) {
         if (data == null || data.length == 0) {
             return null;
         }
@@ -49,8 +49,8 @@ public class TransactionJsonMessageDeserializer implements Deserializer<Transact
         }
     }
 
-    private TransactionMetadataValue.TransactionMetadata parseTransactionMetadata(Map<String, Object> rawMessage) throws IOException {
-        TransactionMetadataValue.TransactionMetadata.Builder builder = TransactionMetadataValue.TransactionMetadata.newBuilder();
+    private SinkProto.TransactionMetadata parseTransactionMetadata(Map<String, Object> rawMessage) throws IOException {
+        SinkProto.TransactionMetadata.Builder builder = SinkProto.TransactionMetadata.newBuilder();
         String json = OBJECT_MAPPER.writeValueAsString(rawMessage.get("payload"));
         PROTO_PARSER.merge(json, builder);
 

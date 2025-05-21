@@ -18,8 +18,8 @@
 package io.pixelsdb.pixels.sink.deserializer;
 
 import com.google.protobuf.ByteString;
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
-import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.generic.GenericRecord;
 
@@ -27,14 +27,14 @@ import java.util.Arrays;
 
 public class DeserializerUtil {
     static RowChangeEvent buildErrorEvent(String topic, byte[] rawData, Exception error) {
-        RowRecordMessage.ErrorInfo errorInfo = RowRecordMessage.ErrorInfo.newBuilder()
+        SinkProto.ErrorInfo errorInfo = SinkProto.ErrorInfo.newBuilder()
                 .setMessage(error.getMessage())
                 .setStackTrace(Arrays.toString(error.getStackTrace()))
                 .setOriginalData(ByteString.copyFrom(rawData))
                 .build();
 
-        RowRecordMessage.RowRecord record = RowRecordMessage.RowRecord.newBuilder()
-                .setOp("ERROR")
+        SinkProto.RowRecord record = SinkProto.RowRecord.newBuilder()
+                .setOp(SinkProto.OperationType.UNRECOGNIZED)
                 .setTsMs(System.currentTimeMillis())
                 .build();
 
@@ -45,7 +45,7 @@ public class DeserializerUtil {
             }
 
             @Override
-            public RowRecordMessage.ErrorInfo getErrorInfo() {
+            public SinkProto.ErrorInfo getErrorInfo() {
                 return errorInfo;
             }
 
@@ -54,6 +54,18 @@ public class DeserializerUtil {
                 return topic;
             }
         };
+    }
+
+    static public SinkProto.TransactionStatus getStatusSafely(GenericRecord record, String field) {
+        String statusString = getStringSafely(record, field);
+        if (statusString.equals("BEGIN")) {
+            return SinkProto.TransactionStatus.BEGIN;
+        }
+        if (statusString.equals("END")) {
+            return SinkProto.TransactionStatus.END;
+        }
+
+        return SinkProto.TransactionStatus.UNRECOGNIZED;
     }
 
     static public String getStringSafely(GenericRecord record, String field) {
@@ -72,5 +84,16 @@ public class DeserializerUtil {
         } catch (AvroRuntimeException e) {
             return 0L;
         }
+    }
+
+    static public SinkProto.OperationType getOperationType(String op) {
+        op = op.toLowerCase();
+        return switch (op) {
+            case "c" -> SinkProto.OperationType.INSERT;
+            case "u" -> SinkProto.OperationType.UPDATE;
+            case "d" -> SinkProto.OperationType.DELETE;
+            case "r" -> SinkProto.OperationType.SNAPSHOT;
+            default -> throw new IllegalArgumentException(String.format("Can't convert %s to operation type", op));
+        };
     }
 }

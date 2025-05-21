@@ -17,12 +17,10 @@
 
 package io.pixelsdb.pixels.sink.concurrent;
 
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.TestUtils;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
-import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
-import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
-import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -67,34 +65,35 @@ class TransactionCoordinatorTest {
         }
     }
 
-    private TransactionMetadataValue.TransactionMetadata buildBeginTx(String txId) {
-        return TransactionMetadataValue.TransactionMetadata.newBuilder()
+    private SinkProto.TransactionMetadata buildBeginTx(String txId) {
+        return SinkProto.TransactionMetadata.newBuilder()
                 .setId(txId)
-                .setStatus("BEGIN")
+                .setStatus(SinkProto.TransactionStatus.BEGIN)
                 .build();
     }
 
-    private TransactionMetadataValue.TransactionMetadata buildEndTx(String txId) {
-        return TransactionMetadataValue.TransactionMetadata.newBuilder()
+    private SinkProto.TransactionMetadata buildEndTx(String txId) {
+        return SinkProto.TransactionMetadata.newBuilder()
                 .setId(txId)
-                .setStatus("END")
+                .setStatus(SinkProto.TransactionStatus.END)
                 .build();
     }
 
     private RowChangeEvent buildEvent(String txId, String table, long collectionOrder, long totalOrder) {
         return new RowChangeEvent(
-                RowRecordMessage.RowRecord.newBuilder().setTransaction(
-                                RowRecordMessage.TransactionInfo.newBuilder()
+
+                SinkProto.RowRecord.newBuilder().setTransaction(
+                                SinkProto.TransactionInfo.newBuilder()
                                         .setId(txId)
                                         .setTotalOrder(totalOrder)
                                         .setDataCollectionOrder(collectionOrder)
                                         .build()
                         ).setSource(
-                        RowRecordMessage.SourceInfo.newBuilder()
+                                SinkProto.SourceInfo.newBuilder()
                                 .setTable(table)
                                 .setDb("test_db")
                                 .build()
-                        ).setOp("c")
+                        ).setOp(SinkProto.OperationType.INSERT)
                         .build()
         );
     }
@@ -133,13 +132,12 @@ class TransactionCoordinatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = OperationType.class, names = {"INSERT", "UPDATE", "DELETE", "SNAPSHOT"})
-    void shouldProcessNonTransactionalEvents(OperationType opType) throws InterruptedException {
+    @EnumSource(value = SinkProto.OperationType.class, names = {"INSERT", "UPDATE", "DELETE", "SNAPSHOT"})
+    void shouldProcessNonTransactionalEvents(SinkProto.OperationType opType) throws InterruptedException {
         RowChangeEvent event = new RowChangeEvent(
-                RowRecordMessage.RowRecord.newBuilder().build(),
-                opType,
-                null,
-                null
+                SinkProto.RowRecord.newBuilder()
+                        .setOp(opType)
+                        .build()
         );
         coordinator.processRowEvent(event);
         TimeUnit.MILLISECONDS.sleep(10);

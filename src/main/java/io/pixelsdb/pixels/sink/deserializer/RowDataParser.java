@@ -18,8 +18,11 @@
 package io.pixelsdb.pixels.sink.deserializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.pixelsdb.pixels.core.PixelsProto;
 import io.pixelsdb.pixels.core.TypeDescription;
-import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
+import io.pixelsdb.pixels.retina.RetinaProto;
+import io.pixelsdb.pixels.sink.SinkProto;
+import org.apache.avro.generic.GenericRecord;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -37,11 +40,20 @@ class RowDataParser {
         this.schema = schema;
     }
 
-    public Map<String, Object> parse(JsonNode dataNode, OperationType operation) {
-        if (dataNode.isNull() && operation == OperationType.DELETE) {
+    public Map<String, Object> parse(JsonNode dataNode, SinkProto.OperationType operation) {
+        if (dataNode.isNull() && operation == SinkProto.OperationType.DELETE) {
             return parseDeleteRecord();
         }
         return parseNode(dataNode, schema);
+    }
+
+    public void parse(GenericRecord record, SinkProto.RowValue.Builder builder) {
+        for (int i = 0; i < schema.getFieldNames().size(); i++) {
+            String fieldName = schema.getFieldNames().get(i);
+            TypeDescription fieldType = schema.getChildren().get(i);
+            builder.addValues(parseValue(record, fieldName, fieldType));
+            // result.put(fieldName, parseValue(node.get(fieldName), fieldType));
+        }
     }
 
     private Map<String, Object> parseNode(JsonNode node, TypeDescription schema) {
@@ -75,6 +87,45 @@ class RowDataParser {
             default:
                 throw new IllegalArgumentException("Unsupported type: " + type);
         }
+    }
+
+    private SinkProto.ColumnValue.Builder parseValue(GenericRecord record, String filedName, TypeDescription fileType) {
+
+        SinkProto.ColumnValue.Builder columnValueBuilder = SinkProto.ColumnValue.newBuilder();
+        columnValueBuilder.setName(filedName);
+        switch (fileType.getCategory()) {
+            case INT: {
+                int value = (int) record.get(filedName);
+                columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setIntegerValue(value));
+                columnValueBuilder.setType(PixelsProto.Type.newBuilder().setKind(PixelsProto.Type.Kind.INT));
+                break;
+            }
+
+            case LONG: {
+                long value = (long) record.get(filedName);
+                columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setLongValue(value));
+                columnValueBuilder.setType(PixelsProto.Type.newBuilder().setKind(PixelsProto.Type.Kind.LONG));
+                break;
+            }
+
+            case STRING: {
+                String value = (String) record.get(filedName);
+                columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setStringValue(value));
+                columnValueBuilder.setType(PixelsProto.Type.newBuilder().setKind(PixelsProto.Type.Kind.STRING));
+                break;
+            }
+//            case DECIMAL:
+//                return parseDecimal(valueNode, type);
+//            case DATE:
+//                return parseDate(valueNode);
+//            case STRUCT:
+//                return parseNode(valueNode, type);
+//            case BINARY:
+//                return parseBinary(valueNode);
+            default:
+                throw new IllegalArgumentException("Unsupported type: " + fileType.getCategory());
+        }
+        return columnValueBuilder;
     }
 
     private Map<String, Object> parseDeleteRecord() {

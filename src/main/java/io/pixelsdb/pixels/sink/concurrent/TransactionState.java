@@ -17,8 +17,8 @@
 
 package io.pixelsdb.pixels.sink.concurrent;
 
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
-import io.pixelsdb.pixels.sink.proto.TransactionMetadataValue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,11 +68,11 @@ public class TransactionState {
         return System.currentTimeMillis() - beginTs > timeoutMs;
     }
 
-    public void setExpectedCounts(List<TransactionMetadataValue.TransactionMetadata.DataCollection> dataCollectionList) {
+    public void setExpectedCounts(List<SinkProto.DataCollection> dataCollectionList) {
         this.expectedCounts = dataCollectionList.stream()
                 .collect(Collectors.toMap(
-                        TransactionMetadataValue.TransactionMetadata.DataCollection::getDataCollection,
-                        TransactionMetadataValue.TransactionMetadata.DataCollection::getEventCount
+                        SinkProto.DataCollection::getDataCollection,
+                        SinkProto.DataCollection::getEventCount
                 ));
     }
 

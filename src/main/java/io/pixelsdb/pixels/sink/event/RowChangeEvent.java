@@ -22,36 +22,35 @@ import io.pixelsdb.pixels.common.metadata.domain.SecondaryIndex;
 import io.pixelsdb.pixels.core.TypeDescription;
 import io.pixelsdb.pixels.index.IndexProto;
 import io.pixelsdb.pixels.retina.RetinaProto;
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.metadata.TableMetadata;
 import io.pixelsdb.pixels.sink.metadata.TableMetadataRegistry;
 import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
-import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
-import io.pixelsdb.pixels.sink.proto.RowRecordMessage;
-import io.pixelsdb.pixels.sink.sink.RetinaWriter;
 import io.prometheus.client.Summary;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+
 public class RowChangeEvent {
 
     @Getter
     private IndexProto.IndexKey indexKey;
+    private final SinkProto.RowRecord rowRecord;
+    @Setter
     private SecondaryIndex indexInfo;
     /**
      * timestamp from pixels transaction server
      */
+    @Setter
     @Getter
     private long timeStamp;
-    @Getter
-    private final OperationType op;
-    private final RowRecordMessage.RowRecord rowRecord;
 
     @Getter
     private final TypeDescription schema;
-    private Map<String, Object> before = null;
-    private Map<String, Object> after = null;
+
     @Getter
     private String topic;
 
@@ -62,26 +61,19 @@ public class RowChangeEvent {
     private Summary.Timer latencyTimer;
 
 
-    public RowChangeEvent(RowRecordMessage.RowRecord rowRecord) {
+    public RowChangeEvent(SinkProto.RowRecord rowRecord) {
         this.rowRecord = rowRecord;
-        this.op = OperationType.fromString(rowRecord.getOp());
         this.schema = null;
     }
 
     @Deprecated
-    public RowChangeEvent(RowRecordMessage.RowRecord rowRecord, OperationType op, Map<String, Object> before, Map<String, Object> after) {
+    public RowChangeEvent(SinkProto.RowRecord rowRecord, SinkProto.OperationType op, Map<String, Object> before, Map<String, Object> after) {
         this.rowRecord = rowRecord;
-        this.op = op;
-        this.before = before;
-        this.after = after;
         this.schema = null;
     }
 
-    public RowChangeEvent(RowRecordMessage.RowRecord rowRecord, TypeDescription schema, OperationType op, Map<String, Object> before, Map<String, Object> after) {
+    public RowChangeEvent(SinkProto.RowRecord rowRecord, TypeDescription schema, SinkProto.OperationType op, Map<String, Object> before, Map<String, Object> after) {
         this.rowRecord = rowRecord;
-        this.op = op;
-        this.before = before;
-        this.after = after;
         this.schema = schema;
         this.timeStamp = rowRecord.getTsMs();
     }
@@ -96,7 +88,7 @@ public class RowChangeEvent {
 
 
     public void initIndexKey() {
-        if (op == OperationType.INSERT || op == OperationType.SNAPSHOT) {
+        if (getOp() == SinkProto.OperationType.INSERT || getOp() == SinkProto.OperationType.SNAPSHOT) {
             // We do not need to generate an index key for insert request
             return;
         }
@@ -108,41 +100,33 @@ public class RowChangeEvent {
         ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
 
+        // TODO ser index key
         for (String name : keyColumnNames) {
-            byteBuffer.put(before.get(name).toString().getBytes()); // TODO (LiZinuo): 不确定这里如何生成index key
+            //  byteBuffer.put(before.get(name).toString().getBytes());
         }
+
         this.indexKey = IndexProto.IndexKey.newBuilder()
                 .setTimestamp(timeStamp)
                 .setKey(ByteString.copyFrom(byteBuffer))
-                //.setIndexId(indexInfo.getId())
+                // .setIndexId(indexInfo.getId())
                 .build();
     }
 
-    public RetinaProto.Value getBeforePk() {
-        return RetinaWriter.convertValue(
-                before.get(tableMetadata.getKeyColumnNames().get(0)));
 
+    // TODO change
+    public RetinaProto.Value getBeforePk() {
+        return rowRecord.getBefore().getValues(0).getValue();
     }
 
     public RetinaProto.Value getAfterPk() {
-        return RetinaWriter.convertValue(
-                after.get(tableMetadata.getKeyColumnNames().get(0)));
+        return rowRecord.getBefore().getValues(0).getValue();
     }
 
     public String getSourceTable() {
         return rowRecord.getSource().getTable();
     }
 
-
-    public Map<String, Object> getBeforeData() {
-        return before;
-    }
-
-    public Map<String, Object> getAfterData() {
-        return after;
-    }
-
-    public RowRecordMessage.TransactionInfo getTransaction() {
+    public SinkProto.TransactionInfo getTransaction() {
         return rowRecord.getTransaction();
     }
 
@@ -163,7 +147,7 @@ public class RowChangeEvent {
         return false;
     }
 
-    public RowRecordMessage.ErrorInfo getErrorInfo() {
+    public SinkProto.ErrorInfo getErrorInfo() {
         return rowRecord.getError();
     }
 
@@ -172,15 +156,15 @@ public class RowChangeEvent {
     }
 
     public boolean isDelete() {
-        return op == OperationType.DELETE;
+        return getOp() == SinkProto.OperationType.DELETE;
     }
 
     public boolean isInsert() {
-        return op == OperationType.INSERT;
+        return getOp() == SinkProto.OperationType.INSERT;
     }
 
     public boolean isUpdate() {
-        return op == OperationType.UPDATE;
+        return getOp() == SinkProto.OperationType.UPDATE;
     }
 
     public Long getTimeStampUs() {
@@ -200,5 +184,9 @@ public class RowChangeEvent {
             this.latencyTimer.close();
         }
 
+    }
+
+    public SinkProto.OperationType getOp() {
+        return rowRecord.getOp();
     }
 }

@@ -25,11 +25,11 @@ import io.pixelsdb.pixels.common.index.IndexService;
 import io.pixelsdb.pixels.index.IndexProto;
 import io.pixelsdb.pixels.retina.RetinaProto;
 import io.pixelsdb.pixels.retina.RetinaWorkerServiceGrpc;
+import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.monitor.MetricsFacade;
-import io.pixelsdb.pixels.sink.pojo.enums.OperationType;
 import io.pixelsdb.pixels.sink.util.LatencySimulator;
 import io.prometheus.client.Summary;
 import lombok.Getter;
@@ -46,7 +46,7 @@ public class RetinaWriter implements PixelsSinkWriter {
     private static final Logger LOGGER = LoggerFactory.getLogger(RetinaWriter.class);
     @Getter
     private static final PixelsSinkMode pixelsSinkMode = PixelsSinkMode.RETINA;
-    private static final IndexService indexService = new IndexService();
+    private static final IndexService indexService = IndexService.Instance();
 
 
     private static final PixelsSinkConfig config = PixelsSinkConfigFactory.getInstance();
@@ -125,12 +125,11 @@ public class RetinaWriter implements PixelsSinkWriter {
                         return sendUpdateRequest(event);
                     case DELETE:
                         return sendDeleteRequest(event);
-                    case UNKNOWN:
                     case UNRECOGNIZED:
                         break;
                 }
             } else {
-                if (event.getOp() != OperationType.INSERT && event.getOp() != OperationType.SNAPSHOT) {
+                if (event.getOp() != SinkProto.OperationType.INSERT && event.getOp() != SinkProto.OperationType.SNAPSHOT) {
                     Summary.Timer indexLatencyTimer = metricsFacade.startIndexLatencyTimer();
                     LatencySimulator.smartDelay(); // Mock Look Up Index
                     indexLatencyTimer.close();
@@ -162,10 +161,10 @@ public class RetinaWriter implements PixelsSinkWriter {
         RetinaProto.InsertRecordRequest.Builder builder = RetinaProto.InsertRecordRequest.newBuilder();
 //        event.getAfterData().forEach((col, value) ->
 //                builder.addColValues(value.toString()));
-//
-//        // Step2. Build Insert Request
+
+        // Step2. Build Insert Request
         return builder
-                //.setTable(event.getTable())
+                // .setTable(event.getTable())
                 .setTimestamp(event.getTimeStamp()).build();
     }
 
@@ -180,8 +179,8 @@ public class RetinaWriter implements PixelsSinkWriter {
 
         // Step2. Serialize New Data
         RetinaProto.UpdateRecordRequest.Builder builder = RetinaProto.UpdateRecordRequest.newBuilder();
-        event.getAfterData().forEach((col, value) ->
-                builder.addNewValues(convertValue(value)));
+//        event.getAfterData().forEach((col, value) ->
+//                builder.addNewValues(convertValue(value)));
 
         // Step3. Build Update Request
         return builder
