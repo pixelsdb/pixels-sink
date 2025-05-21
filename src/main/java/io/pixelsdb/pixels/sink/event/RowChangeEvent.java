@@ -66,6 +66,11 @@ public class RowChangeEvent {
         this.schema = null;
     }
 
+
+    public RowChangeEvent(SinkProto.RowRecord rowRecord, TypeDescription schema) {
+        this.rowRecord = rowRecord;
+        this.schema = schema;
+    }
     @Deprecated
     public RowChangeEvent(SinkProto.RowRecord rowRecord, SinkProto.OperationType op, Map<String, Object> before, Map<String, Object> after) {
         this.rowRecord = rowRecord;

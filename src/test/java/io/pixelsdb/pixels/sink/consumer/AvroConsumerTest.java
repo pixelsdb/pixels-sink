@@ -44,7 +44,7 @@ public class AvroConsumerTest {
     private static final String TOPIC = "oltp_server.pixels_realtime_crud.customer";
     private static final String REGISTRY_URL = "http://localhost:8080/apis/registry/v2";
     private static final String BOOTSTRAP_SERVERS = "localhost:29092";
-    private static final String GROUP_ID = "avro-consumer-test-group-4";
+    private static final String GROUP_ID = "avro-consumer-test-group-5";
 
     private static KafkaConsumer<String, RowChangeEvent> getRowChangeEventAvroKafkaConsumer() {
         Properties props = new Properties();

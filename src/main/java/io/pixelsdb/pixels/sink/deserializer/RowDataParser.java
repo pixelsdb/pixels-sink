@@ -27,12 +27,12 @@ import org.apache.avro.generic.GenericRecord;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 class RowDataParser {
     private final TypeDescription schema;
 
@@ -51,7 +51,7 @@ class RowDataParser {
         for (int i = 0; i < schema.getFieldNames().size(); i++) {
             String fieldName = schema.getFieldNames().get(i);
             TypeDescription fieldType = schema.getChildren().get(i);
-            builder.addValues(parseValue(record, fieldName, fieldType));
+            builder.addValues(parseValue(record, fieldName, fieldType).build());
             // result.put(fieldName, parseValue(node.get(fieldName), fieldType));
         }
     }
@@ -89,11 +89,11 @@ class RowDataParser {
         }
     }
 
-    private SinkProto.ColumnValue.Builder parseValue(GenericRecord record, String filedName, TypeDescription fileType) {
+    private SinkProto.ColumnValue.Builder parseValue(GenericRecord record, String filedName, TypeDescription filedType) {
 
         SinkProto.ColumnValue.Builder columnValueBuilder = SinkProto.ColumnValue.newBuilder();
         columnValueBuilder.setName(filedName);
-        switch (fileType.getCategory()) {
+        switch (filedType.getCategory()) {
             case INT: {
                 int value = (int) record.get(filedName);
                 columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setIntegerValue(value));
@@ -109,13 +109,21 @@ class RowDataParser {
             }
 
             case STRING: {
-                String value = (String) record.get(filedName);
+                String value = (String) record.get(filedName).toString();
                 columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setStringValue(value));
                 columnValueBuilder.setType(PixelsProto.Type.newBuilder().setKind(PixelsProto.Type.Kind.STRING));
                 break;
             }
-//            case DECIMAL:
-//                return parseDecimal(valueNode, type);
+            case DECIMAL: {
+                columnValueBuilder.setType(PixelsProto.Type.newBuilder()
+                        .setKind(PixelsProto.Type.Kind.DECIMAL)
+                        .setDimension(filedType.getDimension())
+                        .setScale(filedType.getScale())
+                        .build());
+                columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setStringValue(
+                        new String(((ByteBuffer) record.get(filedName)).array())));
+                break;
+            }
 //            case DATE:
 //                return parseDate(valueNode);
 //            case STRUCT:
@@ -123,7 +131,7 @@ class RowDataParser {
 //            case BINARY:
 //                return parseBinary(valueNode);
             default:
-                throw new IllegalArgumentException("Unsupported type: " + fileType.getCategory());
+                throw new IllegalArgumentException("Unsupported type: " + filedType.getCategory());
         }
         return columnValueBuilder;
     }

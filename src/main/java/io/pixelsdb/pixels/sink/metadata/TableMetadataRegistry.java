@@ -86,7 +86,7 @@ public class TableMetadataRegistry {
      * @return
      */
     public TypeDescription parseTypeDescription(GenericRecord record, String sourceSchema, String sourceTable) {
-        Schema schema = ((GenericData.Record) record.get("before")).getSchema();
+        Schema schema = ((GenericData.Record) record).getSchema().getField("before").schema().getTypes().get(1);
         TableMetadataKey tableMetadataKey = new TableMetadataKey(sourceSchema, sourceTable);
         TypeDescription typeDescription = typeDescriptionConcurrentMap.computeIfAbsent(
                 tableMetadataKey,

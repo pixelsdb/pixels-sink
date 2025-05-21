@@ -70,7 +70,7 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
     private RowChangeEvent convertToRowChangeEvent(GenericRecord avroRecord, Schema schema) {
         SinkProto.OperationType op = parseOperationType(avroRecord);
         SinkProto.RowRecord.Builder recordBuilder = SinkProto.RowRecord.newBuilder()
-                .setOp(DeserializerUtil.getOperationType(avroRecord.get("op").toString()))
+                .setOp(op)
                 .setTsMs(DeserializerUtil.getLongSafely(avroRecord, "ts_ms"));
 
         if (avroRecord.get("source") != null) {
@@ -78,20 +78,20 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
             parseSourceInfo((GenericRecord) avroRecord.get("source"), recordBuilder.getSourceBuilder());
         }
 
-        String sourceSchema = recordBuilder.getSource().getSchema();
+        String sourceSchema = recordBuilder.getSource().getDb();
         String sourceTable = recordBuilder.getSource().getTable();
         TypeDescription typeDescription = tableMetadataRegistry.parseTypeDescription(avroRecord, sourceSchema, sourceTable);
         // TableMetadata tableMetadata = tableMetadataRegistry.loadTableMetadata(sourceSchema, sourceTable);
 
-        parseRowData(avroRecord.get("before"), recordBuilder.getBeforeBuilder(), typeDescription);
-        parseRowData(avroRecord.get("after"), recordBuilder.getAfterBuilder(), typeDescription);
+        recordBuilder.setBefore(parseRowData(avroRecord.get("before"), typeDescription));
+        recordBuilder.setAfter(parseRowData(avroRecord.get("after"), typeDescription));
 
         if (avroRecord.get("transaction") != null) {
             parseTransactionInfo((GenericRecord) avroRecord.get("transaction"),
                     recordBuilder.getTransactionBuilder());
         }
 
-        return new RowChangeEvent(recordBuilder.build());
+        return new RowChangeEvent(recordBuilder.build(), typeDescription);
     }
 
     private SinkProto.OperationType parseOperationType(GenericRecord record) {
@@ -103,11 +103,13 @@ public class RowChangeEventAvroDeserializer implements Deserializer<RowChangeEve
         }
     }
 
-    private void parseRowData(Object data, SinkProto.RowValue.Builder builder, TypeDescription typeDescription) {
+    private SinkProto.RowValue.Builder parseRowData(Object data, TypeDescription typeDescription) {
+        SinkProto.RowValue.Builder builder = SinkProto.RowValue.newBuilder();
         if (data instanceof GenericRecord rowData) {
             RowDataParser rowDataParser = new RowDataParser(typeDescription); // TODO make it static?
             rowDataParser.parse(rowData, builder);
         }
+        return builder;
     }
 
     private void parseSourceInfo(GenericRecord source, SinkProto.SourceInfo.Builder builder) {
