@@ -21,6 +21,7 @@ import io.apicurio.registry.rest.client.RegistryClient;
 import io.apicurio.registry.rest.client.RegistryClientFactory;
 import io.apicurio.registry.serde.SerdeConfig;
 import io.apicurio.registry.serde.avro.AvroKafkaDeserializer;
+import io.pixelsdb.pixels.retina.RetinaProto;
 import io.pixelsdb.pixels.sink.SinkProto;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.deserializer.RowChangeEventAvroDeserializer;
@@ -44,7 +45,7 @@ public class AvroConsumerTest {
     private static final String TOPIC = "oltp_server.pixels_realtime_crud.customer";
     private static final String REGISTRY_URL = "http://localhost:8080/apis/registry/v2";
     private static final String BOOTSTRAP_SERVERS = "localhost:29092";
-    private static final String GROUP_ID = "avro-consumer-test-group-5";
+    private static final String GROUP_ID = "avro-consumer-test-group-1";
 
     private static KafkaConsumer<String, RowChangeEvent> getRowChangeEventAvroKafkaConsumer() {
         Properties props = new Properties();
@@ -62,7 +63,11 @@ public class AvroConsumerTest {
     }
 
     private static void processRecord(RowChangeEvent event) {
-
+        RetinaProto.RowValue.Builder builder = RetinaProto.RowValue.newBuilder();
+        for (SinkProto.ColumnValue value : event.getRowRecord().getAfter().getValuesList()) {
+            builder.addValues(value.getValue());
+        }
+        builder.build();
     }
 
     private static KafkaConsumer<String, GenericRecord> getStringGenericRecordKafkaConsumer() {

@@ -94,11 +94,6 @@ public class CsvWriter implements PixelsSinkWriter {
     }
 
     @Override
-    public boolean write(Map<String, Object> message) throws IOException {
-        return true;
-    }
-
-    @Override
     public boolean write(RowChangeEvent event) {
         final String tableName = event.getTable();
         if (event.getOp() == SinkProto.OperationType.DELETE) {

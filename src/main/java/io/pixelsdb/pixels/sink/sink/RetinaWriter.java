@@ -17,7 +17,6 @@
 
 package io.pixelsdb.pixels.sink.sink;
 
-import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -37,10 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class RetinaWriter implements PixelsSinkWriter {
     private static final Logger LOGGER = LoggerFactory.getLogger(RetinaWriter.class);
@@ -50,7 +47,6 @@ public class RetinaWriter implements PixelsSinkWriter {
 
 
     private static final PixelsSinkConfig config = PixelsSinkConfigFactory.getInstance();
-    private final ReentrantLock writeLock = new ReentrantLock();
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     // TODO(LiZinuo): 使用RetinaService替换
     final ManagedChannel channel;
@@ -76,36 +72,6 @@ public class RetinaWriter implements PixelsSinkWriter {
 
     @Override
     public void flush() {
-    }
-
-    //TODO: Move this method to somewhere else
-    public static RetinaProto.Value convertValue(Object value) {
-        RetinaProto.Value.Builder builder = RetinaProto.Value.newBuilder();
-        if (value instanceof byte[]) {
-            builder.setStringValueBytes(ByteString.copyFrom((byte[]) value));
-        } else if (value instanceof String) {
-            builder.setStringValue((String) value);
-        } else if (value instanceof Integer) {
-            builder.setIntegerValue((Integer) value);
-        } else if (value instanceof Long) {
-            builder.setLongValue((Long) value);
-        } else if (value instanceof Double) {
-            builder.setDoubleValue((Double) value);
-        } else {
-            throw new IllegalArgumentException("Unsupported data type: " + value.getClass());
-        }
-        return builder.build();
-    }
-
-    @Override
-    @Deprecated
-    public boolean write(Map<String, Object> message) throws IOException {
-        if (isClosed.get()) {
-            throw new IOException("Writer is already closed");
-        }
-//        SinkProto.WriteRequest request = SinkProto.WriteRequest.newBuilder().build();
-//        SinkProto.WriteResponse response = blockingStub.writeData(request);
-        return false;
     }
 
     @Override
@@ -159,42 +125,23 @@ public class RetinaWriter implements PixelsSinkWriter {
     private RetinaProto.InsertRecordRequest getInsertRecordRequest(RowChangeEvent event) {
         // Step1. Serialize Row Data
         RetinaProto.InsertRecordRequest.Builder builder = RetinaProto.InsertRecordRequest.newBuilder();
-//        event.getAfterData().forEach((col, value) ->
-//                builder.addColValues(value.toString()));
+        RetinaProto.RowValue.Builder rowValueBuilder = builder.getRowBuilder();
+        event.getAfterData().getValuesList().forEach(value ->
+                builder.setRow(rowValueBuilder.addValues(value.getValue())));
 
         // Step2. Build Insert Request
         return builder
-                // .setTable(event.getTable())
-                .setTimestamp(event.getTimeStamp()).build();
-    }
-
-    private boolean sendUpdateRequest(RowChangeEvent event) {
-        RetinaProto.UpdateRecordResponse updateRecordResponse = blockingStub.updateRecord(getUpdateRecordRequest(event));
-        return updateRecordResponse.getHeader().getErrorCode() == 0;
-    }
-
-    private RetinaProto.UpdateRecordRequest getUpdateRecordRequest(RowChangeEvent event) {
-        // Step1. Look up unique index to find row location
-        IndexProto.RowLocation rowLocation = indexService.lookupUniqueIndex(event.getIndexKey());
-
-        // Step2. Serialize New Data
-        RetinaProto.UpdateRecordRequest.Builder builder = RetinaProto.UpdateRecordRequest.newBuilder();
-//        event.getAfterData().forEach((col, value) ->
-//                builder.addNewValues(convertValue(value)));
-
-        // Step3. Build Update Request
-        return builder
-                .setTableName(event.getTable())
-                .setSchemaName(event.getSchemaName())
+                .setSchema(event.getDb())
+                .setTable(event.getTable())
+                .setRow(rowValueBuilder.build())
                 .setTimestamp(event.getTimeStamp())
-                .setPrimaryKey(event.getAfterPk())
-                .setPkId(event.getPkId())
+                .setTransInfo(getTransinfo(event))
                 .build();
     }
 
     private boolean sendDeleteRequest(RowChangeEvent event) {
-        RetinaProto.UpdateRecordResponse updateRecordResponse = blockingStub.updateRecord(getUpdateRecordRequest(event));
-        return updateRecordResponse.getHeader().getErrorCode() == 0;
+        RetinaProto.DeleteRecordResponse deleteRecordResponse = blockingStub.deleteRecord(getDeleteRecordRequest(event));
+        return deleteRecordResponse.getHeader().getErrorCode() == 0;
     }
 
     @Override
@@ -219,12 +166,26 @@ public class RetinaWriter implements PixelsSinkWriter {
         // Step2. Build Delete Request
         RetinaProto.DeleteRecordRequest.Builder builder = RetinaProto.DeleteRecordRequest.newBuilder();
         return builder
-                .setTableName(event.getTable())
-                .setSchemaName(event.getSchemaName())
+                .setRow(builder.getRowBuilder().setRgRowId(rowLocation.getRgRowId()).setFileId(rowLocation.getFileId()).setRgId(rowLocation.getRgId()))
                 .setTimestamp(event.getTimeStamp())
-                .setPrimaryKey(event.getBeforePk())
-                .setPkId(event.getPkId())
+                .setTransInfo(getTransinfo(event))
                 .build();
     }
 
+    private boolean sendUpdateRequest(RowChangeEvent event) {
+        // Delete & Insert
+        RetinaProto.DeleteRecordResponse deleteRecordResponse = blockingStub.deleteRecord(getDeleteRecordRequest(event));
+        if (deleteRecordResponse.getHeader().getErrorCode() != 0) {
+            return false;
+        }
+
+        RetinaProto.InsertRecordResponse insertRecordResponse = blockingStub.insertRecord(getInsertRecordRequest(event));
+        return insertRecordResponse.getHeader().getErrorCode() == 0;
+    }
+
+    private RetinaProto.TransInfo getTransinfo(RowChangeEvent event) {
+        return RetinaProto.TransInfo.newBuilder()
+                .setOrder(event.getTransaction().getTotalOrder())
+                .setTransId(event.getTransaction().getId().hashCode()).build();
+    }
 }

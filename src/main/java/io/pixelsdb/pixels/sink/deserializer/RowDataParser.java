@@ -96,21 +96,21 @@ class RowDataParser {
         switch (filedType.getCategory()) {
             case INT: {
                 int value = (int) record.get(filedName);
-                columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setIntegerValue(value));
+                columnValueBuilder.setValue(RetinaProto.ColumnValue.newBuilder().setNumberVal(Integer.toString(value)));
                 columnValueBuilder.setType(PixelsProto.Type.newBuilder().setKind(PixelsProto.Type.Kind.INT));
                 break;
             }
 
             case LONG: {
                 long value = (long) record.get(filedName);
-                columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setLongValue(value));
+                columnValueBuilder.setValue(RetinaProto.ColumnValue.newBuilder().setNumberVal(Long.toString(value)));
                 columnValueBuilder.setType(PixelsProto.Type.newBuilder().setKind(PixelsProto.Type.Kind.LONG));
                 break;
             }
 
             case STRING: {
                 String value = (String) record.get(filedName).toString();
-                columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setStringValue(value));
+                columnValueBuilder.setValue(RetinaProto.ColumnValue.newBuilder().setStringVal(value));
                 columnValueBuilder.setType(PixelsProto.Type.newBuilder().setKind(PixelsProto.Type.Kind.STRING));
                 break;
             }
@@ -120,7 +120,7 @@ class RowDataParser {
                         .setDimension(filedType.getDimension())
                         .setScale(filedType.getScale())
                         .build());
-                columnValueBuilder.setValue(RetinaProto.Value.newBuilder().setStringValue(
+                columnValueBuilder.setValue(RetinaProto.ColumnValue.newBuilder().setNumberVal(
                         new String(((ByteBuffer) record.get(filedName)).array())));
                 break;
             }
