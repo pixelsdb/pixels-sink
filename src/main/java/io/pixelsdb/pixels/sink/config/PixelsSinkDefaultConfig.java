@@ -39,6 +39,11 @@ public class PixelsSinkDefaultConfig {
 //    sink.timeout.ms=5000
 //    sink.flush.interval.ms=5000
 //    sink.max.retries=3
+
+    // Transaction Service
+    public static final int TRANSACTION_BATCH_SIZE = 100;
+
+
     // REMOTE BUFFER
     public static final String SINK_REMOTE_HOST = "localhost";
     public static final short SINK_REMOTE_PORT = 22942;

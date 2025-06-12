@@ -194,7 +194,7 @@ class TransactionCoordinatorTest {
         }
 
         @Override
-        protected void dispatchImmediately(RowChangeEvent event, TransactionContext ctx) {
+        protected void dispatchImmediately(RowChangeEvent event, SinkContext ctx) {
             dispatchExecutor.execute(() -> {
                 try {
                     String log = String.format("Dispatching [%s] %s.%s (Order: %s/%s)",

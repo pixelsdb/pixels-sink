@@ -39,6 +39,8 @@ public class PixelsSinkConfig {
     private short monitorPort;
     private boolean rpcEnable;
     private int mockRpcDelay;
+    private int transBatchSize;
+
     public PixelsSinkConfig(String configFilePath) throws IOException {
         this.config = ConfigFactory.Instance();
         this.config.loadProperties(configFilePath);
@@ -63,6 +65,7 @@ public class PixelsSinkConfig {
         this.monitorPort = parseShort(getProperty("sink.monitor.port"), PixelsSinkDefaultConfig.SINK_MONITOR_PORT);
         this.rpcEnable = parseBoolean(getProperty("sink.rpc.enable"), PixelsSinkDefaultConfig.SINK_RPC_ENABLED);
         this.mockRpcDelay = parseInt(getProperty("sink.rpc.mock.delay"), PixelsSinkDefaultConfig.MOCK_RPC_DELAY);
+        this.transBatchSize = parseInt(getProperty("sink.trans.batch.size"), PixelsSinkDefaultConfig.TRANSACTION_BATCH_SIZE);
     }
 
     public String getTopicPrefix() {
