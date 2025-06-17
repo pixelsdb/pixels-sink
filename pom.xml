@@ -7,12 +7,12 @@
     <parent>
         <artifactId>pixels</artifactId>
         <groupId>io.pixelsdb</groupId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.2.0-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <artifactId>pixels-sink</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <description>Pixels Data Sink</description>
     <url>https://github.com/pixelsdb/pixels-sink</url>
     <inceptionYear>2022</inceptionYear>
@@ -27,13 +27,18 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <mainClass>io.pixelsdb.pixels.sink.Main</mainClass>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <mainClass>io.pixelsdb.pixels.sink.PixelsSinkApp</mainClass>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
 
-        <dep.argparse4j.version>0.7.0</dep.argparse4j.version>
+        <dep.argparse4j.version>0.9.0</dep.argparse4j.version>
+        <dep.kafka.version>3.8.0</dep.kafka.version>
+        <dep.opencsv.version>5.8</dep.opencsv.version>
+        <dep.lombok.version>1.18.36</dep.lombok.version>
+        <dep.debezium.version>3.0.7.Final</dep.debezium.version>
+        <plugin.dockerfile-maven.version>1.4.13</plugin.dockerfile-maven.version>
     </properties>
 
     <dependencies>
@@ -47,41 +52,23 @@
             <artifactId>pixels-core</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-cache</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-storage-localfs</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-storage-hdfs</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-storage-s3</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.facebook.presto</groupId>
-            <artifactId>presto-jdbc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.trino</groupId>
-            <artifactId>trino-jdbc</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <!-- the default binding from slf4j to log4j, be careful of other conflict bindings -->
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>${dep.log4j.version}</version>
         </dependency>
 
         <!-- grpc -->
@@ -100,6 +87,16 @@
             <artifactId>grpc-stub</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>3.25.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>
@@ -107,6 +104,98 @@
             <version>${dep.argparse4j.version}</version>
             <optional>true</optional>
         </dependency>
+
+        <!-- Kafka Consumer Dependency -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${dep.kafka.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${dep.opencsv.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${dep.lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+        <!-- debezium-->
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-api</artifactId>
+            <version>${dep.debezium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-embedded</artifactId>
+            <version>${dep.debezium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-sink</artifactId>
+            <version>${dep.debezium.version}</version>
+        </dependency>
+
+        <!-- testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.apicurio</groupId>
+            <artifactId>apicurio-registry-serdes-avro-serde</artifactId>
+            <version>2.6.2.Final</version>
+        </dependency>
+
+
+        <!--monitor-->
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <version>0.16.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_httpserver</artifactId>
+            <version>0.16.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -154,6 +243,56 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+        <plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>dockerfile-maven-plugin</artifactId>
+            <version>${plugin.dockerfile-maven.version}</version>
+            <configuration>
+                <repository>${project.artifactId}</repository>
+                <tag>${project.version}</tag>
+                <buildArgs>
+                    <jarFile>${project.build.finalName}-${project.version}-full.jar</jarFile>
+                </buildArgs>
+                <dockerfile>develop/images/pixels-sink/Dockerfile</dockerfile>
+            </configuration>
+        </plugin>
+            <plugin>
+                <groupId>com.github.os72</groupId>
+                <artifactId>protoc-jar-maven-plugin</artifactId>
+                <version>3.3.0.1</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <inputDirectories>
+                                <directory>src/main/proto</directory>
+                            </inputDirectories>
+                            <outputTargets>
+                                <outputTarget>
+                                    <type>java</type>
+                                    <outputDirectory>src/main/java</outputDirectory>
+                                </outputTarget>
+                                <outputTarget>
+                                    <type>grpc-java</type>
+                                    <outputDirectory>src/main/java</outputDirectory>
+                                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.53.0</pluginArtifact>
+                                </outputTarget>
+                            </outputTargets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>16</source>
+                    <target>16</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>

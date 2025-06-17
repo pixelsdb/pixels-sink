@@ -1,0 +1,207 @@
+services:
+
+  apicurio:
+    image: apicurio/apicurio-registry-mem:2.6.2.Final
+    container_name: apicurio
+    ports:
+      - "8080:8080"
+    networks:
+      - pixels_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: pixels_mysql_source_db
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql-root-password
+      MYSQL_DATABASE: pixels_realtime_crud
+      MYSQL_USER: pixels
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql-pixels-password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./example/sql:/var/lib/mysql-files/sql
+      - ./example/tpch_data:/var/lib/mysql-files/tpch_data
+      - ./example/mysql_init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./example/mysql_load.sql:/load.sql
+    secrets:
+      - mysql-root-password
+      - mysql-pixels-password
+    networks:
+      - pixels_network
+
+  postgres:
+    image: quay.io/debezium/postgres:17  # This image install plugin: postgres-decoderbufs and configure wal_level = logical
+    container_name: pixels_postgres_source_db
+    environment:
+      POSTGRES_DB: pixels_realtime_crud
+      POSTGRES_USER: pixels
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./example/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./example:/example
+      - ./example/postgres_load.sql:/load.sql
+    secrets:
+      - postgres-password
+    networks:
+      - pixels_network
+
+  kafka:
+    image: apache/kafka:3.9.0
+    container_name: pixels_kafka
+    environment:
+      CLUSTER_ID: pixels_kafka_01
+      TRACE: true
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_LISTENERS: 'INTERNAL://0.0.0.0:9092,CONTROLLER://pixels_kafka:29093,EXTERNAL://0.0.0.0:29092'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://pixels_kafka:9092,EXTERNAL://localhost:29092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@pixels_kafka:29093'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    expose:
+      - "29092"
+    networks:
+      - pixels_network
+
+  pixels-sink:
+    image: pixels-sink:0.2.0-SNAPSHOT
+    container_name: pixels-sink
+    volumes:
+      - ./data:/app/data
+    # command: tail -f /dev/null # debug
+    ports:
+      - "9464:9464"
+    depends_on:
+      - kafka
+      - pg_debezium
+      - mysql_debezium
+    networks:
+      - pixels_network
+
+  kafka_ui:
+    image: obsidiandynamics/kafdrop:latest
+    container_name: kafka_ui
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: pixels_kafka:9092
+      JVM_OPTS: "-Xms32M -Xmx64M"
+    networks:
+      - pixels_network
+
+  pg_debezium:
+    image: debezium/connect:2.7.3.Final
+    ports:
+      - "8084:8083"
+    depends_on:
+     - kafka
+     - postgres
+     - apicurio
+    environment:
+      ENABLE_APICURIO_CONVERTERS: "true"
+      CONNECT_KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio:8080/apis/registry/v2
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+      CONNECT_VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio:8080/apis/registry/v2
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+      CONNECT_SCHEMA_NAME_ADJUSTMENT_MODE: "avro"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      BOOTSTRAP_CONTROLLERS: pixels_kafka:9092
+      BOOTSTRAP_SERVERS: pixels_kafka:9092
+      GROUP_ID: "pg_debezium"
+      CONFIG_STORAGE_TOPIC: pg_connect_configs
+      OFFSET_STORAGE_TOPIC: pg_connect_offsets
+      STATUS_STORAGE_TOPIC: pg_connect_statuses
+    networks:
+      - pixels_network
+
+  mysql_debezium:
+    image: debezium/connect:2.7.3.Final
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka
+      - mysql
+      - apicurio
+    environment:
+      ENABLE_APICURIO_CONVERTERS: "true"
+      CONNECT_KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio:8080/apis/registry/v2
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_KEY_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+      CONNECT_VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio:8080/apis/registry/v2
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_AUTO-REGISTER: "true"
+      CONNECT_VALUE_CONVERTER_APICURIO_REGISTRY_FIND-LATEST: "true"
+      CONNECT_SCHEMA_NAME_ADJUSTMENT_MODE: "avro"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      #      CONNECT_BOOTSTRAP_SERVERS: pixels_kafka:9092
+      BOOTSTRAP_CONTROLLERS: pixels_kafka:9092
+      BOOTSTRAP_SERVERS: pixels_kafka:9092
+      GROUP_ID: "mysql_debezium"
+      CONFIG_STORAGE_TOPIC: mysql_connect_configs
+      OFFSET_STORAGE_TOPIC: mysql_connect_offsets
+      STATUS_STORAGE_TOPIC: mysql_connect_statuses
+    networks:
+      - pixels_network
+
+  # monitor
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    container_name: pixels-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./images/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - pixels_network
+  #    depends_on:
+  #      - pixels-sink
+
+  grafana:
+    image: grafana/grafana:10.1.5
+    container_name: pixels-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./images/grafana-provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_DEFAULT_INSTANCE_THEME=light
+    networks:
+      - pixels_network
+    depends_on:
+      - prometheus
+volumes:
+  mysql_data:
+  postgres_data:
+  grafana-data:
+
+secrets:
+  mysql-root-password:
+    file: ./secrets/mysql-root-password.txt
+  mysql-pixels-password:
+    file: ./secrets/mysql-pixels-password.txt
+  postgres-password:
+    file: ./secrets/postgres-pixels-password.txt
+
+networks:
+  pixels_network:
+    name: pixels_crud_network 
+    driver: bridge

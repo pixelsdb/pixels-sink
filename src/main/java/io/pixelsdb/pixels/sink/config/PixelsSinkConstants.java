@@ -14,22 +14,15 @@
  * limitations under the License.
  *
  */
-package io.pixelsdb.pixels.sink;
 
-import org.junit.Test;
+package io.pixelsdb.pixels.sink.config;
 
-/**
- * Created at: 29/04/2021
- * Author: hank
- */
-public class TestSplitString
-{
-    @Test
-    public void test()
-    {
-        String s = "1|3689999|O|224560.83|1996-01-02|5-LOW|Clerk#000095055|0|nstructions sleep furiously among |";
-        String reg = "\\\\|";
-        String[] splits = s.split(reg);
-        System.out.println(splits.length);
-    }
+public final class PixelsSinkConstants {
+    public static final String ROW_RECORD_KAFKA_PROP_FACTORY = "row-record";
+    public static final String TRANSACTION_KAFKA_PROP_FACTORY = "transaction";
+    public static final int MONITOR_NUM = 2;
+
+    public static final String SNAPSHOT_TX_PREFIX = "SNAPSHOT-";
+
+    private PixelsSinkConstants() {}
 }

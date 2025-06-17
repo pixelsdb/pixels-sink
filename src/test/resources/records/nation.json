@@ -1,0 +1,224 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "int32",
+            "optional": false,
+            "field": "n_nationkey"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "n_name"
+          },
+          {
+            "type": "int32",
+            "optional": false,
+            "field": "n_regionkey"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "n_comment"
+          }
+        ],
+        "optional": true,
+        "name": "oltp_server.public.nation.Value",
+        "field": "before"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "int32",
+            "optional": false,
+            "field": "n_nationkey"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "n_name"
+          },
+          {
+            "type": "int32",
+            "optional": false,
+            "field": "n_regionkey"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "n_comment"
+          }
+        ],
+        "optional": true,
+        "name": "oltp_server.public.nation.Value",
+        "field": "after"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": false,
+            "field": "version"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "connector"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "name"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "ts_ms"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "name": "io.debezium.data.Enum",
+            "version": 1,
+            "parameters": {
+              "allowed": "true,first,first_in_data_collection,last_in_data_collection,last,false,incremental"
+            },
+            "default": "false",
+            "field": "snapshot"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "db"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "sequence"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "ts_us"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "ts_ns"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "schema"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "table"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "txId"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "lsn"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "xmin"
+          }
+        ],
+        "optional": false,
+        "name": "io.debezium.connector.postgresql.Source",
+        "field": "source"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": false,
+            "field": "id"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "total_order"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "data_collection_order"
+          }
+        ],
+        "optional": true,
+        "name": "event.block",
+        "version": 1,
+        "field": "transaction"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "op"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "field": "ts_ms"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "field": "ts_us"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "field": "ts_ns"
+      }
+    ],
+    "optional": false,
+    "name": "oltp_server.public.nation.Envelope",
+    "version": 2
+  },
+  "payload": {
+    "before": null,
+    "after": {
+      "n_nationkey": 0,
+      "n_name": "ALGERIA                  ",
+      "n_regionkey": 0,
+      "n_comment": " haggle. carefully final deposits detect slyly agai"
+    },
+    "source": {
+      "version": "3.0.7.Final",
+      "connector": "postgresql",
+      "name": "oltp_server",
+      "ts_ms": 1740642612039,
+      "snapshot": "first_in_data_collection",
+      "db": "pixels_realtime_crud",
+      "sequence": "[null,\"38581544\"]",
+      "ts_us": 1740642612039534,
+      "ts_ns": 1740642612039534000,
+      "schema": "public",
+      "table": "nation",
+      "txId": 757,
+      "lsn": 38581544,
+      "xmin": null
+    },
+    "transaction": null,
+    "op": "r",
+    "ts_ms": 1740642623442,
+    "ts_us": 1740642623442160,
+    "ts_ns": 1740642623442160400
+  }
+}

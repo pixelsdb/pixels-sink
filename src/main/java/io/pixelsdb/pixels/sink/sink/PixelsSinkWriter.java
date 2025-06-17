@@ -14,22 +14,17 @@
  * limitations under the License.
  *
  */
-package io.pixelsdb.pixels.sink;
 
-import org.junit.Test;
+package io.pixelsdb.pixels.sink.sink;
 
-/**
- * Created at: 29/04/2021
- * Author: hank
- */
-public class TestSplitString
-{
-    @Test
-    public void test()
-    {
-        String s = "1|3689999|O|224560.83|1996-01-02|5-LOW|Clerk#000095055|0|nstructions sleep furiously among |";
-        String reg = "\\\\|";
-        String[] splits = s.split(reg);
-        System.out.println(splits.length);
-    }
+import io.pixelsdb.pixels.sink.event.RowChangeEvent;
+
+import java.io.Closeable;
+
+public interface PixelsSinkWriter extends Closeable {
+    void flush();
+
+    boolean write(RowChangeEvent rowChangeEvent);
+
+    // boolean write(RowChangeEvent rowChangeEvent, ByteBuffer byteBuffer);
 }

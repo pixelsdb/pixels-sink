@@ -1,0 +1,217 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "int32",
+            "optional": false,
+            "field": "r_regionkey"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "r_name"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "r_comment"
+          }
+        ],
+        "optional": true,
+        "name": "oltp_server.public.region.Value",
+        "field": "before"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "int32",
+            "optional": false,
+            "field": "r_regionkey"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "r_name"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "r_comment"
+          }
+        ],
+        "optional": true,
+        "name": "oltp_server.public.region.Value",
+        "field": "after"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": false,
+            "field": "version"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "connector"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "name"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "ts_ms"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "name": "io.debezium.data.Enum",
+            "version": 1,
+            "parameters": {
+              "allowed": "true,first,first_in_data_collection,last_in_data_collection,last,false,incremental"
+            },
+            "default": "false",
+            "field": "snapshot"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "db"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "sequence"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "ts_us"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "ts_ns"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "schema"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "table"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "txId"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "lsn"
+          },
+          {
+            "type": "int64",
+            "optional": true,
+            "field": "xmin"
+          }
+        ],
+        "optional": false,
+        "name": "io.debezium.connector.postgresql.Source",
+        "field": "source"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": false,
+            "field": "id"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "total_order"
+          },
+          {
+            "type": "int64",
+            "optional": false,
+            "field": "data_collection_order"
+          }
+        ],
+        "optional": true,
+        "name": "event.block",
+        "version": 1,
+        "field": "transaction"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "op"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "field": "ts_ms"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "field": "ts_us"
+      },
+      {
+        "type": "int64",
+        "optional": true,
+        "field": "ts_ns"
+      }
+    ],
+    "optional": false,
+    "name": "oltp_server.public.region.Envelope",
+    "version": 2
+  },
+  "payload": {
+    "before": null,
+    "after": {
+      "r_regionkey": 6,
+      "r_name": "BASE                     ",
+      "r_comment": "aaabbbcccpixels"
+    },
+    "source": {
+      "version": "3.0.7.Final",
+      "connector": "postgresql",
+      "name": "oltp_server",
+      "ts_ms": 1741055096841,
+      "snapshot": "false",
+      "db": "pixels_realtime_crud",
+      "sequence": "[\"39109264\",\"39110592\"]",
+      "ts_us": 1741055096841822,
+      "ts_ns": 1741055096841822000,
+      "schema": "public",
+      "table": "region",
+      "txId": 779,
+      "lsn": 39110592,
+      "xmin": null
+    },
+    "transaction": {
+      "id": "779:39110592",
+      "total_order": 1,
+      "data_collection_order": 1
+    },
+    "op": "c",
+    "ts_ms": 1741055098108,
+    "ts_us": 1741055098108635,
+    "ts_ns": 1741055098108635400
+  }
+}
