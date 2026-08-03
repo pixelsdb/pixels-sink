@@ -34,13 +34,41 @@
         <maven.install.skip>true</maven.install.skip>
 
         <dep.argparse4j.version>0.9.0</dep.argparse4j.version>
-        <dep.kafka.version>3.8.0</dep.kafka.version>
-        <dep.opencsv.version>5.8</dep.opencsv.version>
+        <dep.kafka.version>3.9.1</dep.kafka.version>
         <dep.lombok.version>1.18.42</dep.lombok.version>
         <dep.debezium.version>3.2.3.Final</dep.debezium.version>
+        <dep.jackson.version>2.16.2</dep.jackson.version>
+        <dep.apicurio.version>2.6.2.Final</dep.apicurio.version>
+        <dep.avro.version>1.11.3</dep.avro.version>
+        <dep.commons-math3.version>3.6.1</dep.commons-math3.version>
+        <dep.commons-lang3.version>3.12.0</dep.commons-lang3.version>
+        <!-- override parent dep.trino.version for sink freshness client -->
+        <dep.trino.version>440</dep.trino.version>
+        <dep.hive.jdbc.version>2.3.9</dep.hive.jdbc.version>
+        <dep.testcontainers.version>1.21.3</dep.testcontainers.version>
+        <docker.api.version>1.40</docker.api.version>
         <plugin.dockerfile-maven.version>1.4.13</plugin.dockerfile-maven.version>
-        <trino.version>440</trino.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Align Jackson across Kafka connect-json / Debezium transitive deps -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${dep.jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${dep.netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -54,56 +82,82 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>io.pixelsdb</groupId>
-            <artifactId>pixels-retina</artifactId>
-            <optional>true</optional>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hive</groupId>
-            <artifactId>hive-jdbc</artifactId>
-            <version>2.3.9</version>
-        </dependency>
-        <dependency>
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- Minimal unshaded Netty runtime for jetcd/gRPC.
+             These roots provide the required buffer, transport, handler, HTTP and resolver modules. -->
         <dependency>
             <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
+            <artifactId>netty-codec-http2</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty</artifactId>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler-proxy</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-unix-common</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.trino</groupId>
             <artifactId>trino-jdbc</artifactId>
-            <version>${trino.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <optional>true</optional>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <optional>true</optional>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <!-- the default binding from slf4j to log4j, be careful of other conflict bindings -->
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <!-- migrate log4j-1 logging to slf4j, use it with log4j-slf4j-impl -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <!-- route java.util.logging (e.g. mysql-binlog-connector) to log4j2,
+                 requires -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -->
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jul</artifactId>
             <version>${dep.log4j.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
-        <!-- grpc -->
+        <!-- Application gRPC transport. -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
             <optional>true</optional>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- jetcd/Vert.x directly references the unshaded NettyChannelBuilder.
+             Its provider registrations are filtered from the shaded JAR below. -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -116,14 +170,12 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java-util</artifactId>
-            <version>3.25.1</version>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-api</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
         </dependency>
 
         <dependency>
@@ -144,16 +196,14 @@
             <artifactId>connect-api</artifactId>
             <version>${dep.kafka.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-            <version>${dep.opencsv.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.2.0-jre</version>
         </dependency>
 
         <dependency>
@@ -163,6 +213,19 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>${dep.avro.version}</version>
+        </dependency>
 
         <!-- debezium-->
         <dependency>
@@ -174,84 +237,99 @@
             <groupId>io.debezium</groupId>
             <artifactId>debezium-embedded</artifactId>
             <version>${dep.debezium.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.debezium</groupId>
-            <artifactId>debezium-sink</artifactId>
-            <version>${dep.debezium.version}</version>
+            <exclusions>
+                <!-- connect-runtime brings a log4j1 implementation competing with log4j-over-slf4j -->
+                <exclusion>
+                    <groupId>ch.qos.reload4j</groupId>
+                    <artifactId>reload4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.debezium</groupId>
             <artifactId>debezium-connector-postgres</artifactId>
             <version>${dep.debezium.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-connector-mysql</artifactId>
+            <version>${dep.debezium.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <!-- testing -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <scope>test</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-runner</artifactId>
-            <scope>test</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.8.2</version>
+            <version>${dep.junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.8.2</version>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${dep.testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mysql</artifactId>
+            <version>${dep.testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${dep.testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.apicurio</groupId>
             <artifactId>apicurio-registry-serdes-avro-serde</artifactId>
-            <version>2.6.2.Final</version>
+            <version>${dep.apicurio.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.apicurio</groupId>
+            <artifactId>apicurio-registry-serde-common</artifactId>
+            <version>${dep.apicurio.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.apicurio</groupId>
+            <artifactId>apicurio-registry-client</artifactId>
+            <version>${dep.apicurio.version}</version>
         </dependency>
 
         <!--monitor-->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.16.0</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_hotspot</artifactId>
-            <version>0.16.0</version>
         </dependency>
-
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_httpserver</artifactId>
-            <version>0.16.0</version>
+            <version>${dep.prometheus.client.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version>
+            <version>${dep.commons-math3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${dep.commons-lang3.version}</version>
         </dependency>
 
-        <!--storage-->
+        <!--storage: SPI provider for file:// used by proto/storage paths -->
         <dependency>
             <groupId>io.pixelsdb</groupId>
             <artifactId>pixels-storage-localfs</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
     </dependencies>
@@ -267,8 +345,19 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>false</skipTests>
+                    <excludedGroups>integration</excludedGroups>
+                    <argLine>--add-opens=java.base/java.nio=ALL-UNNAMED
+                        --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+                        -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>${maven.plugin.shade.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -278,6 +367,7 @@
                         <configuration>
                             <finalName>pixels-sink</finalName>
                             <outputDirectory>${project.basedir}/target</outputDirectory>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>full</shadedClassifierName>
                             <filters>
@@ -287,6 +377,35 @@
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/**/module-info.class</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>io.grpc:grpc-netty</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/services/io.grpc.ServerProvider</exclude>
+                                        <exclude>META-INF/services/io.grpc.ManagedChannelProvider</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <!-- The standalone driver embeds older copies of these APIs.
+                                         Use the versions managed by this application instead. -->
+                                    <artifact>org.apache.hive:hive-jdbc</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/logging/log4j/**</exclude>
+                                        <exclude>org/apache/logging/slf4j/**</exclude>
+                                        <exclude>com/fasterxml/jackson/**</exclude>
+                                        <exclude>javax/servlet/**</exclude>
+                                        <exclude>org/openjdk/jol/**</exclude>
+                                        <exclude>META-INF/org/apache/logging/log4j/**</exclude>
+                                        <exclude>META-INF/services/org.apache.logging.log4j.*</exclude>
+                                        <exclude>META-INF/services/com.fasterxml.jackson.*</exclude>
+                                        <exclude>META-INF/services/javax.servlet.ServletContainerInitializer</exclude>
+                                        <exclude>META-INF/maven/org.apache.logging.log4j/**</exclude>
+                                        <exclude>META-INF/maven/com.fasterxml.jackson.core/**</exclude>
+                                        <exclude>META-INF/maven/javax.servlet/**</exclude>
+                                        <exclude>META-INF/maven/org.openjdk.jol/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -296,6 +415,11 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>${mainClass}</mainClass>
+                                    <manifestEntries>
+                                        <!-- dependencies such as log4j-api ship JDK9+ classes under
+                                             META-INF/versions/9, which the JVM only honors with this entry -->
+                                        <Multi-Release>true</Multi-Release>
+                                    </manifestEntries>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -335,4 +459,67 @@
         </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Default build excludes hive-jdbc (heavy Hadoop transitive deps).
+             Enable for Hudi RO incremental freshness: mvn -Phudi-hive package -->
+        <profile>
+            <id>hudi-hive</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-jdbc</artifactId>
+                    <version>${dep.hive.jdbc.version}</version>
+                    <classifier>standalone</classifier>
+                    <scope>runtime</scope>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>*</groupId>
+                            <artifactId>*</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>false</skipTests>
+                            <excludedGroups combine.self="override"></excludedGroups>
+                            <argLine>--add-opens=java.base/java.nio=ALL-UNNAMED
+                                --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+                                -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>cdc-validation</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>false</skipTests>
+                            <groups>integration &amp; cdc-validation</groups>
+                            <excludedGroups combine.self="override"></excludedGroups>
+                            <systemPropertyVariables>
+                                <api.version>${docker.api.version}</api.version>
+                            </systemPropertyVariables>
+                            <argLine>--add-opens=java.base/java.nio=ALL-UNNAMED
+                                --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+                                -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

@@ -1,0 +1,2 @@
+io.pixelsdb.pixels.sink.conversion.debezium.dialect.MySqlSourceAdapter
+io.pixelsdb.pixels.sink.conversion.debezium.dialect.PostgresSourceAdapter

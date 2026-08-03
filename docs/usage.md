@@ -25,7 +25,8 @@ mvn -q -DskipTests exec:java \
 
 **Pipeline Summary**
 - A source reads change events from Debezium Engine, Kafka, or storage files.
-- A provider converts source records into Pixels events.
+- Conversion normalizes source records into canonical Pixels events.
+- Pipelines route events through bounded queues to their processors.
 - Processors enforce ordering by table and write to the configured sink.
 - The sink writer persists the events to Retina, CSV, Proto, Flink, or a no-op sink.
 

@@ -1,0 +1,55 @@
+INSERT INTO records
+VALUES (2002,
+        1,
+        FALSE,
+        8,
+        2345,
+        123456789,
+        1234567890123456789,
+        2.5,
+        67890.25,
+        -12345678901234.5678,
+        'WXYZ',
+        'insert-varchar',
+        'insert-text',
+        X'10203040',
+        X'CAFEBABE',
+        X'7F0080',
+        '2025-01-02',
+        '01:02:03.004',
+        '2025-01-02 03:04:05.654321',
+        '像素-插入🚀',
+        NULL,
+        '"json-insert"',
+        'RED',
+        'BETA');
+
+UPDATE records
+SET sequence_no     = 2,
+    boolean_value   = TRUE,
+    tiny_value      = -9,
+    small_value     = -3456,
+    int_value       = -987654321,
+    big_value       = -2222222222222222222,
+    float_value     = -3.75,
+    double_value    = 0.125,
+    decimal_value   = 99999999999999.9999,
+    char_value      = 'IJKL',
+    varchar_value   = 'update-varchar',
+    text_value      = 'update-text',
+    binary_value    = X'FFEEDDCC',
+    varbinary_value = X'0123456789',
+    blob_value      = X'AA55',
+    date_value      = '2026-06-07',
+    time_value      = '23:59:59.999',
+    timestamp_value = '2026-06-07 08:09:10.111222',
+    unicode_value   = '像素-更新🧪',
+    nullable_value  = NULL,
+    json_value      = '"json-update"',
+    enum_value      = 'BLUE',
+    set_value       = 'ALPHA,BETA'
+WHERE id = 2002;
+
+DELETE
+FROM records
+WHERE id = 2002;

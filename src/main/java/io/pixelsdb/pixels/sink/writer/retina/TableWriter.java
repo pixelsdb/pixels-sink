@@ -1,31 +1,23 @@
 /*
  * Copyright 2025 PixelsDB.
  *
- * This file is part of Pixels.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Pixels is free software: you can redistribute it and/or modify
- * it under the terms of the Affero GNU General Public License as
- * published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Pixels is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Affero GNU General Public License for more details.
- *
- * You should have received a copy of the Affero GNU General Public
- * License along with Pixels.  If not, see
- * <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package io.pixelsdb.pixels.sink.writer.retina;
 
-
-import io.pixelsdb.pixels.retina.RetinaProto;
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
 import io.pixelsdb.pixels.sink.config.factory.PixelsSinkConfigFactory;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
-import io.pixelsdb.pixels.sink.exception.SinkException;
 import io.pixelsdb.pixels.sink.util.MetricsFacade;
 import org.slf4j.Logger;
 
@@ -100,41 +92,6 @@ public abstract class TableWriter
         }
         this.flusherThread = new Thread(new FlusherRunnable(), "Pixels-Flusher-" + tableName);
         this.flusherThread.start();
-    }
-
-    /**
-     * Helper: add insert/delete data into proto builder.
-     */
-    protected static void addUpdateData(RowChangeEvent rowChangeEvent,
-                                        RetinaProto.TableUpdateData.Builder builder) throws SinkException
-    {
-        switch (rowChangeEvent.getOp())
-        {
-            case SNAPSHOT, INSERT ->
-            {
-                RetinaProto.InsertData.Builder insertDataBuilder = RetinaProto.InsertData.newBuilder();
-                insertDataBuilder.addIndexKeys(rowChangeEvent.getAfterKey());
-                insertDataBuilder.addAllColValues(rowChangeEvent.getAfterData());
-                builder.addInsertData(insertDataBuilder);
-            }
-            case UPDATE ->
-            {
-                RetinaProto.UpdateData.Builder updateDataBuilder = RetinaProto.UpdateData.newBuilder();
-                updateDataBuilder.addIndexKeys(rowChangeEvent.getAfterKey());
-                updateDataBuilder.addAllColValues(rowChangeEvent.getAfterData());
-                builder.addUpdateData(updateDataBuilder);
-            }
-            case DELETE ->
-            {
-                RetinaProto.DeleteData.Builder deleteDataBuilder = RetinaProto.DeleteData.newBuilder();
-                deleteDataBuilder.addIndexKeys(rowChangeEvent.getBeforeKey());
-                builder.addDeleteData(deleteDataBuilder);
-            }
-            case UNRECOGNIZED ->
-            {
-                throw new SinkException("Unrecognized op: " + rowChangeEvent.getOp());
-            }
-        }
     }
 
     private void submitFlushTask(List<RowChangeEvent> batch)

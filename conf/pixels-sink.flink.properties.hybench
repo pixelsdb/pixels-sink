@@ -1,5 +1,6 @@
 # engine | kafka | storage
 sink.datasource=storage
+sink.storage.mode=stream
 # -1 means no limit, Only implement in retina sink mode yet
 sink.datasource.rate.limit=500
 sink.datasource.rate.limit.type=guava
@@ -12,10 +13,10 @@ sink.monitor.report.enable=true
 sink.monitor.report.file=/home/ubuntu/pixels-sink/result_delta/rate_hybench_rate500.csv
 sink.monitor.freshness.file=/home/ubuntu/pixels-sink/result_delta/fresh_hybench_rate500.csv
 # trino for freshness query
-trino.url=jdbc:trino://realtime-pixels-coordinator:8080/delta_lake/hybench_sf1000
-trino.user=pixels
-trino.password=password
-trino.parallel=1
+sink.query.url=jdbc:trino://realtime-pixels-coordinator:8080/delta_lake/hybench_sf1000
+sink.query.user=pixels
+sink.query.password=password
+sink.query.parallel=1
 # row or txn or embed
 sink.monitor.freshness.level=embed
 sink.monitor.freshness.embed.warmup=10

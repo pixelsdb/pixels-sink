@@ -12,10 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
-
 package io.pixelsdb.pixels.sink;
 
 
@@ -24,9 +21,13 @@ import io.debezium.engine.DebeziumEngine;
 import io.debezium.engine.RecordChangeEvent;
 import io.debezium.engine.format.ChangeEventFormat;
 import org.apache.kafka.connect.source.SourceRecord;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.util.List;
+import java.nio.file.Path;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,10 +38,12 @@ import java.util.concurrent.Executors;
  * @author: AntiO2
  * @date: 2025/9/25 12:16
  */
-public class DebeziumEngineTest
+@Tag("integration")
+class DebeziumEngineTest
 {
     @Test
-    public void testPostgresCDC()
+    @Disabled("Manual PostgreSQL integration test; requires an external database")
+    void testPostgresCDC(@TempDir Path tempDir) throws Exception
     {
         final Properties props = new Properties();
 
@@ -49,17 +52,24 @@ public class DebeziumEngineTest
         props.setProperty("provide.transaction.metadata", "true");
 
         props.setProperty("offset.storage", "org.apache.kafka.connect.storage.FileOffsetBackingStore");
-        props.setProperty("offset.storage.file.filename", "/tmp/offsets.dat");
+        props.setProperty("offset.storage.file.filename",
+                tempDir.resolve("offsets.dat").toString());
         props.setProperty("offset.flush.interval.ms", "60000");
 
         props.setProperty("schema.history.internal", "io.debezium.storage.file.history.FileSchemaHistory");
-        props.setProperty("schema.history.internal.file.filename", "/tmp/schemahistory.dat");
+        props.setProperty("schema.history.internal.file.filename",
+                tempDir.resolve("schemahistory.dat").toString());
 
-        props.setProperty("database.hostname", "localhost");
-        props.setProperty("database.port", "5432");
-        props.setProperty("database.user", "pixels");
-        props.setProperty("database.password", "pixels_realtime_crud");
-        props.setProperty("database.dbname", "pixels_bench_sf1x");
+        props.setProperty("database.hostname",
+                requiredProperty("pixels.sink.debezium.database.hostname"));
+        props.setProperty("database.port",
+                requiredProperty("pixels.sink.debezium.database.port"));
+        props.setProperty("database.user",
+                requiredProperty("pixels.sink.debezium.database.user"));
+        props.setProperty("database.password",
+                requiredProperty("pixels.sink.debezium.database.password"));
+        props.setProperty("database.dbname",
+                requiredProperty("pixels.sink.debezium.database.name"));
         props.setProperty("plugin.name", "pgoutput");
         props.setProperty("database.server.id", "1");
         props.setProperty("schema.include.list", "public");
@@ -81,11 +91,24 @@ public class DebeziumEngineTest
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(engine);
-
-        while (true)
+        try
         {
-
+            Thread.sleep(Long.getLong("pixels.sink.debezium.run.millis", 1000L));
+        } finally
+        {
+            engine.close();
+            executor.shutdownNow();
         }
+    }
+
+    private static String requiredProperty(String key)
+    {
+        String value = System.getProperty(key);
+        if (value == null || value.isBlank())
+        {
+            throw new IllegalStateException("Set -D" + key + " to run this integration test");
+        }
+        return value;
     }
 
     class MyChangeConsumer implements DebeziumEngine.ChangeConsumer<RecordChangeEvent<SourceRecord>>

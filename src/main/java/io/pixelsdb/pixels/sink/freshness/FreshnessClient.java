@@ -1,23 +1,18 @@
 /*
  * Copyright 2025 PixelsDB.
  *
- * This file is part of Pixels.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Pixels is free software: you can redistribute it and/or modify
- * it under the terms of the Affero GNU General Public License as
- * published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Pixels is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Affero GNU General Public License for more details.
- *
- * You should have received a copy of the Affero GNU General Public
- * License along with Pixels.  If not, see
- * <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package io.pixelsdb.pixels.sink.freshness;
 
 import io.pixelsdb.pixels.common.exception.TransException;
@@ -36,8 +31,8 @@ import java.util.Date;
 import java.util.concurrent.*;
 
 /**
- * FreshnessClient is responsible for monitoring data freshness by periodically
- * querying the maximum timestamp from a set of dynamically configured tables via Trino JDBC.
+ * FreshnessClient monitors data freshness by periodically querying max(freshness_ts)
+ * via JDBC (Trino by default, or HiveServer2 for Hudi when built with {@code -Phudi-hive}).
  */
 public class FreshnessClient
 {
@@ -45,9 +40,10 @@ public class FreshnessClient
     private static final int QUERY_INTERVAL_SECONDS = 1;
     private static volatile FreshnessClient instance;
     // Configuration parameters (should ideally be loaded from a config file)
-    private final String trinoJdbcUrl;
-    private final String trinoUser;
-    private final String trinoPassword;
+    private final String queryJdbcUrl;
+    private final String queryUser;
+    private final String queryPassword;
+    private final QueryEngine queryEngine;
     private final int maxConcurrentQueries;
     private final Semaphore queryPermits;
     private final ThreadPoolExecutor connectionExecutor;
@@ -58,17 +54,35 @@ public class FreshnessClient
     private final int warmUpSeconds;
     private final PixelsSinkConfig config;
 
+    private enum QueryEngine
+    {
+        TRINO("io.trino.jdbc.TrinoDriver",
+                "Trino JDBC driver not found on classpath."),
+        HIVE("org.apache.hive.jdbc.HiveDriver",
+                "Hive JDBC driver not found. Build with -Phudi-hive to enable Hudi freshness via HiveServer2.");
+
+        private final String driverClass;
+        private final String missingHint;
+
+        QueryEngine(String driverClass, String missingHint)
+        {
+            this.driverClass = driverClass;
+            this.missingHint = missingHint;
+        }
+    }
+
     private FreshnessClient()
     {
         // Initializes the set with thread safety wrapper
         this.monitoredTables = Collections.synchronizedSet(new HashSet<>());
 
         this.config = PixelsSinkConfigFactory.getInstance();
-        this.trinoUser = config.getTrinoUser();
-        this.trinoJdbcUrl = config.getTrinoUrl();
-        this.trinoPassword = config.getTrinoPassword();
+        this.queryUser = config.getSinkQueryUser();
+        this.queryJdbcUrl = config.getSinkQueryUrl();
+        this.queryPassword = config.getSinkQueryPassword();
+        this.queryEngine = resolveQueryEngine(queryJdbcUrl);
         this.warmUpSeconds = config.getSinkMonitorFreshnessEmbedWarmupSeconds();
-        this.maxConcurrentQueries = config.getTrinoParallel();
+        this.maxConcurrentQueries = config.getSinkQueryParallel();
         this.queryPermits = new Semaphore(maxConcurrentQueries);
         // Initializes a single-threaded scheduler for executing freshness queries
         this.scheduler = Executors.newSingleThreadScheduledExecutor(r ->
@@ -113,42 +127,59 @@ public class FreshnessClient
         return instance;
     }
 
-    @Deprecated
-    protected Connection createNewConnection() throws SQLException
+    /**
+     * Unified JDBC entry: resolve engine from URL at construction, load driver,
+     * apply engine-specific connection properties, then return a ready Connection.
+     *
+     * @param queryTimestamp Trino snapshot timestamp when embed.snapshot is enabled; ignored otherwise / for Hive
+     */
+    protected Connection openConnection(Long queryTimestamp) throws SQLException
     {
         try
         {
-            Class.forName("io.trino.jdbc.TrinoDriver");
-        } catch (ClassNotFoundException e)
+            Class.forName(queryEngine.driverClass);
+        }
+        catch (ClassNotFoundException e)
         {
-            throw new SQLException(e);
+            throw new SQLException(queryEngine.missingHint, e);
         }
 
         Properties properties = new Properties();
+        properties.setProperty("user", queryUser);
+        if (queryEngine == QueryEngine.TRINO
+                && queryTimestamp != null
+                && config.isSinkMonitorFreshnessEmbedSnapshot())
+        {
+            String sessionPropValue = String.format(
+                    "pixels.query_snapshot_timestamp:%d", queryTimestamp);
+            properties.setProperty("sessionProperties", sessionPropValue);
+        }
+        return DriverManager.getConnection(queryJdbcUrl, properties);
+    }
 
-
-        return DriverManager.getConnection(trinoJdbcUrl, trinoUser, null);
+    @Deprecated
+    protected Connection createNewConnection() throws SQLException
+    {
+        return openConnection(null);
     }
 
     protected Connection createNewConnection(long queryTimestamp) throws SQLException
     {
-        try
-        {
-            Class.forName("io.trino.jdbc.TrinoDriver");
-        } catch (ClassNotFoundException e)
-        {
-            throw new SQLException(e);
-        }
+        return openConnection(queryTimestamp);
+    }
 
-        Properties properties = new Properties();
-        properties.setProperty("user", trinoUser);
-        if (config.isSinkMonitorFreshnessEmbedSnapshot())
+    private static QueryEngine resolveQueryEngine(String jdbcUrl)
+    {
+        if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:hive2:"))
         {
-            String catalogName = "pixels";
-            String sessionPropValue = String.format("%s.query_snapshot_timestamp:%d", catalogName, queryTimestamp);
-            properties.setProperty("sessionProperties", sessionPropValue);
+            return QueryEngine.HIVE;
         }
-        return DriverManager.getConnection(trinoJdbcUrl, properties);
+        if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:trino:"))
+        {
+            return QueryEngine.TRINO;
+        }
+        throw new IllegalArgumentException(
+                "Unsupported freshness JDBC URL (expect jdbc:trino:// or jdbc:hive2://): " + jdbcUrl);
     }
 
     private void closeConnection(Connection conn)
@@ -160,7 +191,7 @@ public class FreshnessClient
                 conn.close();
             } catch (SQLException e)
             {
-                LOGGER.warn("Error closing Trino connection.", e);
+                LOGGER.warn("Error closing freshness JDBC connection.", e);
             }
         }
     }
@@ -282,14 +313,13 @@ public class FreshnessClient
             }
             // Timestamp when the query is sent (t_send)
             long tSendMillis = System.currentTimeMillis();
+            Long snapshotTimestamp = null;
             if (config.isSinkMonitorFreshnessEmbedSnapshot())
             {
                 transContext = TransService.Instance().beginTrans(true);
-                conn = createNewConnection(transContext.getTimestamp());
-            } else
-            {
-                conn = createNewConnection();
+                snapshotTimestamp = transContext.getTimestamp();
             }
+            conn = openConnection(snapshotTimestamp);
 
             String tSendMillisStr = DateUtil.convertDateToString(new Date(tSendMillis));
             // Query to find the latest timestamp in the table

@@ -1,27 +1,25 @@
 /*
  * Copyright 2025 PixelsDB.
  *
- * This file is part of Pixels.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Pixels is free software: you can redistribute it and/or modify
- * it under the terms of the Affero GNU General Public License as
- * published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Pixels is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Affero GNU General Public License for more details.
- *
- * You should have received a copy of the Affero GNU General Public
- * License along with Pixels.  If not, see
- * <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package io.pixelsdb.pixels.sink.config.factory;
 
 import io.pixelsdb.pixels.sink.config.PixelsSinkConfig;
+import io.pixelsdb.pixels.sink.config.PixelsSinkConstants;
+import io.apicurio.registry.serde.SerdeConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 
 import java.util.Properties;
 
@@ -33,6 +31,8 @@ public class RowRecordKafkaPropFactory implements KafkaPropFactory
         kafkaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServers());
         kafkaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, config.getKeyDeserializer());
         kafkaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        kafkaProperties.put(
+                PixelsSinkConstants.KAFKA_VALUE_FORMAT, config.getKafkaValueFormat());
         return kafkaProperties;
     }
 
@@ -40,7 +40,16 @@ public class RowRecordKafkaPropFactory implements KafkaPropFactory
     public Properties createKafkaProperties(PixelsSinkConfig config)
     {
         Properties kafkaProperties = getCommonKafkaProperties(config);
-        kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, config.getValueDeserializer());
+        String dialect = config.resolveDebeziumSourceDialect();
+        if (!dialect.isBlank())
+        {
+            kafkaProperties.put(PixelsSinkConstants.SINK_DEBEZIUM_DIALECT, dialect);
+        }
+        if (config.getRegistryUrl() != null && !config.getRegistryUrl().isBlank())
+        {
+            kafkaProperties.put(SerdeConfig.REGISTRY_URL, config.getRegistryUrl());
+        }
+        kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
         kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, config.getGroupId());
 
         kafkaProperties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");

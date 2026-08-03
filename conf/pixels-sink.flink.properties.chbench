@@ -1,5 +1,6 @@
 # engine | kafka | storage
 sink.datasource=storage
+sink.storage.mode=stream
 # -1 means no limit, Only implement in retina sink mode yet
 sink.datasource.rate.limit=2000
 # Sink Config: retina | csv | proto | flink | none
@@ -11,10 +12,10 @@ sink.monitor.report.enable=true
 sink.monitor.report.file=/home/ubuntu/pixels-sink/result_delta/rate_test.csv
 sink.monitor.freshness.file=/home/ubuntu/pixels-sink/result_delta/fresh_batch10k.csv
 # trino for freshness query
-trino.url=jdbc:trino://realtime-pixels-coordinator:8080/delta_lake/chbenchmark_w10000
-trino.user=pixels
-trino.password=password
-trino.parallel=1
+sink.query.url=jdbc:trino://realtime-pixels-coordinator:8080/delta_lake/chbenchmark_w10000
+sink.query.user=pixels
+sink.query.password=password
+sink.query.parallel=1
 # row or txn or embed
 sink.monitor.freshness.level=embed
 sink.monitor.freshness.embed.warmup=10

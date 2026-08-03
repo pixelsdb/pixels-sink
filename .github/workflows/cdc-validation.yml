@@ -1,0 +1,116 @@
+name: CDC Payload Validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PIXELS_REPOSITORY: pixelsdb/pixels
+
+jobs:
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out pixels-sink
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check out latest Pixels
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PIXELS_REPOSITORY }}
+          path: .ci/pixels
+          persist-credentials: false
+
+      - name: Set up Java 17 and Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Build required Pixels dependencies
+        working-directory: .ci/pixels
+        run: >-
+          mvn -B -ntp
+          -pl pixels-common,pixels-core,pixels-storage/pixels-storage-localfs
+          -am -DskipTests install
+
+      - name: Run default unit tests
+        run: mvn -B -ntp test
+
+      - name: Upload unit-test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports
+          path: target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+  cdc-validation:
+    name: CDC payload validation (${{ matrix.database }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        database:
+          - mysql
+          - postgresql
+
+    steps:
+      - name: Check out pixels-sink
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check out latest Pixels
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PIXELS_REPOSITORY }}
+          path: .ci/pixels
+          persist-credentials: false
+
+      - name: Set up Java 17 and Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Build required Pixels dependencies
+        working-directory: .ci/pixels
+        run: >-
+          mvn -B -ntp
+          -pl pixels-common,pixels-core,pixels-storage/pixels-storage-localfs
+          -am -DskipTests install
+
+      - name: Run CDC payload validation
+        run: >-
+          mvn -B -ntp
+          -Pcdc-validation
+          -Dcdc.database=${{ matrix.database }}
+          test
+
+      - name: Upload CDC payloads, reports, and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cdc-validation-${{ matrix.database }}
+          path: |
+            target/cdc-validation/${{ matrix.database }}/
+            target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 14

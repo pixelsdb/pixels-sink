@@ -1,27 +1,22 @@
 /*
  * Copyright 2025 PixelsDB.
  *
- * This file is part of Pixels.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Pixels is free software: you can redistribute it and/or modify
- * it under the terms of the Affero GNU General Public License as
- * published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Pixels is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Affero GNU General Public License for more details.
- *
- * You should have received a copy of the Affero GNU General Public
- * License along with Pixels.  If not, see
- * <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package io.pixelsdb.pixels.sink.processor;
 
 import io.pixelsdb.pixels.sink.SinkProto;
-import io.pixelsdb.pixels.sink.provider.TransactionEventProvider;
+import io.pixelsdb.pixels.sink.util.BlockingBoundedQueue;
 import io.pixelsdb.pixels.sink.writer.PixelsSinkWriter;
 import io.pixelsdb.pixels.sink.writer.PixelsSinkWriterFactory;
 import org.slf4j.Logger;
@@ -29,17 +24,25 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TransactionProcessor implements Runnable, StoppableProcessor
+public class TransactionProcessor implements Runnable
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionProcessor.class);
     private final PixelsSinkWriter sinkWriter;
     private final AtomicBoolean running = new AtomicBoolean(true);
-    private final TransactionEventProvider transactionEventProvider;
+    private final BlockingBoundedQueue<SinkProto.TransactionMetadata> eventQueue;
 
-    public TransactionProcessor(TransactionEventProvider transactionEventProvider)
+    public TransactionProcessor(
+            BlockingBoundedQueue<SinkProto.TransactionMetadata> eventQueue)
     {
-        this.transactionEventProvider = transactionEventProvider;
-        this.sinkWriter = PixelsSinkWriterFactory.getWriter();
+        this(eventQueue, PixelsSinkWriterFactory.getWriter());
+    }
+
+    public TransactionProcessor(
+            BlockingBoundedQueue<SinkProto.TransactionMetadata> eventQueue,
+            PixelsSinkWriter sinkWriter)
+    {
+        this.eventQueue = eventQueue;
+        this.sinkWriter = sinkWriter;
     }
 
     @Override
@@ -47,10 +50,9 @@ public class TransactionProcessor implements Runnable, StoppableProcessor
     {
         while (running.get())
         {
-            SinkProto.TransactionMetadata transaction = transactionEventProvider.getTransaction();
+            SinkProto.TransactionMetadata transaction = eventQueue.take();
             if (transaction == null)
             {
-                LOGGER.warn("Received null transaction");
                 running.set(false);
                 break;
             }
@@ -59,10 +61,9 @@ public class TransactionProcessor implements Runnable, StoppableProcessor
         LOGGER.info("Processor thread exited for transaction");
     }
 
-    @Override
-    public void stopProcessor()
+    public void abort()
     {
-        LOGGER.info("Stopping transaction monitor");
+        LOGGER.info("Aborting transaction processor");
         running.set(false);
     }
 }

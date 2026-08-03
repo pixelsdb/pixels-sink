@@ -12,18 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
-
 package io.pixelsdb.pixels.sink.util;
 
 
+import io.pixelsdb.pixels.common.utils.EtcdUtil;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
+
+import org.junit.jupiter.api.io.TempDir;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @package: io.pixelsdb.pixels.sink.util
@@ -31,24 +34,28 @@ import java.util.List;
  * @author: AntiO2
  * @date: 2025/10/5 08:54
  */
-public class EtcdFileRegistryTest
+@Tag("integration")
+class EtcdFileRegistryTest
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EtcdFileRegistryTest.class);
-
     @Test
-    public void testCreateFile()
+    void shouldCreateAndListCompletedFiles(@TempDir Path tempDir)
     {
-        EtcdFileRegistry etcdFileRegistry = new EtcdFileRegistry("test", "file:///tmp/test/ray");
-        for (int i = 0; i < 10; i++)
+        String topic = "test-" + UUID.randomUUID();
+        try
         {
-            String newFile = etcdFileRegistry.createNewFile();
-            etcdFileRegistry.markFileCompleted(newFile);
-        }
-        List<String> files = etcdFileRegistry.listAllFiles();
-        for (String file : files)
+            EtcdFileRegistry etcdFileRegistry = new EtcdFileRegistry(
+                    topic, tempDir.resolve("ray").toUri().toString());
+            for (int i = 0; i < 10; i++)
+            {
+                String newFile = etcdFileRegistry.createNewFile();
+                etcdFileRegistry.markFileCompleted(newFile);
+            }
+            List<String> files = etcdFileRegistry.listAllFiles();
+
+            assertEquals(10, files.size());
+        } finally
         {
-            LOGGER.info(file);
+            EtcdUtil.Instance().deleteByPrefix("/sink/proto/registry/" + topic);
         }
-        etcdFileRegistry.cleanData();
     }
 }

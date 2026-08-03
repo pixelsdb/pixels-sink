@@ -12,14 +12,18 @@ Values are loaded by `PixelsSinkConfig` and mapped from keys in the properties f
 | --- | --- | --- |
 | `sink.datasource` | `engine` | Source type: `engine`, `kafka`, or `storage`. |
 | `sink.mode` | `retina` | Sink type: `retina`, `csv`, `proto`, `flink`, or `none`. |
+| `sink.datasource.decode.threads` | `4` | Decode thread pool size. Engine uses `StreamOrderedDecoder` (multi logical stream); Storage uses `OrderedBatchDecoder` (single-key batch). |
+| `sink.datasource.engine.format` | `connect` | Engine wire format. Only `connect` is allowed; other values fail fast on resolve. |
 | `sink.datasource.rate.limit` | `-1` | Rate limit for source ingestion. `-1` disables. |
 | `sink.datasource.rate.limit.type` | `semaphore` | Rate limiter type used by `FlushRateLimiterFactory`. 'guava' or 'semaphore'|
 
 ### Notes on `sink.datasource`
 
-- `engine` reads CDC logs directly from Debezium Engine. 
+- `engine` reads CDC logs directly from Debezium Engine. Currently requires `sink.datasource.engine.format=connect`. Json/Avro Engine paths are reserved and will reuse the same `conversion.debezium` converter interfaces later.
 - `storage` reads CDC logs from files dumped by `sink.proto` output; schema reference: [sink.proto](https://github.com/pixelsdb/pixels/blob/master/proto/sink.proto). 
 - `kafka` reads from a set of Kafka topics; this mode is deprecated and not actively tested.
+- Engine and Kafka records are normalized to the canonical `SinkProto` contract before reaching writers.
+- Storage row records use canonical `SinkProto`; `SourceInfo.schema` may be empty for MySQL.
 
 ### Notes on `sink.mode`
 
@@ -50,9 +54,15 @@ Notes on `sink.trans.mode`:
 
 | Key | Default | Notes |
 | --- | --- | --- |
+| `sink.datasource.engine.format` | `connect` | Only `connect` is runnable today. Non-`connect` values fail fast. |
+| `sink.debezium.dialect` | none | Sink-side CDC dialect for envelope normalization: `mysql` or `postgresql`. Used by Engine and Kafka conversion. If unset, falls back to inferring from `debezium.connector.class`. |
 | `debezium.name` | none | Engine name. |
-| `debezium.connector.class` | none | Connector class, e.g. PostgreSQL connector. |
+| `debezium.connector.class` | none | Debezium Engine connector class only (which DB the engine connects to). Not a Kafka setting. |
 | `debezium.*` | none | Standard Debezium engine properties. |
+
+See `conf/pixels-sink.mysql.properties` for a TDSQL MySQL CDC example.
+
+The Debezium Connector reads the database Binlog or WAL. The local `conversion.debezium` package only converts envelopes already emitted by Debezium (`connect` / `json` / `avro` plus shared `support` / `dialect`).
 
 ### Retina Sink
 
@@ -89,6 +99,7 @@ Notes on `sink.trans.mode`:
 | `sink.proto.dir` | required | Proto output or input directory. |
 | `sink.proto.data` | `data` | Data set name. |
 | `sink.proto.maxRecords` | `100000` | Max records per file. |
+| `sink.storage.mode` | `stream` | Storage read mode: `stream` reads records incrementally; `memory` preloads all records before replay. |
 | `sink.storage.loop` | `false` | Whether to loop over stored files. |
 
 ### Flink Sink
@@ -108,14 +119,26 @@ Kafka source is deprecated.
 | `group.id` | required | Consumer group id. |
 | `auto.offset.reset` | none | Standard Kafka consumer property. |
 | `key.deserializer` | `org.apache.kafka.common.serialization.StringDeserializer` | Kafka key deserializer. |
-| `value.deserializer` | `io.pixelsdb.pixels.sink.event.deserializer.RowChangeEventJsonDeserializer` | Kafka value deserializer for row events. |
+| `sink.kafka.value.format` | `json` | Envelope format: `json` or `avro`. Kafka sources assemble `conversion.debezium` converters from this key. |
+| `sink.debezium.dialect` | none | Upstream CDC dialect (`mysql` / `postgresql`). Required for Kafka transaction decoding; row events can also infer from `source.connector` when unset. |
 | `topic.prefix` | required | Topic prefix for table events. |
 | `consumer.capture_database` | required | Database name used to build topic names. |
 | `consumer.include_tables` | empty | Comma-separated table list, empty means all. |
 | `transaction.topic.suffix` | `transaction` | Suffix appended to transaction topics. |
-| `transaction.topic.value.deserializer` | `io.pixelsdb.pixels.sink.event.deserializer.RowChangeEventJsonDeserializer` | Deserializer for transaction messages. |
 | `transaction.topic.group_id` | `transaction_consumer` | Consumer group for transaction topic. |
 | `sink.registry.url` | required | Avro Schema registry endpoint. |
+
+**Legacy Kafka deserializer migration**
+
+Prefer `sink.kafka.value.format`. Old keys `value.deserializer` and
+`transaction.topic.value.deserializer` are no longer SPI; `PixelsSinkConfig`
+migrates them at startup:
+
+| Condition | Behavior |
+| --- | --- |
+| `sink.kafka.value.format` is set; legacy keys still present | Warn and ignore legacy keys |
+| Format unset; legacy class name maps to Json/Avro | Infer format and warn |
+| Row/tx inferences conflict, or class name unrecognized | Fail fast |
 
 **Reserved Configuration**
 
@@ -124,7 +147,6 @@ Kafka source is deprecated.
 | `sink.remote.host` | `localhost` | Sink server host. |
 | `sink.remote.port` | `9090` | Sink server port. |
 | `sink.rpc.enable` | `false` | Enable RPC simulation (for development). |
-| `sink.rpc.mock.delay` | `0` | Artificial delay in ms. |
 
 **Monitoring and Metrics**
 
@@ -146,13 +168,13 @@ Kafka source is deprecated.
 | `sink.monitor.freshness.verbose` | `false` | Verbose freshness logging. |
 | `sink.monitor.freshness.timestamp` | `false` | Include timestamps. |
 
-Note: In the Retina paper experiments, `sink.monitor.freshness.level=embed` is used to query freshness from Trino. This requires the last column of each table to be `freshness_ts`.
+Note: In the Retina paper experiments, `sink.monitor.freshness.level=embed` queries freshness through JDBC. This requires the last column of each table to be `freshness_ts`. Trino is available in the default build; HiveServer2 support for Hudi requires building with `-Phudi-hive`.
 
-**Freshness Trino Settings**
+**Freshness Query Settings**
 
 | Key | Default | Notes |
 | --- | --- | --- |
-| `trino.url` | required for Trino-based freshness | JDBC URL. |
-| `trino.user` | required for Trino-based freshness | Username. |
-| `trino.password` | required for Trino-based freshness | Password. |
-| `trino.parallel` | `1` | Parallel query count. |
+| `sink.query.url` | required for embedded freshness | Trino or HiveServer2 JDBC URL. |
+| `sink.query.user` | required for embedded freshness | Username. |
+| `sink.query.password` | empty | Password. |
+| `sink.query.parallel` | `1` | Parallel query count. |

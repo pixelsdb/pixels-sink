@@ -1,30 +1,28 @@
 /*
- * Copyright 2025 PixelsDB.
+ * Copyright 2023 PixelsDB.
  *
- * This file is part of Pixels.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Pixels is free software: you can redistribute it and/or modify
- * it under the terms of the Affero GNU General Public License as
- * published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Pixels is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Affero GNU General Public License for more details.
- *
- * You should have received a copy of the Affero GNU General Public
- * License along with Pixels.  If not, see
- * <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package io.pixelsdb.pixels.sink.config;
 
 public final class PixelsSinkConstants
 {
     public static final String ROW_RECORD_KAFKA_PROP_FACTORY = "row-record";
     public static final String TRANSACTION_KAFKA_PROP_FACTORY = "transaction";
-    public static final int MONITOR_NUM = 2;
+    public static final String KAFKA_VALUE_FORMAT = "pixels.sink.kafka.value.format";
+    /** Sink-side CDC dialect for envelope normalization: {@code mysql} or {@code postgresql}. */
+    public static final String SINK_DEBEZIUM_DIALECT = "sink.debezium.dialect";
+    public static final String DEBEZIUM_CONNECTOR_CLASS = "debezium.connector.class";
     public static final int MAX_QUEUE_SIZE = 1_000;
     public static final String SNAPSHOT_TX_PREFIX = "SNAPSHOT-";
 
