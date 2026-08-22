@@ -118,6 +118,7 @@ class RetinaWriterIntegrationTest
                     );
             RowChangeEvent rowChangeEvent = new RowChangeEvent(builder.build());
             rowChangeEvent.setTimeStamp(timeStamp);
+            rowChangeEvent.bindIndexKey();
             IndexProto.IndexKey indexKey = rowChangeEvent.getAfterKey();
             RetinaProto.InsertData.Builder insertDataBuilder = RetinaProto.InsertData.newBuilder();
             insertDataBuilder.
@@ -184,6 +185,7 @@ class RetinaWriterIntegrationTest
 
             RowChangeEvent rowChangeEvent = new RowChangeEvent(builder.build());
             rowChangeEvent.setTimeStamp(timeStamp);
+            rowChangeEvent.bindIndexKey();
             RetinaProto.DeleteData.Builder deleteDataBuilder = RetinaProto.DeleteData.newBuilder();
             deleteDataBuilder
                     .addIndexKeys(rowChangeEvent.getBeforeKey());
@@ -274,6 +276,7 @@ class RetinaWriterIntegrationTest
 
                     RowChangeEvent rowChangeEvent = new RowChangeEvent(rowBuilder.build());
                     rowChangeEvent.setTimeStamp(timeStamp);
+                    rowChangeEvent.bindIndexKey();
 
                     // InsertData
                     RetinaProto.InsertData.Builder insertDataBuilder = RetinaProto.InsertData.newBuilder()
@@ -403,6 +406,7 @@ class RetinaWriterIntegrationTest
 
                         RowChangeEvent rowChangeEvent = new RowChangeEvent(rowBuilder.build());
                         rowChangeEvent.setTimeStamp(timeStamp);
+                        rowChangeEvent.bindIndexKey();
 
                         // deleteData
                         RetinaProto.DeleteData.Builder deleteDataBuilder = RetinaProto.DeleteData.newBuilder()
@@ -536,8 +540,10 @@ class RetinaWriterIntegrationTest
                         );
                 RowChangeEvent rowChangeEvent = new RowChangeEvent(rowBuilder.build());
                 rowChangeEvent.setTimeStamp(timeStamp);
+                rowChangeEvent.bindIndexKey();
                 RowChangeEvent rowChangeEvent2 = new RowChangeEvent(rowBuilder.build());
                 rowChangeEvent2.setTimeStamp(timeStamp);
+                rowChangeEvent2.bindIndexKey();
                 // InsertData
                 RetinaProto.InsertData.Builder insertDataBuilder = RetinaProto.InsertData.newBuilder()
                         .addColValues(ByteString.copyFrom(cols[0]))

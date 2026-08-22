@@ -28,7 +28,7 @@ public abstract class AbstractBucketedWriter<C>
             return;
         }
 
-        event.initIndexKey();
+        event.initRoutingKey();
 
         switch (event.getOp())
         {
@@ -92,7 +92,8 @@ public abstract class AbstractBucketedWriter<C>
 
         RowChangeEvent deleteEvent =
                 new RowChangeEvent(builder.build(), event.getSchema());
-        deleteEvent.initIndexKey();
+        deleteEvent.setTimeStamp(event.getTimeStamp());
+        deleteEvent.initRoutingKey();
         return deleteEvent;
     }
 
@@ -105,7 +106,8 @@ public abstract class AbstractBucketedWriter<C>
 
         RowChangeEvent insertEvent =
                 new RowChangeEvent(builder.build(), event.getSchema());
-        insertEvent.initIndexKey();
+        insertEvent.setTimeStamp(event.getTimeStamp());
+        insertEvent.initRoutingKey();
         return insertEvent;
     }
 }

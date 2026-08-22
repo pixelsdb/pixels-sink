@@ -47,6 +47,9 @@ public final class RetinaPayloadBuilder
                 .setTableName(tableName);
         for (RowChangeEvent event : events)
         {
+            // Bind IndexKey once with the same timestamp written into TableUpdateData.
+            event.setTimeStamp(timestamp);
+            event.bindIndexKey();
             addRowChange(event, builder);
         }
         return builder.build();

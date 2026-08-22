@@ -51,12 +51,7 @@ public class TableSingleRecordWriter extends TableCrossTxWriter
         try
         {
             List<RetinaProto.TableUpdateData> tableUpdateData = new LinkedList<>();
-            for (RowChangeEvent event : batch)
-            {
-                event.setTimeStamp(pixelsTransContext.getTimestamp());
-                event.updateIndexKey();
-            }
-
+            // Timestamp + IndexKey binding happen inside RetinaPayloadBuilder.
             RetinaProto.TableUpdateData update =
                     buildTableUpdateDataFromBatch(pixelsTransContext, batch);
             if (update != null)
@@ -97,9 +92,6 @@ public class TableSingleRecordWriter extends TableCrossTxWriter
                         }
                     }
             );
-        } catch (SinkException e)
-        {
-            throw new RuntimeException(e);
         } finally
         {
             writeLock.unlock();

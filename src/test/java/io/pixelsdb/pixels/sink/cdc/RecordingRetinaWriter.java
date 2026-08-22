@@ -82,7 +82,6 @@ final class RecordingRetinaWriter implements PixelsSinkWriter
             int ordinal = recordedRequests.size() + 1;
             long timestamp = TIMESTAMP_BASE + ordinal;
             row.setTimeStamp(timestamp);
-            row.updateIndexKey();
 
             RetinaProto.TableUpdateData tableUpdate =
                     RetinaPayloadBuilder.buildTableUpdateData(

@@ -236,6 +236,7 @@ public class SinkContextManager
     {
         if (ctx != null)
         {
+            // Routing uses key bytes only; IndexKey is bound later in RetinaPayloadBuilder.
             event.setTimeStamp(ctx.getTimestamp());
         }
         retinaBucketDispatcher.writeRowChangeEvent(event, ctx);

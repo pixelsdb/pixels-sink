@@ -54,12 +54,21 @@ public class RowChangeEvent
     private TableMetadata tableMetadata = null;
     private Map<String, SinkProto.ColumnValue> beforeValueMap;
     private Map<String, SinkProto.ColumnValue> afterValueMap;
+    /**
+     * Primary-key bytes used for bucket routing / PK-change detection.
+     * Independent of TransService timestamp.
+     */
+    @Getter
+    private ByteString beforeRoutingKey;
+    @Getter
+    private ByteString afterRoutingKey;
     @Getter
     private IndexProto.IndexKey beforeKey;
     @Getter
     private IndexProto.IndexKey afterKey;
 
-    private boolean indexKeyInited = false;
+    private boolean routingKeyInited = false;
+    private boolean indexKeyBound = false;
 
     @Getter
     private long tableId;
@@ -76,7 +85,7 @@ public class RowChangeEvent
         this.tableMetadata = tableMetadataRegistry.getMetadata(
                 rowRecord.getSource().getDb(), rowRecord.getSource().getTable());
         init();
-        initIndexKey();
+        initRoutingKey();
     }
 
     public RowChangeEvent(SinkProto.RowRecord rowRecord, TypeDescription schema) throws SinkException
@@ -135,9 +144,12 @@ public class RowChangeEvent
                 .forEach(i -> map.put(schema.getFieldNames().get(i), rowValue.getValuesList().get(i)));
     }
 
-    public void initIndexKey() throws SinkException
+    /**
+     * Builds primary-key bytes for routing. Safe before TransService timestamp is known.
+     */
+    public void initRoutingKey() throws SinkException
     {
-        if (indexKeyInited)
+        if (routingKeyInited)
         {
             return;
         }
@@ -149,49 +161,89 @@ public class RowChangeEvent
 
         if (!this.tableMetadata.hasPrimaryIndex())
         {
+            routingKeyInited = true;
             return;
         }
         if (hasBeforeData())
         {
-            this.beforeKey = generateIndexKey(tableMetadata, beforeValueMap);
+            this.beforeRoutingKey = generateRoutingKey(tableMetadata, beforeValueMap);
         }
 
         if (hasAfterData())
         {
-            this.afterKey = generateIndexKey(tableMetadata, afterValueMap);
+            this.afterRoutingKey = generateRoutingKey(tableMetadata, afterValueMap);
         }
 
-        indexKeyInited = true;
+        routingKeyInited = true;
     }
 
-    public void updateIndexKey() throws SinkException
+    /**
+     * Builds Retina {@link IndexProto.IndexKey} from routing bytes and {@link #timeStamp}.
+     * Call after the TransService timestamp is assigned.
+     */
+    public void bindIndexKey() throws SinkException
     {
+        initRoutingKey();
+
+        if (this.tableMetadata == null || !this.tableMetadata.hasPrimaryIndex())
+        {
+            return;
+        }
+
+        SinglePointIndex index = tableMetadata.getIndex();
+        long tableIdForKey = tableMetadata.getTable().getId();
         if (hasBeforeData())
         {
-            this.beforeKey = generateIndexKey(tableMetadata, beforeValueMap);
+            this.beforeKey = toIndexKey(beforeRoutingKey, index.getId(), tableIdForKey);
         }
 
         if (hasAfterData())
         {
-            this.afterKey = generateIndexKey(tableMetadata, afterValueMap);
+            this.afterKey = toIndexKey(afterRoutingKey, index.getId(), tableIdForKey);
         }
+
+        indexKeyBound = true;
+    }
+
+    /**
+     * @deprecated Use {@link #initRoutingKey()} for bucketing and {@link #bindIndexKey()} after
+     * timestamp assignment. Kept for callers that only need routing.
+     */
+    @Deprecated
+    public void initIndexKey() throws SinkException
+    {
+        initRoutingKey();
+    }
+
+    /**
+     * @deprecated Use {@link #bindIndexKey()}.
+     */
+    @Deprecated
+    public void updateIndexKey() throws SinkException
+    {
+        bindIndexKey();
+    }
+
+    public boolean isIndexKeyBound()
+    {
+        return indexKeyBound;
     }
 
     public int getBeforeBucketFromIndex()
     {
-        assert indexKeyInited;
+        assert routingKeyInited;
         if (hasBeforeData())
         {
-            return getBucketFromIndexKey(beforeKey);
+            return getBucketIdFromByteBuffer(beforeRoutingKey);
         }
         throw new IllegalCallerException("Event dosen't have before data");
     }
 
     public boolean isPkChanged() throws SinkException
     {
-        if (!indexKeyInited)
+        if (!routingKeyInited)
         {
-            initIndexKey();
+            initRoutingKey();
         }
 
         if (getOp() != SinkProto.OperationType.UPDATE)
@@ -199,26 +251,23 @@ public class RowChangeEvent
             return false;
         }
 
-        ByteString beforeKey = getBeforeKey().getKey();
-        ByteString afterKey = getAfterKey().getKey();
-
-        return !beforeKey.equals(afterKey);
+        return !beforeRoutingKey.equals(afterRoutingKey);
     }
 
     public int getAfterBucketFromIndex()
     {
-        assert indexKeyInited;
+        assert routingKeyInited;
         if (hasAfterData())
         {
-            return getBucketFromIndexKey(afterKey);
+            return getBucketIdFromByteBuffer(afterRoutingKey);
         }
         throw new IllegalCallerException("Event dosen't have after data");
     }
 
-    private IndexProto.IndexKey generateIndexKey(TableMetadata tableMetadata, Map<String, SinkProto.ColumnValue> rowValue)
+    private ByteString generateRoutingKey(
+            TableMetadata tableMetadata, Map<String, SinkProto.ColumnValue> rowValue)
     {
         List<String> keyColumnNames = tableMetadata.getKeyColumnNames();
-        SinglePointIndex index = tableMetadata.getIndex();
         int len = keyColumnNames.size();
         List<ByteString> keyColumnValues = new ArrayList<>(len);
         int keySize = 0;
@@ -234,12 +283,16 @@ public class RowChangeEvent
         {
             byteBuffer.put(value.toByteArray());
         }
+        return ByteString.copyFrom(byteBuffer.rewind());
+    }
 
+    private IndexProto.IndexKey toIndexKey(ByteString routingKey, long indexId, long tableIdForKey)
+    {
         return IndexProto.IndexKey.newBuilder()
                 .setTimestamp(timeStamp)
-                .setKey(ByteString.copyFrom(byteBuffer.rewind()))
-                .setIndexId(index.getId())
-                .setTableId(tableMetadata.getTable().getId())
+                .setKey(routingKey)
+                .setIndexId(indexId)
+                .setTableId(tableIdForKey)
                 .build();
     }
 

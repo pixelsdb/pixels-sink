@@ -142,6 +142,15 @@ class RetinaPayloadBuilderTest
             SinkProto.RowValue after,
             TableMetadata metadata) throws Exception
     {
+        return eventWithRoutingOnly(operation, before, after, metadata);
+    }
+
+    private static RowChangeEvent eventWithRoutingOnly(
+            SinkProto.OperationType operation,
+            SinkProto.RowValue before,
+            SinkProto.RowValue after,
+            TableMetadata metadata) throws Exception
+    {
         SinkProto.RowRecord.Builder record = SinkProto.RowRecord.newBuilder()
                 .setOp(operation)
                 .setSource(SinkProto.SourceInfo.newBuilder()
@@ -158,8 +167,7 @@ class RetinaPayloadBuilderTest
 
         RowChangeEvent event = new RowChangeEvent(
                 record.build(), metadata.getTypeDescription(), metadata);
-        event.setTimeStamp(TIMESTAMP);
-        event.initIndexKey();
+        event.initRoutingKey();
         return event;
     }
 
@@ -201,5 +209,25 @@ class RetinaPayloadBuilderTest
     private static ByteString bytes(String value)
     {
         return ByteString.copyFromUtf8(value);
+    }
+
+    @Test
+    void shouldBindIndexKeyWithPayloadTimestamp() throws Exception
+    {
+        TableMetadata metadata = tableMetadata();
+        RowChangeEvent insert = eventWithRoutingOnly(
+                SinkProto.OperationType.INSERT, null, row("1", "insert"), metadata);
+
+        assertEquals(bytes("1"), insert.getAfterRoutingKey());
+        assertEquals(null, insert.getAfterKey());
+
+        RetinaProto.TableUpdateData tableUpdate =
+                RetinaPayloadBuilder.buildTableUpdateData(
+                        TABLE_NAME, TIMESTAMP, List.of(insert));
+
+        assertEquals(TIMESTAMP, tableUpdate.getTimestamp());
+        assertEquals(TIMESTAMP, tableUpdate.getInsertData(0).getIndexKeys(0).getTimestamp());
+        assertEquals(bytes("1"), tableUpdate.getInsertData(0).getIndexKeys(0).getKey());
+        assertEquals(TIMESTAMP, insert.getAfterKey().getTimestamp());
     }
 }

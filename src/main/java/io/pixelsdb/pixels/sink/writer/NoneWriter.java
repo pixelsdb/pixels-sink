@@ -93,10 +93,11 @@ public class NoneWriter implements PixelsSinkWriter
         metricsFacade.recordRowChange(rowChangeEvent.getTable(), rowChangeEvent.getOp());
         try
         {
-            rowChangeEvent.initIndexKey();
-            if (rowChangeEvent.getAfterKey() != null)
+            rowChangeEvent.initRoutingKey();
+            if (rowChangeEvent.getAfterRoutingKey() != null)
             {
-                metricsFacade.recordPrimaryKeyUpdateDistribution(rowChangeEvent.getTable(), rowChangeEvent.getAfterKey().getKey());
+                metricsFacade.recordPrimaryKeyUpdateDistribution(
+                        rowChangeEvent.getTable(), rowChangeEvent.getAfterRoutingKey());
             }
 
 

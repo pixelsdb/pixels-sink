@@ -157,7 +157,7 @@ class CdcOrderContractTest
                 metadataFixture.metadata().getTypeDescription(),
                 metadataFixture.metadata());
         event.setTimeStamp(7001L);
-        event.initIndexKey();
+        event.initRoutingKey();
         return event;
     }
 
@@ -202,9 +202,9 @@ class CdcOrderContractTest
         {
             return emitted.stream()
                     .map(event -> event.hasAfterData()
-                            ? event.getAfterKey()
-                            : event.getBeforeKey())
-                    .map(key -> readLong(key.getKey()))
+                            ? event.getAfterRoutingKey()
+                            : event.getBeforeRoutingKey())
+                    .map(CdcOrderContractTest::readLong)
                     .toList();
         }
     }

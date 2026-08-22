@@ -95,7 +95,7 @@ public final class RowChangeEventFactory
         }
 
         RowChangeEvent event = new RowChangeEvent(rowRecord, schema, metadata);
-        event.initIndexKey();
+        event.initRoutingKey();
         return event;
     }
 }

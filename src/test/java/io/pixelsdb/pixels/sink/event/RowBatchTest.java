@@ -31,7 +31,7 @@ class RowBatchTest
         TypeDescription schema = TypeDescription.createSchemaFromStrings(
                 java.util.List.of("id"), java.util.List.of("int"));
         VectorizedRowBatch rowBatch = schema.createRowBatch(
-                3, TypeDescription.Mode.CREATE_INT_VECTOR_FOR_INT);
+                3, TypeDescription.VectorLayout.NONE);
         IntColumnVector vector = (IntColumnVector) rowBatch.cols[0];
         vector.add(10);
         vector.add(20);
@@ -52,7 +52,7 @@ class RowBatchTest
     {
         TypeDescription schema = TypeDescription.createSchemaFromStrings(
                 java.util.List.of("name"), java.util.List.of("varchar(100)"));
-        VectorizedRowBatch rowBatch = schema.createRowBatch(3, TypeDescription.Mode.CREATE_INT_VECTOR_FOR_INT);
+        VectorizedRowBatch rowBatch = schema.createRowBatch(3, TypeDescription.VectorLayout.NONE);
         BinaryColumnVector v = (BinaryColumnVector) rowBatch.cols[0];
         v.add("rr");
         v.add("zz");
