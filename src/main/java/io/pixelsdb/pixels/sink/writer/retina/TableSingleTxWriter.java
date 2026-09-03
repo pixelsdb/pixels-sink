@@ -82,8 +82,8 @@ public class TableSingleTxWriter extends TableWriter
         RowChangeEvent event1 = batch.get(0);
         try
         {
-            List<RetinaProto.TableUpdateData> tableUpdateData = List.of(
-                    RetinaPayloadBuilder.buildTableUpdateData(tableName, 0L, batch));
+            List<RetinaProto.TableUpdateData> tableUpdateData =
+                    RetinaPayloadBuilder.buildTableUpdateDataList(tableName, 0L, batch);
             delegate.writeTrans(event1.getSchemaName(), tableUpdateData);
             sinkContext.updateCounter(fullTableName, batch.size());
             // ---- Outside lock: build proto and write ----

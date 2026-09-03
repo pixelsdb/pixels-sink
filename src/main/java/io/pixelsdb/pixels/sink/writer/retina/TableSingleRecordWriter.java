@@ -52,12 +52,9 @@ public class TableSingleRecordWriter extends TableCrossTxWriter
         {
             List<RetinaProto.TableUpdateData> tableUpdateData = new LinkedList<>();
             // Timestamp + IndexKey binding happen inside RetinaPayloadBuilder.
-            RetinaProto.TableUpdateData update =
+            List<RetinaProto.TableUpdateData> updates =
                     buildTableUpdateDataFromBatch(pixelsTransContext, batch);
-            if (update != null)
-            {
-                tableUpdateData.add(update);
-            }
+            tableUpdateData.addAll(updates);
 
             // flushRateLimiter.acquire(batch.size());
             long txStartTime = System.currentTimeMillis();
@@ -98,12 +95,12 @@ public class TableSingleRecordWriter extends TableCrossTxWriter
         }
     }
 
-    protected RetinaProto.TableUpdateData buildTableUpdateDataFromBatch(
+    protected List<RetinaProto.TableUpdateData> buildTableUpdateDataFromBatch(
             TransContext transContext, List<RowChangeEvent> smallBatch)
     {
         try
         {
-            return RetinaPayloadBuilder.buildTableUpdateData(
+            return RetinaPayloadBuilder.buildTableUpdateDataList(
                     tableName, transContext.getTimestamp(), smallBatch);
         } catch (SinkException e)
         {

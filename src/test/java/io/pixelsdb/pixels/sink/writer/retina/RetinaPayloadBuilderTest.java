@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RetinaPayloadBuilderTest
 {
@@ -51,41 +52,85 @@ class RetinaPayloadBuilderTest
         RowChangeEvent delete = event(
                 SinkProto.OperationType.DELETE, row("4", "delete"), null, metadata);
 
-        RetinaProto.TableUpdateData tableUpdate =
-                RetinaPayloadBuilder.buildTableUpdateData(
+        List<RetinaProto.TableUpdateData> tableUpdates =
+                RetinaPayloadBuilder.buildTableUpdateDataList(
                         TABLE_NAME, TIMESTAMP, List.of(insert, snapshot, update, delete));
         RetinaProto.UpdateRecordRequest request =
                 RetinaPayloadBuilder.buildUpdateRecordRequest(
-                        "fixed-token", SCHEMA_NAME, 23, List.of(tableUpdate));
+                        "fixed-token", SCHEMA_NAME, 23, tableUpdates);
 
         assertEquals("fixed-token", request.getHeader().getToken());
         assertEquals(SCHEMA_NAME, request.getSchemaName());
         assertEquals(23, request.getVirtualNodeId());
-        assertEquals(List.of(tableUpdate), request.getTableUpdateDataList());
-        assertEquals(TABLE_NAME, tableUpdate.getTableName());
-        assertEquals(INDEX_ID, tableUpdate.getPrimaryIndexId());
-        assertEquals(TIMESTAMP, tableUpdate.getTimestamp());
+        assertEquals(tableUpdates, request.getTableUpdateDataList());
+        assertEquals(4, tableUpdates.size());
+        for (RetinaProto.TableUpdateData tableUpdate : tableUpdates)
+        {
+            assertEquals(TABLE_NAME, tableUpdate.getTableName());
+            assertEquals(INDEX_ID, tableUpdate.getPrimaryIndexId());
+            assertEquals(TIMESTAMP, tableUpdate.getTimestamp());
+        }
 
-        assertEquals(2, tableUpdate.getInsertDataCount());
-        assertRow(tableUpdate.getInsertData(0).getIndexKeys(0),
-                tableUpdate.getInsertData(0).getColValuesList(), "1", "insert");
-        assertEquals(List.of(false, false), tableUpdate.getInsertData(0).getIsNullList());
-        assertRow(tableUpdate.getInsertData(1).getIndexKeys(0),
-                tableUpdate.getInsertData(1).getColValuesList(), "2", "snapshot");
-        assertEquals(List.of(false, false), tableUpdate.getInsertData(1).getIsNullList());
+        assertEquals(1, tableUpdates.get(0).getInsertDataCount());
+        assertRow(tableUpdates.get(0).getInsertData(0).getIndexKeys(0),
+                tableUpdates.get(0).getInsertData(0).getColValuesList(), "1", "insert");
+        assertEquals(List.of(false, false), tableUpdates.get(0).getInsertData(0).getIsNullList());
+        assertEquals(1, tableUpdates.get(1).getInsertDataCount());
+        assertRow(tableUpdates.get(1).getInsertData(0).getIndexKeys(0),
+                tableUpdates.get(1).getInsertData(0).getColValuesList(), "2", "snapshot");
+        assertEquals(List.of(false, false), tableUpdates.get(1).getInsertData(0).getIsNullList());
 
-        assertEquals(1, tableUpdate.getUpdateDataCount());
-        assertRow(tableUpdate.getUpdateData(0).getIndexKeys(0),
-                tableUpdate.getUpdateData(0).getColValuesList(), "3", "after");
-        assertEquals(List.of(false, false), tableUpdate.getUpdateData(0).getIsNullList());
+        assertEquals(1, tableUpdates.get(2).getUpdateDataCount());
+        assertRow(tableUpdates.get(2).getUpdateData(0).getIndexKeys(0),
+                tableUpdates.get(2).getUpdateData(0).getColValuesList(), "3", "after");
+        assertEquals(List.of(false, false), tableUpdates.get(2).getUpdateData(0).getIsNullList());
 
-        assertEquals(1, tableUpdate.getDeleteDataCount());
-        assertEquals(bytes("4"), tableUpdate.getDeleteData(0).getIndexKeys(0).getKey());
-        assertEquals(INDEX_ID, tableUpdate.getDeleteData(0).getIndexKeys(0).getIndexId());
-        assertEquals(TABLE_ID, tableUpdate.getDeleteData(0).getIndexKeys(0).getTableId());
-        assertEquals(TIMESTAMP, tableUpdate.getDeleteData(0).getIndexKeys(0).getTimestamp());
+        assertEquals(1, tableUpdates.get(3).getDeleteDataCount());
+        assertEquals(bytes("4"), tableUpdates.get(3).getDeleteData(0).getIndexKeys(0).getKey());
+        assertEquals(INDEX_ID, tableUpdates.get(3).getDeleteData(0).getIndexKeys(0).getIndexId());
+        assertEquals(TABLE_ID, tableUpdates.get(3).getDeleteData(0).getIndexKeys(0).getTableId());
+        assertEquals(TIMESTAMP, tableUpdates.get(3).getDeleteData(0).getIndexKeys(0).getTimestamp());
 
         assertEquals(request, RetinaProto.UpdateRecordRequest.parseFrom(request.toByteArray()));
+    }
+
+    @Test
+    void shouldGroupOnlyAdjacentEventsWithTheSameOperation() throws Exception
+    {
+        TableMetadata metadata = tableMetadata();
+        List<RowChangeEvent> events = List.of(
+                event(SinkProto.OperationType.INSERT, null, row("1", "first"), metadata),
+                event(SinkProto.OperationType.INSERT, null, row("2", "second"), metadata),
+                event(SinkProto.OperationType.DELETE, row("3", "third"), null, metadata),
+                event(SinkProto.OperationType.DELETE, row("4", "fourth"), null, metadata),
+                event(SinkProto.OperationType.INSERT, null, row("5", "fifth"), metadata));
+
+        List<RetinaProto.TableUpdateData> updates =
+                RetinaPayloadBuilder.buildTableUpdateDataList(TABLE_NAME, TIMESTAMP, events);
+
+        assertEquals(3, updates.size());
+        assertEquals(2, updates.get(0).getInsertDataCount());
+        assertEquals(2, updates.get(1).getDeleteDataCount());
+        assertEquals(1, updates.get(2).getInsertDataCount());
+        assertEquals(bytes("1"), updates.get(0).getInsertData(0).getIndexKeys(0).getKey());
+        assertEquals(bytes("2"), updates.get(0).getInsertData(1).getIndexKeys(0).getKey());
+        assertEquals(bytes("3"), updates.get(1).getDeleteData(0).getIndexKeys(0).getKey());
+        assertEquals(bytes("4"), updates.get(1).getDeleteData(1).getIndexKeys(0).getKey());
+        assertEquals(bytes("5"), updates.get(2).getInsertData(0).getIndexKeys(0).getKey());
+    }
+
+    @Test
+    void shouldRejectMixedOperationsInOneTableUpdateData() throws Exception
+    {
+        TableMetadata metadata = tableMetadata();
+        RowChangeEvent insert = event(
+                SinkProto.OperationType.INSERT, null, row("1", "insert"), metadata);
+        RowChangeEvent delete = event(
+                SinkProto.OperationType.DELETE, row("1", "delete"), null, metadata);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> RetinaPayloadBuilder.buildTableUpdateData(
+                        TABLE_NAME, TIMESTAMP, List.of(insert, delete)));
     }
 
     @Test
@@ -111,16 +156,16 @@ class RetinaPayloadBuilderTest
                         .build(),
                 metadata);
 
-        RetinaProto.TableUpdateData tableUpdate =
-                RetinaPayloadBuilder.buildTableUpdateData(
+        List<RetinaProto.TableUpdateData> tableUpdates =
+                RetinaPayloadBuilder.buildTableUpdateDataList(
                         TABLE_NAME, TIMESTAMP, List.of(withNull, emptyString));
 
-        assertEquals(List.of(false, true), tableUpdate.getInsertData(0).getIsNullList());
-        assertEquals(bytes("5"), tableUpdate.getInsertData(0).getColValues(0));
-        assertEquals(ByteString.EMPTY, tableUpdate.getInsertData(0).getColValues(1));
+        assertEquals(List.of(false, true), tableUpdates.get(0).getInsertData(0).getIsNullList());
+        assertEquals(bytes("5"), tableUpdates.get(0).getInsertData(0).getColValues(0));
+        assertEquals(ByteString.EMPTY, tableUpdates.get(0).getInsertData(0).getColValues(1));
 
-        assertEquals(List.of(false, false), tableUpdate.getUpdateData(0).getIsNullList());
-        assertEquals(ByteString.EMPTY, tableUpdate.getUpdateData(0).getColValues(1));
+        assertEquals(List.of(false, false), tableUpdates.get(1).getUpdateData(0).getIsNullList());
+        assertEquals(ByteString.EMPTY, tableUpdates.get(1).getUpdateData(0).getColValues(1));
     }
 
     private static void assertRow(

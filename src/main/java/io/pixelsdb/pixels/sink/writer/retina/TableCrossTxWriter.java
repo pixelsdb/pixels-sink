@@ -72,17 +72,9 @@ public class TableCrossTxWriter extends TableWriter
                 {
                     if (smallBatch != null && !smallBatch.isEmpty())
                     {
-                        RetinaProto.TableUpdateData update =
-                                buildTableUpdateDataFromBatch(txId, smallBatch);
-                        if (update == null)
-                        {
-                            continue;
-                        }
-                        tableUpdateData.add(update);
-                        tableUpdateCount.add(smallBatch.size());
+                        addTransactionBatch(txId, smallBatch, tableUpdateData,
+                                txIds, fullTableName, tableUpdateCount);
                     }
-                    txIds.add(currTxId);
-                    fullTableName.add(event.getFullTableName());
                     txId = currTxId;
                     smallBatch = new LinkedList<>();
                 }
@@ -91,13 +83,8 @@ public class TableCrossTxWriter extends TableWriter
 
             if (smallBatch != null)
             {
-                RetinaProto.TableUpdateData update =
-                        buildTableUpdateDataFromBatch(txId, smallBatch);
-                if (update != null)
-                {
-                    tableUpdateData.add(update);
-                    tableUpdateCount.add(smallBatch.size());
-                }
+                addTransactionBatch(txId, smallBatch, tableUpdateData,
+                        txIds, fullTableName, tableUpdateCount);
             }
 
             // flushRateLimiter.acquire(batch.size());
@@ -149,6 +136,26 @@ public class TableCrossTxWriter extends TableWriter
         }
     }
 
+    private void addTransactionBatch(
+            String txId,
+            List<RowChangeEvent> transactionBatch,
+            List<RetinaProto.TableUpdateData> tableUpdateData,
+            List<String> txIds,
+            List<String> fullTableNames,
+            List<Integer> tableUpdateCount)
+    {
+        List<RetinaProto.TableUpdateData> updates =
+                buildTableUpdateDataFromBatch(txId, transactionBatch);
+        if (updates.isEmpty())
+        {
+            return;
+        }
+        tableUpdateData.addAll(updates);
+        txIds.add(txId);
+        fullTableNames.add(transactionBatch.get(0).getFullTableName());
+        tableUpdateCount.add(transactionBatch.size());
+    }
+
     private void failCtxs(List<String> txIds)
     {
         for (String writeTxId : txIds)
@@ -187,13 +194,13 @@ public class TableCrossTxWriter extends TableWriter
         writeLock.unlock();
     }
 
-    protected RetinaProto.TableUpdateData buildTableUpdateDataFromBatch(
+    protected List<RetinaProto.TableUpdateData> buildTableUpdateDataFromBatch(
             String txId, List<RowChangeEvent> smallBatch)
     {
         SinkContext sinkContext = SinkContextManager.getInstance().getSinkContext(txId);
         if (sinkContext == null)
         {
-            return null;
+            return List.of();
         }
         try
         {
@@ -212,7 +219,7 @@ public class TableCrossTxWriter extends TableWriter
         }
         try
         {
-            return RetinaPayloadBuilder.buildTableUpdateData(
+            return RetinaPayloadBuilder.buildTableUpdateDataList(
                     tableName, sinkContext.getTimestamp(), smallBatch);
         } catch (SinkException e)
         {
