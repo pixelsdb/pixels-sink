@@ -19,6 +19,7 @@ import io.pixelsdb.pixels.retina.RetinaProto;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.exception.SinkException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +31,41 @@ public final class RetinaPayloadBuilder
     {
     }
 
+    /**
+     * Builds table updates while preserving the source operation order.
+     *
+     * <p>Retina processes the operation fields inside one {@code TableUpdateData}
+     * in its own fixed order. Therefore, only adjacent events with the same
+     * operation may share a payload. The order of the returned payloads matches
+     * the order of {@code events}.</p>
+     */
+    public static List<RetinaProto.TableUpdateData> buildTableUpdateDataList(
+            String tableName,
+            long timestamp,
+            List<RowChangeEvent> events) throws SinkException
+    {
+        if (events == null || events.isEmpty())
+        {
+            throw new IllegalArgumentException("events is empty");
+        }
+
+        List<RetinaProto.TableUpdateData> updates = new ArrayList<>();
+        int groupStart = 0;
+        for (int i = 1; i <= events.size(); i++)
+        {
+            if (i == events.size() || events.get(i).getOp() != events.get(groupStart).getOp())
+            {
+                updates.add(buildTableUpdateData(
+                        tableName, timestamp, events.subList(groupStart, i)));
+                groupStart = i;
+            }
+        }
+        return updates;
+    }
+
+    /**
+     * Builds one table update from a non-empty, homogeneous operation group.
+     */
     public static RetinaProto.TableUpdateData buildTableUpdateData(
             String tableName,
             long timestamp,
@@ -41,6 +77,14 @@ public final class RetinaPayloadBuilder
         }
 
         RowChangeEvent firstEvent = events.get(0);
+        for (RowChangeEvent event : events)
+        {
+            if (event.getOp() != firstEvent.getOp())
+            {
+                throw new IllegalArgumentException(
+                        "TableUpdateData cannot contain different operation types");
+            }
+        }
         RetinaProto.TableUpdateData.Builder builder = RetinaProto.TableUpdateData.newBuilder()
                 .setTimestamp(timestamp)
                 .setPrimaryIndexId(firstEvent.getTableMetadata().getPrimaryIndexKeyId())
