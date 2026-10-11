@@ -19,6 +19,9 @@ import io.pixelsdb.pixels.retina.RetinaProto;
 import io.pixelsdb.pixels.sink.event.RowChangeEvent;
 import io.pixelsdb.pixels.sink.exception.SinkException;
 
+import com.google.protobuf.ByteString;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,12 +35,13 @@ public final class RetinaPayloadBuilder
     }
 
     /**
-     * Builds table updates while preserving the source operation order.
+     * Folds repeated keys within each source transaction, then groups net operations.
      *
      * <p>Retina processes the operation fields inside one {@code TableUpdateData}
      * in its own fixed order. Therefore, only adjacent events with the same
-     * operation may share a payload. The order of the returned payloads matches
-     * the order of {@code events}.</p>
+     * operation and source transaction may share a payload. Within a transaction,
+     * independent keys keep their first-occurrence order, with each key reduced
+     * to its earliest before image and final after image.</p>
      */
     public static List<RetinaProto.TableUpdateData> buildTableUpdateDataList(
             String tableName,
@@ -49,16 +53,28 @@ public final class RetinaPayloadBuilder
             throw new IllegalArgumentException("events is empty");
         }
 
+        events = TransactionBatchCoalescer.coalesce(events);
         List<RetinaProto.TableUpdateData> updates = new ArrayList<>();
         int groupStart = 0;
-        for (int i = 1; i <= events.size(); i++)
+        Set<ByteString> groupKeys = new HashSet<>();
+        for (int i = 0; i < events.size(); i++)
         {
-            if (i == events.size() || events.get(i).getOp() != events.get(groupStart).getOp())
+            RowChangeEvent event = events.get(i);
+            event.initRoutingKey();
+            ByteString key = event.isDelete() ? event.getBeforeRoutingKey() : event.getAfterRoutingKey();
+            if (i > groupStart && (event.getOp() != events.get(groupStart).getOp()
+                    || !event.getTransaction().getId().equals(events.get(groupStart).getTransaction().getId())
+                    || groupKeys.contains(key)))
             {
-                updates.add(buildTableUpdateData(
-                        tableName, timestamp, events.subList(groupStart, i)));
+                updates.add(buildTableUpdateData(tableName, timestamp, events.subList(groupStart, i)));
                 groupStart = i;
+                groupKeys.clear();
             }
+            groupKeys.add(key);
+        }
+        if (groupStart < events.size())
+        {
+            updates.add(buildTableUpdateData(tableName, timestamp, events.subList(groupStart, events.size())));
         }
         return updates;
     }

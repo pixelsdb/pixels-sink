@@ -275,4 +275,133 @@ class RetinaPayloadBuilderTest
         assertEquals(bytes("1"), tableUpdate.getInsertData(0).getIndexKeys(0).getKey());
         assertEquals(TIMESTAMP, insert.getAfterKey().getTimestamp());
     }
+
+    @Test
+    void shouldFoldPostgresTransactionSequences() throws Exception
+    {
+        String[] sequences = {"UU", "IU", "ID", "UD", "DI", "IUD", "UDI", "IDI", "DID"};
+        SinkProto.OperationType[] expected = {SinkProto.OperationType.UPDATE, SinkProto.OperationType.INSERT,
+                null, SinkProto.OperationType.DELETE, SinkProto.OperationType.UPDATE, null,
+                SinkProto.OperationType.UPDATE, SinkProto.OperationType.INSERT, SinkProto.OperationType.DELETE};
+        for (int n = 0; n < sequences.length; n++)
+        {
+            List<RowChangeEvent> input = transactionSequence(sequences[n], "tx");
+            List<RowChangeEvent> net = TransactionBatchCoalescer.coalesce(input);
+            if (expected[n] == null) assertEquals(List.of(), net, sequences[n]);
+            else
+            {
+                assertEquals(1, net.size(), sequences[n]);
+                assertEquals(expected[n], net.get(0).getOp(), sequences[n]);
+                if (net.get(0).hasBeforeData()) assertEquals(input.get(0).getBefore(), net.get(0).getBefore());
+                if (net.get(0).hasAfterData()) assertEquals(input.get(input.size() - 1).getAfter(), net.get(0).getAfter());
+            }
+            List<RetinaProto.TableUpdateData> payload = RetinaPayloadBuilder.buildTableUpdateDataList(TABLE_NAME, TIMESTAMP, input);
+            assertEquals(expected[n] == null ? 0 : 1, payload.size(), sequences[n]);
+        }
+    }
+
+    @Test
+    void shouldPreserveTransactionsAndRpcBoundaries() throws Exception
+    {
+        RowChangeEvent a = transactionSequence("U", "a").get(0);
+        RowChangeEvent b = transactionSequence("U", "b").get(0);
+        assertEquals(2, RetinaPayloadBuilder.buildTableUpdateDataList(TABLE_NAME, TIMESTAMP, List.of(a, b)).size());
+        List<RowChangeEvent> canceled = transactionSequence("ID", "c");
+        assertEquals(1, RetinaPayloadBuilder.buildTableUpdateDataList(TABLE_NAME, TIMESTAMP, canceled.subList(0, 1)).get(0).getInsertDataCount());
+        assertEquals(1, RetinaPayloadBuilder.buildTableUpdateDataList(TABLE_NAME, TIMESTAMP, canceled.subList(1, 2)).get(0).getDeleteDataCount());
+    }
+
+    @Test
+    void shouldFoldInterleavedKeysAndLeaveSourceRecordsUnchanged() throws Exception
+    {
+        List<RowChangeEvent> changes = transactionSequence("UU", "tx");
+        RowChangeEvent other = withTransaction(event(SinkProto.OperationType.UPDATE, row("2", "old"), row("2", "new"), tableMetadata()), "tx", 2);
+        List<RetinaProto.TableUpdateData> updates = RetinaPayloadBuilder.buildTableUpdateDataList(TABLE_NAME, TIMESTAMP, List.of(changes.get(0), other, changes.get(1)));
+        assertEquals(1, updates.size());
+        assertEquals(2, updates.get(0).getUpdateDataCount());
+        assertEquals(bytes("2"), updates.get(0).getUpdateData(1).getIndexKeys(0).getKey());
+        assertEquals(bytes("2"), updates.get(0).getUpdateData(0).getColValues(1));
+        assertEquals(bytes("1"), changes.get(0).getAfterData().get(1));
+    }
+
+    @Test
+    void shouldRejectUnsplitPrimaryKeyChangesAndInvalidSequences() throws Exception
+    {
+        RowChangeEvent changedKey = withTransaction(event(SinkProto.OperationType.UPDATE, row("1", "old"), row("2", "new"), tableMetadata()), "tx", 1);
+        assertThrows(io.pixelsdb.pixels.sink.exception.SinkException.class,
+                () -> TransactionBatchCoalescer.coalesce(List.of(changedKey)));
+        assertThrows(io.pixelsdb.pixels.sink.exception.SinkException.class,
+                () -> TransactionBatchCoalescer.coalesce(transactionSequence("II", "tx")));
+    }
+
+    static List<RowChangeEvent> transactionSequence(String sequence, String tx) throws Exception
+    {
+        List<RowChangeEvent> result = new java.util.ArrayList<>();
+        TableMetadata metadata = tableMetadata();
+        for (int i = 0; i < sequence.length(); i++)
+        {
+            char op = sequence.charAt(i);
+            result.add(withTransaction(event(op == 'I' ? SinkProto.OperationType.INSERT : op == 'U' ? SinkProto.OperationType.UPDATE : SinkProto.OperationType.DELETE,
+                    op == 'I' ? null : row("1", Integer.toString(i)),
+                    op == 'D' ? null : row("1", Integer.toString(i + 1)), metadata), tx, i + 1));
+        }
+        return result;
+    }
+
+    @Test
+    void canceledTransactionMustNotCombineSeparateRunsOfTheSameKey() throws Exception
+    {
+        List<RowChangeEvent> events = new java.util.ArrayList<>();
+        events.addAll(transactionSequence("U", "a"));
+        events.addAll(transactionSequence("ID", "b"));
+        events.addAll(transactionSequence("U", "a"));
+        assertEquals(2, RetinaPayloadBuilder.buildTableUpdateDataList(TABLE_NAME, TIMESTAMP, events).size());
+    }
+
+    @Test
+    void shouldCoalesceSplitPrimaryKeyChangeAndKeepFinalNullValue() throws Exception
+    {
+        TableMetadata metadata = tableMetadata();
+        RowChangeEvent deleteOld = withTransaction(event(SinkProto.OperationType.DELETE, row("1", "old"), null, metadata), "tx", 1);
+        RowChangeEvent insertNew = withTransaction(event(SinkProto.OperationType.INSERT, null, row("2", "new"), metadata), "tx", 1);
+        SinkProto.RowValue finalRow = SinkProto.RowValue.newBuilder()
+                .addValues(SinkProto.ColumnValue.newBuilder().setValue(bytes("2")))
+                .addValues(SinkProto.ColumnValue.newBuilder().setIsNull(true)).build();
+        RowChangeEvent updateNew = withTransaction(event(SinkProto.OperationType.UPDATE, row("2", "new"), finalRow, metadata), "tx", 2);
+        List<RetinaProto.TableUpdateData> result = RetinaPayloadBuilder.buildTableUpdateDataList(TABLE_NAME, TIMESTAMP, List.of(deleteOld, insertNew, updateNew));
+        assertEquals(2, result.size());
+        assertEquals(bytes("1"), result.get(0).getDeleteData(0).getIndexKeys(0).getKey());
+        assertEquals(bytes("2"), result.get(1).getInsertData(0).getIndexKeys(0).getKey());
+        assertEquals(List.of(false, true), result.get(1).getInsertData(0).getIsNullList());
+    }
+
+    @Test
+    void concurrentBatchesMustKeepIndependentNetEffects() throws Exception
+    {
+        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(8);
+        try
+        {
+            List<java.util.concurrent.Future<?>> results = new java.util.ArrayList<>();
+            for (int i = 0; i < 100; i++)
+            {
+                final int id = i;
+                results.add(executor.submit(() -> {
+                    List<RetinaProto.TableUpdateData> result = RetinaPayloadBuilder.buildTableUpdateDataList(
+                            TABLE_NAME, TIMESTAMP + id, transactionSequence("UU", "tx" + id));
+                    assertEquals(1, result.size());
+                    assertEquals(1, result.get(0).getUpdateDataCount());
+                    assertEquals(TIMESTAMP + id, result.get(0).getUpdateData(0).getIndexKeys(0).getTimestamp());
+                    return null;
+                }));
+            }
+            for (java.util.concurrent.Future<?> result : results) result.get();
+        }
+        finally { executor.shutdownNow(); }
+    }
+
+    private static RowChangeEvent withTransaction(RowChangeEvent event, String tx, long order) throws Exception
+    {
+        return new RowChangeEvent(event.getRowRecord().toBuilder().setTransaction(
+                SinkProto.TransactionInfo.newBuilder().setId(tx).setTotalOrder(order)).build(), event.getSchema(), event.getTableMetadata());
+    }
 }
