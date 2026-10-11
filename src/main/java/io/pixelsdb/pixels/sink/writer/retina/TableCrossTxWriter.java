@@ -144,12 +144,14 @@ public class TableCrossTxWriter extends TableWriter
             List<String> fullTableNames,
             List<Integer> tableUpdateCount)
     {
-        List<RetinaProto.TableUpdateData> updates =
-                buildTableUpdateDataFromBatch(txId, transactionBatch);
-        if (updates.isEmpty())
+        if (SinkContextManager.getInstance().getSinkContext(txId) == null)
         {
             return;
         }
+        List<RetinaProto.TableUpdateData> updates =
+                buildTableUpdateDataFromBatch(txId, transactionBatch);
+        // A canceled I->D still consumes source events. Keep its counters, and
+        // acknowledge them with the RPC (an empty RPC is valid when all rows cancel).
         tableUpdateData.addAll(updates);
         txIds.add(txId);
         fullTableNames.add(transactionBatch.get(0).getFullTableName());
